@@ -1,18 +1,24 @@
-CCXX=g++
-DEBUG_FLAGS=-g
-RELEASE_FLAGS=-03 -march=corei7
-TARGET=proXo.a
-HEADERS=*/*.h
-OBJECTS=
+#########################
+# customise these
+CFILES := foo.c bar.c
+PROG := prog
+CFLAGS := -Wall -Wextra -g
+LDFLAGS :=
+########################
 
-${TARGET}: ${OBJECTS}
-	ar cr -o $@ $^
+# -MMD generates dependencies while compiling
+CFLAGS += -MMD
+CXX := g++
 
-%.o: %.c
-		@set -e; rm -f $@; \
-		$(CC) -M $(CPPFLAGS) $< > $@.$$$$; \
-		sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
-		rm -f $@.$$$$
+OBJFILES := $(CFILES:.c=.o)
+DEPFILES := $(CFILES:.c=.d)
+
+$(PROG) : $(OBJFILES)
+	$(LINK.o) $(LDFLAGS) -o $@ $^
 
 clean:
-	rm *OA.o
+	rm -f $(PROG) $(OBJFILES) $(DEPFILES)
+
+-include $(DEPFILES)
+
+

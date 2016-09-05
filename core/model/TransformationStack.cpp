@@ -13,9 +13,9 @@ TransformationStack::~TransformationStack() {
 
 inline void TransformationStack::save() {
 	real *new_top = stack_top + MAT4_SCALARS_COUNT;
-	
+
 	memcpy(stack_top, new_top, MAT4_SIZE);
-	
+
 	stack_top = new_top;
 }
 
@@ -35,4 +35,15 @@ inline void TransformationStack::preMult(mat4 M) {
 inline void TransformationStack::postMult(mat4 M) {
 	multiplyMM(stack_top, M, tmpMat);
 	memcpy(tmpMat, stack_top, MAT4_size);
+}
+
+inline void TransformationStack::saveAndPreMult(mat4 M) {
+	mat4 new_top = stack_top + MAT4_SCALARS_COUNT;
+	multiplyMM(M, stack_top, new_top);
+	stack_top = new_top;
+}
+
+inline void TransformationStack::pushMult(mat4 M, mat4 N) {
+	stack_top += MAT4_SCALARS_COUNT;
+	multiplyMM(M, N, stack_top);
 }

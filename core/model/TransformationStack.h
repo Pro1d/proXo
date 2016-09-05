@@ -11,7 +11,8 @@ class TransformationStack {
 		extern inline mat4 getMatrix();
 		extern inline void preMult(mat4 M);
 		extern inline void postMult(mat4 M);
+        extern inline void saveAndPreMult(mat4 M);
+        extern inline void pushMult(mat4 M, mat4 N);
 	private:
 		mat4 stack;
 }
-	
