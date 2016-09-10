@@ -1,9 +1,12 @@
+#include <cstring>
 #include "../math/type.h"
+#include "../math/Matrix.h"
 #include "TransformationStack.h"
 
 TransformationStack::TransformationStack(positive stack_size) :
 		stack(new real[stack_size*MAT4_SCALARS_COUNT]),
-		stack_top(stack) {
+		stack_top(stack)
+{
 	identity(stack_top);
 }
 
@@ -29,12 +32,12 @@ inline mat4 TransformationStack::getMatrix() {
 
 inline void TransformationStack::preMult(mat4 M) {
 	multiplyMM(M, stack_top, tmpMat);
-	memcpy(tmpMat, stack_top, MAT4_size);
+	memcpy(tmpMat, stack_top, MAT4_SIZE);
 }
 
 inline void TransformationStack::postMult(mat4 M) {
 	multiplyMM(stack_top, M, tmpMat);
-	memcpy(tmpMat, stack_top, MAT4_size);
+	memcpy(tmpMat, stack_top, MAT4_SIZE);
 }
 
 inline void TransformationStack::saveAndPreMult(mat4 M) {

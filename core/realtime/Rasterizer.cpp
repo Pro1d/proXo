@@ -1,6 +1,7 @@
-#include "../math/types.h"
+#include "../math/type.h"
 #include "Buffer.h"
 #include <algorithm>
+#include <cmath>
 
 using std::min;
 using std::max;
@@ -51,7 +52,7 @@ inline void triangleSup(Buffer & buffer, const vec3 A, const vec3 B, const vec3 
 	{
 		/// coord en x du centre du pixel [strictement après/avant] le côté gauche/droit
 		const real lxs = max((real)round(xs), (real) 0.0) + (real) 0.5;
-		const integer  lxe = min((integer)round(xe), buffer.width);
+		const integer  lxe = min((positive)round(xe), buffer.width);
 		const real lvx = xe - xs;
 		const real lvx_inv = 1 / lvx;
 		/// var en z par rapport à x
@@ -66,27 +67,27 @@ inline void triangleSup(Buffer & buffer, const vec3 A, const vec3 B, const vec3 
 		/// coord z du point associé au centre du premier pixel de la première  ligne
 		real lz = zs + ldz*vx1;
 		/// couleur du point associé au centre du premier pixel de la première  ligne
-		vec3 lc(rs + ldr*vx1,
-				gs + ldg*vx1,
-				bs + ldb*vx1);
+		real lr = rs + ldr*vx1;
+		real lg = gs + ldg*vx1;
+		real lb = bs + ldb*vx1;
 
 		// Dessine une ligne
 		for(positive lx = (positive) lxs; lx < lvx; lx++) {
 			real * pts = buffer.getPtr(lx, y);
 			// depth test
-			if(lz < ptr[BUF_Z_OFFSET]) {
-				ptr[BUF_Z_OFFSET] = lz;
-				ptr[BUF_R_OFFSET] = lc[0];
-				ptr[BUF_G_OFFSET] = lc[1];
-				ptr[BUF_B_OFFSET] = lc[2];
+			if(lz < pts[BUF_Z_OFFSET]) {
+				pts[BUF_Z_OFFSET] = lz;
+				pts[BUF_R_OFFSET] = lr;
+				pts[BUF_G_OFFSET] = lg;
+				pts[BUF_B_OFFSET] = lb;
 			}
-			
+
 			lz += ldz;
-			lc[0] += ldr;
-			lc[1] += ldg;
-			lc[2] += ldb;
+			lr += ldr;
+			lg += ldg;
+			lb += ldb;
 		}
-		
+
 		xs += dxs; xe += dxe;
 		zs += dzs; ze += dze;
 		rs += drs; re += dre;
@@ -140,7 +141,7 @@ inline void triangleInf(Buffer & buffer, const vec3 A, const vec3 B, const vec3 
 	{
 		/// coord en x du centre du pixel [strictement après/avant] le côté gauche/droit
 		const real lxs = max((real)round(xs), (real)0.0) + (real) 0.5;
-		const integer  lxe = min((integer)round(xe), buffer.width);
+		const integer  lxe = min((positive)round(xe), buffer.width);
 		const real lvx = xe - xs;
 		const real lvx_inv = 1 / lvx;
 		/// var en z par rapport à x
@@ -155,29 +156,27 @@ inline void triangleInf(Buffer & buffer, const vec3 A, const vec3 B, const vec3 
 		/// coord z du point associé au centre du premier pixel de la première  ligne
 		real lz = zs + ldz*vx1;
 		/// couleur du point associé au centre du premier pixel de la première  ligne
-		real lc[3] = {
-				rs + ldr*vx1,
-                gs + ldg*vx1,
-				bs + ldb*vx1
-		};
-		
+		real lr = rs + ldr*vx1;
+        real lg = gs + ldg*vx1;
+		real lb = bs + ldb*vx1;
+
 		// Dessine une ligne
 		for(positive lx = (positive) lxs; lx < lxe; lx++) {
 			real * pts = buffer.getPtr(lx, y);
 			// depth test
-			if(lz < ptr[BUF_Z_OFFSET]) {
-				ptr[BUF_Z_OFFSET] = lz;
-				ptr[BUF_R_OFFSET] = lc[0];
-				ptr[BUF_G_OFFSET] = lc[1];
-				ptr[BUF_B_OFFSET] = lc[2];
+			if(lz < pts[BUF_Z_OFFSET]) {
+				pts[BUF_Z_OFFSET] = lz;
+				pts[BUF_R_OFFSET] = lr;
+				pts[BUF_G_OFFSET] = lg;
+				pts[BUF_B_OFFSET] = lb;
 			}
-			
+
 			lz += ldz;
-			lc[0] += ldr;
-			lc[1] += ldg;
-			lc[2] += ldb;
+			lr += ldr;
+			lg += ldg;
+			lb += ldb;
 		}
-		
+
 		xs += dxs; xe += dxe;
 		zs += dzs; ze += dze;
 		rs += drs; re += dre;
@@ -191,23 +190,23 @@ inline void triangleSortedPoints(Buffer & buffer, const vec3 A, const vec3 B, co
 	/// côté inférieur horizontal
 	if(B[1] == C[1]) {
 		if(C[0] < B[0])
-            triangleSup(dst, depth, A, C, B, colorA, colorC, colorB);
+            triangleSup(buffer, A, C, B, colorA, colorC, colorB);
         else
-            triangleSup(dst, depth, A, B, C, colorA, colorB, colorC);
+            triangleSup(buffer, A, B, C, colorA, colorB, colorC);
 	}
 	/// côté supérieur horizontal
 	else if(A[1] == B[1]) {
 		if(A[0] < B[0])
-            triangleInf(dst, depth, C, A, B, colorC, colorA, colorB);
+            triangleInf(buffer, C, A, B, colorC, colorA, colorB);
 		else
-            triangleInf(dst, depth, C, B, A, colorC, colorB, colorA);
+            triangleInf(buffer, C, B, A, colorC, colorB, colorA);
 	}
 	/// côté supérieur horizontal
 	else if(A[1] == C[1]) {
 		if(A[0] < C[0])
-            triangleInf(dst, depth, B, A, C, colorB, colorA, colorC);
+            triangleInf(buffer, B, A, C, colorB, colorA, colorC);
         else
-            triangleInf(dst, depth, B, C, A, colorB, colorC, colorA);
+            triangleInf(buffer, B, C, A, colorB, colorC, colorA);
 	}
 	/// pas de côté horizontal
 	else {
@@ -215,42 +214,50 @@ inline void triangleSortedPoints(Buffer & buffer, const vec3 A, const vec3 B, co
             /// On calcule I, le point de AC de même y que B <=> AI.y = k * AC.y = AB.y
             real k = (C[1]-A[1]) / (B[1]-A[1]); /// rmq : 0 < k < 1
             real I[3] = {(B[0]-A[0]) * k + A[0], C[1], (B[2]-A[2]) * k + A[2]};
-            vec3 colorI((colorB[0]-colorA[0]) * k + colorA[0], (colorB[1]-colorA[1]) * k + colorA[1], (colorB[2]-colorA[2]) * k + colorA[2]);
+            real colorI[VEC3_SCALARS_COUNT] = {
+                (colorB[0]-colorA[0]) * k + colorA[0],
+                (colorB[1]-colorA[1]) * k + colorA[1],
+                (colorB[2]-colorA[2]) * k + colorA[2]
+            };
 
             /// I est à gauche de C
             if(I[0] < C[0]) {
                 /// on dessine le triangle supérieur AIC
-                triangleSup(dst, depth, A, I, C, colorA, colorI, colorC);
+                triangleSup(buffer, A, I, C, colorA, colorI, colorC);
                 /// on dessine le triangle inférieur BCI
-                triangleInf(dst, depth, B, I, C, colorB, colorI, colorC);
+                triangleInf(buffer, B, I, C, colorB, colorI, colorC);
             }
             /// C est à gauche de A
             else {
                 /// on dessine le triangle supérieur ACI
-                triangleSup(dst, depth, A, C, I, colorA, colorC, colorI);
+                triangleSup(buffer, A, C, I, colorA, colorC, colorI);
                 /// on dessine le triangle inférieur BCI
-                triangleInf(dst, depth, B, C, I, colorB, colorC, colorI);
+                triangleInf(buffer, B, C, I, colorB, colorC, colorI);
             }
 		}
 		else {
             /// On calcule I, le point de AC de même y que B <=> AI.y = k * AC.y = AB.y
             real k = (B[1]-A[1]) / (C[1]-A[1]); /// rmq : 0 < k < 1
             real I[3] = {(C[0]-A[0]) * k + A[0], B[1], (C[2]-A[2]) * k + A[2]};
-            vec3 colorI((colorC[0]-colorA[0]) * k + colorA[0], (colorC[1]-colorA[1]) * k + colorA[1], (colorC[2]-colorA[2]) * k + colorA[2]);
+            real colorI[VEC3_SCALARS_COUNT] = {
+                (colorC[0]-colorA[0]) * k + colorA[0],
+                (colorC[1]-colorA[1]) * k + colorA[1],
+                (colorC[2]-colorA[2]) * k + colorA[2]
+            };
 
             /// I est à gauche de B
             if(I[0] < B[0]) {
                 /// on dessine le triangle supérieur AIB
-                triangleSup(dst, depth, A, I, B, colorA, colorI, colorB);
+                triangleSup(buffer, A, I, B, colorA, colorI, colorB);
                 /// on dessine le triangle inférieur CBI
-                triangleInf(dst, depth, C, I, B, colorC, colorI, colorB);
+                triangleInf(buffer, C, I, B, colorC, colorI, colorB);
             }
             /// B est à gauche de A
             else {
                 /// on dessine le triangle supérieur ABI
-                triangleSup(dst, depth, A, B, I, colorA, colorB, colorI);
+                triangleSup(buffer, A, B, I, colorA, colorB, colorI);
                 /// on dessine le triangle inférieur CBI
-                triangleInf(dst, depth, C, B, I, colorC, colorB, colorI);
+                triangleInf(buffer, C, B, I, colorC, colorB, colorI);
             }
 		}
 	}
@@ -266,19 +273,19 @@ void triangle(Buffer & buffer, const vec3 A, const vec3 B, const vec3 C, const v
 
     if(A[1] <= B[1]) {
         if(B[1] <= C[1]) {
-            triangleSortedPoints(dst, depth, A, B, C, colorA, colorB, colorC);
+            triangleSortedPoints(buffer, A, B, C, colorA, colorB, colorC);
         } else if(C[1] <= A[1]) {
-            triangleSortedPoints(dst, depth, C, A, B, colorC, colorA, colorB);
+            triangleSortedPoints(buffer, C, A, B, colorC, colorA, colorB);
         } else {
-            triangleSortedPoints(dst, depth, A, C, B, colorA, colorC, colorB);
+            triangleSortedPoints(buffer, A, C, B, colorA, colorC, colorB);
         }
     } else {
         if(A[1] <= C[1]) {
-            triangleSortedPoints(dst, depth, B, A, C, colorB, colorA, colorC);
+            triangleSortedPoints(buffer, B, A, C, colorB, colorA, colorC);
         } else if(C[1] <= B[1]) {
-            triangleSortedPoints(dst, depth, C, B, A, colorC, colorB, colorA);
+            triangleSortedPoints(buffer, C, B, A, colorC, colorB, colorA);
         } else {
-            triangleSortedPoints(dst, depth, B, C, A, colorB, colorC, colorA);
+            triangleSortedPoints(buffer, B, C, A, colorB, colorC, colorA);
         }
     }
 }

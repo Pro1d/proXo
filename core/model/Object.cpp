@@ -1,4 +1,6 @@
+#include <cstdlib>
 #include "Object.h"
+#include "../math/type.h"
 
 Object::Object(/*const char * filename, positive texture_id*/) :
 		vertices(NULL),
@@ -6,11 +8,11 @@ Object::Object(/*const char * filename, positive texture_id*/) :
 		colors(NULL),
 		texture_mapping(NULL),
 		faces(NULL),
-		texture_id(0)
-		verticesCount(0)
+		texture_id(0),
+		verticesCount(0),
 		facesCount(0)
 {
-	
+
 }
 
 Object::~Object() {

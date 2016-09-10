@@ -1,4 +1,7 @@
+#include <cstdlib>
+#include <cstring>
 #include "SceneToPool.h"
+#include "../math/Matrix.h"
 
 SceneToPool::SceneToPool() : transformation(50) {
 
@@ -13,7 +16,7 @@ void SceneToPool::run(Scene & scene, Pool & pool) {
     // push world
     *contStackTop = &scene.world;
     contStackTop++;
-    transformation.pushMult(camera.matrix);
+    transformation.saveAndPreMult(scene.camera.matrix);
 
     while(contStackTop != containerStack) {
         contStackTop--;
@@ -40,7 +43,7 @@ void SceneToPool::run(Scene & scene, Pool & pool) {
             contStackTop++;
             for(positive i = (*contStackTop)->containersCount; --i >= 0; ) {
                 // push container
-                transformation.pushMult((*contStackTop)->containerMatrices+i*MAT4_SCALARS_COUNT);
+                transformation.pushMult((*contStackTop)->containerMatrices+i*MAT4_SCALARS_COUNT, matrix);
                 *contStackTop = &(*contStackTop)->containers[i];
                 contStackTop++;
             }
@@ -49,13 +52,13 @@ void SceneToPool::run(Scene & scene, Pool & pool) {
 }
 
 void SceneToPool::objectToPool(Object & object, Pool & pool) {
-    poitive vertexOffset = pool.currentVerticesCount;
+    positive vertexOffset = pool.currentVerticesCount;
     mat4 matrix = transformation.getMatrix();
 
     // Per vertex
     vec4 vertices = pool.vertexPool + vertexOffset * VEC4_SCALARS_COUNT;
     vec4 normals = pool.normalPool + vertexOffset * VEC4_SCALARS_COUNT;
-    vec4 colors = pool.colorPool + vertexOffset * VEC4_SCALARS_COUNT;
+    vec8 materials = pool.materialPool + vertexOffset * VEC8_SCALARS_COUNT;
     vec2 mappings = pool.mappingPool + vertexOffset * VEC2_SCALARS_COUNT;
     positive * textures = pool.texturePool + vertexOffset;
 
@@ -63,15 +66,22 @@ void SceneToPool::objectToPool(Object & object, Pool & pool) {
         // apply matrix to vertices and normals
         multiplyMV(matrix, object.vertices+i*VEC4_SCALARS_COUNT, vertices);
         multiplyMV(matrix, object.normals+i*VEC4_SCALARS_COUNT, normals);
-        vertices += 4;
-        normals += 4;
+        vertices += VEC4_SCALARS_COUNT;
+        normals += VEC4_SCALARS_COUNT;
+
+        // copy colors and material
+        memcpy(materials, object.colors+i*VEC8_SCALARS_COUNT, 3);
+        materials[3] = object.ambient;
+        materials[4] = object.diffuse;
+        materials[5] = object.specular;
+        materials[6] = object.shininess;
+        materials[7] = object.emissive;
+        materials += VEC8_SCALARS_COUNT;
 
         // copy colors, mappings and textures
-        memcpy(colors, object.colors+i*VEC4_SCALARS_COUNT, VEC4_SIZE);
-        memcpy(mappings, object.mappings+i*VEC2_SCALARS_COUNT, VEC2_SIZE);
-        textures = object.texture_id;
-        colors += 4;
-        mappings += 2;
+        memcpy(mappings, object.texture_mapping+i*VEC2_SCALARS_COUNT, VEC2_SIZE);
+        *textures = object.texture_id;
+        mappings += VEC2_SCALARS_COUNT;
         textures += 1;
     }
 
@@ -79,7 +89,7 @@ void SceneToPool::objectToPool(Object & object, Pool & pool) {
 
 
     // Per face
-    positive * faces = pool.facePool + pool.currentFaceCount*3;
+    positive * faces = pool.facePool + pool.currentFacesCount*3;
 
     positive * end = object.faces + object.facesCount * 3;
     for(positive * f = object.faces; f != end;) {
@@ -96,4 +106,10 @@ void SceneToPool::objectToPool(Object & object, Pool & pool) {
     }
 
     pool.currentFacesCount += object.facesCount;
+}
+
+void SceneToPool::lightToPool(Light & light, Pool & pool) {
+    light.transform(transformation.getMatrix());
+    pool.lightPool[pool.currentLightsCount] = &light;
+    pool.currentLightsCount++;
 }

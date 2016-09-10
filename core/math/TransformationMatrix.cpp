@@ -1,4 +1,5 @@
-#include <cstdib>
+#include <cstdlib>
+#include "type.h"
 #include "Matrix.h"
 
 void fitWithScreenCoordinates(real screenWidth, real screenHeight, mat4 mOut) {

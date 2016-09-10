@@ -1,4 +1,5 @@
-
+#include "basics.h"
+#include "type.h"
 
 inline real clamp01(real x) {
 	if(x <= (real) 0)
@@ -23,7 +24,7 @@ inline void normalize(vec3 v) {
 	v[2] *= inv_norm;
 }
 
-inline real triangleArea(vec2 a, vec2 b, vec2 c) {
+/*inline real triangleArea(vec2 a, vec2 b, vec2 c) {
 	real abx = b[0]-a[0], aby = b[1]-a[1];
     real acx = c[0]-a[0], acy = c[1]-a[1];
     real cbx = b[0]-c[0], cby = b[1]-c[1];
@@ -43,6 +44,6 @@ inline real triangleArea(vec2 a, vec2 b, vec2 c) {
         else
             return abs(abx*acy-acx*aby) / 2;
     }
-}
+}*/
 
 inline void faceNormal(vec3 a, vec3 b, vec3 c, vec3 normalOut);

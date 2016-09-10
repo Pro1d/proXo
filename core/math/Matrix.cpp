@@ -1,5 +1,8 @@
-#include <cstdib>
+#include <cstdlib>
+#include <cmath>
 #include "Matrix.h"
+#include "type.h"
+#include "basics.h"
 
 void identity(mat4 mOut) {
 	mOut[0] =  1; mOut[1] =  0; mOut[2] =  0; mOut[3] =  0;
@@ -49,7 +52,7 @@ void multiplyNoNormalizeMV(mat4 M, vec4 v, vec4 vOut) {
 }
 
 void setRotateX(mat4 mOut, real angle) {
-	real c = cos(angle), s = cost(angle);
+	real c = cos(angle), s = sin(angle);
 	mOut[0] =  1; mOut[1] =  0; mOut[2] =  0; mOut[3] =  0;
 	mOut[4] =  0; mOut[5] =  c; mOut[6] = -s; mOut[7] =  0;
 	mOut[8] =  0; mOut[9] =  s; mOut[10] = c; mOut[11] = 0;
@@ -57,7 +60,7 @@ void setRotateX(mat4 mOut, real angle) {
 }
 
 void setRotateY(mat4 mOut, real angle) {
-	real c = cos(angle), s = cost(angle);
+	real c = cos(angle), s = sin(angle);
 	mOut[0] =  c; mOut[1] =  0; mOut[2] =  s; mOut[3] =  0;
 	mOut[4] =  0; mOut[5] =  1; mOut[6] =  0; mOut[7] =  0;
 	mOut[8] = -s; mOut[9] =  0; mOut[10] = c; mOut[11] = 0;
@@ -65,7 +68,7 @@ void setRotateY(mat4 mOut, real angle) {
 }
 
 void setRotateZ(mat4 mOut, real angle) {
-	real c = cos(angle), s = cost(angle);
+	real c = cos(angle), s = sin(angle);
 	mOut[0] =  c; mOut[1] = -s; mOut[2] =  0; mOut[3] =  0;
 	mOut[4] =  s; mOut[5] =  c; mOut[6] =  0; mOut[7] =  0;
 	mOut[8] =  0; mOut[9] =  0; mOut[10] = 1; mOut[11] = 0;
@@ -73,8 +76,8 @@ void setRotateZ(mat4 mOut, real angle) {
 }
 
 void setRotate(mat4 mOut, real angle, real x, real y, real z) {
-	real c = cos(angle), s = cost(angle);
-	
+	real c = cos(angle), s = sin(angle);
+
 	mOut[0] = c+x*x*(1-c);
 	mOut[1] = x*y*(1-c)-z*s;
 	mOut[2] = x*z*(1-c)+y*s;
@@ -90,7 +93,7 @@ void setRotate(mat4 mOut, real angle, real x, real y, real z) {
     mOut[12] = 0;
     mOut[13] = 0;
     mOut[14] = 0;
-    mOut[15] = 1,
+    mOut[15] = 1;
 }
 
 void setTranslate(mat4 mOut, real x, real y, real z) {
@@ -105,5 +108,13 @@ void setScale(mat4 mOut, real x, real y, real z) {
 	mOut[4] =  0; mOut[5] =  y; mOut[6] =  0; mOut[7] =  0;
 	mOut[8] =  0; mOut[9] =  0; mOut[10] = z; mOut[11] = 0;
 	mOut[12] = 0; mOut[13] = 0; mOut[14] = 0; mOut[15] = 1;
+}
+
+real getMatrixScale(mat4 m) {
+    real sum = m[0]*m[0] + m[1]*m[1] + m[2]*m[2];
+    sum += m[4]*m[4] + m[5]*m[5] + m[6]*m[6];
+    sum += m[8]*m[8] + m[9]*m[9] + m[10]*m[10];
+
+    return sum * sqrt_inv(sum);
 }
 

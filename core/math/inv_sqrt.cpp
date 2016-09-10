@@ -1,6 +1,5 @@
 #include <cmath>
 #include <unistd.h>
-#include "func.h"
 
 
 #if INV_SQRT_METHOD == DEFAULT_MATH_INV_SQRT

@@ -1,27 +1,25 @@
 #ifndef POOL_H
 #define POOL_H
 
+#include "../math/type.h"
+#include "../model/Light.h"
 
 class Pool
 {
     public:
-        Pool(positive maxVertexCount, positive maxFaceCount);
+        Pool(positive maxVerticesCount, positive maxFacesCount, positive maxLightsCount);
         virtual ~Pool();
 
-    protected:
-
-    private:
         vec4 vertexPool;
         vec4 normalPool;
-        vec4 colorPool;
+        vec8 materialPool; // r, g, b, ambient, diffuse, specular, shininess, emissive
         vec2 mappingPool;
         positive * texturePool;
         positive currentVerticesCount;
         positive * facePool;
         positive currentFacesCount;
-
-
-
+        Light ** lightPool;
+        positive currentLightsCount;
 };
 
 #endif // POOL_H
