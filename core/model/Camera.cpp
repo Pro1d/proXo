@@ -42,3 +42,52 @@ void Camera::setFrustrum(real zNear, real zFar, real width, real height) {
 void Camera::updateMatrix() {
     multiplyMM(position, projection, matrix);
 }
+
+
+void Camera::lookAt(vec3 target) {
+    // cartesian to polar coordiantes
+    real d[3] = {
+        -position[3] - target[0],
+        -position[7] - target[1],
+        -position[11] - target[2]
+    };
+    setDirection(d);
+}
+
+void Camera::setPosition(vec3 pos) {
+    position[3] = -pos[0];
+    position[7] = -pos[1];
+    position[11] = -pos[2];
+}
+
+void Camera::setDirection(vec3 dir) {
+    real x = dir[0];
+    real y = dir[1];
+    real z = dir[2];
+
+    real d2 = x*x + y*y + z*z;
+    if(d2 == 0) {
+        // no scale/rotation
+        for(positive i = 0; i < 3; i++)
+        for(positive j = 0; j < 3; j++)
+            position[i+j*4] = (i == j);
+    }
+    else {
+        // R, Theta, Phi
+        //real r = d2 * sqrt_inv(d2);
+        real t = atan2(z, 1 / sqrt_inv(x*x+y*y));
+        real p = atan2(y, x);
+        real rotations[MAT4_SCALARS_COUNT];
+        identity(rotations);
+
+        applyRotate(rotations, -t, 0,1,0);
+        applyRotate(rotations, -p, 0,0,1);
+        real tmp[MAT4_SCALARS_COUNT];
+        multiplyMM(position, rotations, tmp);
+        copyMatrix(position, tmp);
+    }
+}
+
+void Camera::setFieldOfView(real fov) {
+    fieldOfView = fov;
+}

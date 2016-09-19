@@ -19,4 +19,8 @@ public:
     positive height;
 };
 
+inline real * Buffer::getPtr(positive x, positive y) {
+	return data + (x + y * width) * 4;
+}
+
 #endif

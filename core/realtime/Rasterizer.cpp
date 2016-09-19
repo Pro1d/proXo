@@ -9,7 +9,7 @@ using std::max;
 /** A : UP, B : LEFT, C : RIGHT, By=Cy
  *	remplit les pixels dont le centre est contenu dans le triangle
  **/
-inline void triangleSup(Buffer & buffer, const vec3 A, const vec3 B, const vec3 C, const vec3 colorA, const vec3 colorB, const vec3 colorC) {
+void triangleSup(Buffer & buffer, const vec3 A, const vec3 B, const vec3 C, const vec3 colorA, const vec3 colorB, const vec3 colorC) {
 	/// suffix -> s : start (côté gauche/haut), e : end (côté droit/bas)
 	/// preffix -> v : vecteur, d : delta (variation), l : ligne (concerne la ligne actuelle)
 
@@ -48,7 +48,7 @@ inline void triangleSup(Buffer & buffer, const vec3 A, const vec3 B, const vec3 
 	real gs = colorA[1] + dgs*vy1, ge = colorA[1] + dge*vy1;
 	real bs = colorA[2] + dbs*vy1, be = colorA[2] + dbe*vy1;
 
-	for(positive y = (positive) ys; y <= ye; y++)
+	for(integer y = (integer) ys; y <= ye; y++)
 	{
 		/// coord en x du centre du pixel [strictement après/avant] le côté gauche/droit
 		const real lxs = max((real)round(xs), (real) 0.0) + (real) 0.5;
@@ -72,7 +72,7 @@ inline void triangleSup(Buffer & buffer, const vec3 A, const vec3 B, const vec3 
 		real lb = bs + ldb*vx1;
 
 		// Dessine une ligne
-		for(positive lx = (positive) lxs; lx < lvx; lx++) {
+		for(integer lx = (integer) lxs; lx < lxe; lx++) {
 			real * pts = buffer.getPtr(lx, y);
 			// depth test
 			if(lz < pts[BUF_Z_OFFSET]) {
@@ -98,7 +98,7 @@ inline void triangleSup(Buffer & buffer, const vec3 A, const vec3 B, const vec3 
 /** A : DOWN, B : LEFT, C : RIGHT, By=Cy
  *	remplit les pixels dont le centre^+ est contenu dans le triangle
  **/
-inline void triangleInf(Buffer & buffer, const vec3 A, const vec3 B, const vec3 C, const vec3 colorA, const vec3 colorB, const vec3 colorC) {
+void triangleInf(Buffer & buffer, const vec3 A, const vec3 B, const vec3 C, const vec3 colorA, const vec3 colorB, const vec3 colorC) {
 	/// suffix -> s : start (côté gauche/haut), e : end (côté droit/bas)
 	/// preffix -> v : vecteur, d : delta (variation), l : ligne (concerne la ligne actuelle)
 
@@ -137,7 +137,7 @@ inline void triangleInf(Buffer & buffer, const vec3 A, const vec3 B, const vec3 
 	real gs = colorB[1] + dgs*vy1, ge = colorC[1] + dge*vy1;
 	real bs = colorB[2] + dbs*vy1, be = colorC[2] + dbe*vy1;
 
-	for(positive y = (positive) ys; y <= ye; y++)
+	for(integer y = (integer) ys; y <= ye; y++)
 	{
 		/// coord en x du centre du pixel [strictement après/avant] le côté gauche/droit
 		const real lxs = max((real)round(xs), (real)0.0) + (real) 0.5;
@@ -161,7 +161,7 @@ inline void triangleInf(Buffer & buffer, const vec3 A, const vec3 B, const vec3 
 		real lb = bs + ldb*vx1;
 
 		// Dessine une ligne
-		for(positive lx = (positive) lxs; lx < lxe; lx++) {
+		for(integer lx = (integer) lxs; lx < lxe; lx++) {
 			real * pts = buffer.getPtr(lx, y);
 			// depth test
 			if(lz < pts[BUF_Z_OFFSET]) {
@@ -185,7 +185,7 @@ inline void triangleInf(Buffer & buffer, const vec3 A, const vec3 B, const vec3 
 	}
 }
 
-inline void triangleSortedPoints(Buffer & buffer, const vec3 A, const vec3 B, const vec3 C, const vec3 colorA, const vec3 colorB, const vec3 colorC) {
+void triangleSortedPoints(Buffer & buffer, const vec3 A, const vec3 B, const vec3 C, const vec3 colorA, const vec3 colorB, const vec3 colorC) {
 	// cas A[1] == B[1] == C[1] => ne dessine rien
 	/// côté inférieur horizontal
 	if(B[1] == C[1]) {

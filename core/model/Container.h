@@ -5,17 +5,28 @@
 #include "Object.h"
 #include "Container.h"
 #include "Light.h"
+#include "Material.h"
 
 class Container {
 	public:
-		Object * objects;
-		mat4 objectMatrices;
+	    Container(int maxObjectsCount, int maxContainersCount, int maxLightsCount);
+	    ~Container();
+	    void addObject(Object * object, mat4 matrix, Material * material);
+		void addContainer(Container * container, mat4 matrix);
+		void addLight(Light * light, mat4 matrix);
 
-		Container * containers;
-		mat4 containerMatrices;
+		void print(positive depth);
+		void getCounts(positive & vertices, positive & faces, positive & lights);
 
-		Light * lights;
-		mat4 lightMatrices;
+		Object ** objects;
+		mat4 * objectMatrices;
+		Material ** objectMaterials;
+
+		Container ** containers;
+		mat4 * containerMatrices;
+
+		Light ** lights;
+		mat4 * lightMatrices;
 
 		positive objectsCount;
 		positive containersCount;

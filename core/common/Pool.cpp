@@ -25,3 +25,9 @@ Pool::~Pool()
     delete[] facePool;
     delete[] lightPool;
 }
+
+void Pool::reset() {
+    currentFacesCount = 0;
+    currentLightsCount = 0;
+    currentVerticesCount = 0;
+}

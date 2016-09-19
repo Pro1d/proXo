@@ -1,0 +1,25 @@
+materials
+	name wood specular 0.1 shininess 16
+	name metal specular 0.95 shininess 128
+	name other specular 0.5 shininess 32
+end
+objects
+	name ground data obj/ground.ply color tex/ground_texture.bmp normal tex/ground_normal_map.bmp ambient text/ground_ambient_occlusion.bmp diffuse tex/ground_direct_light_map.bmp specular tex/ground_reflect.bmp
+	name chair data obj/chair.ply
+end
+	
+skybox tex/skybox.bmp
+
+world 1 1 1
+	light ambient
+	object ground material other
+	container 1 0 0 t 0.5	-1 2
+		object chair material wood
+	end
+end
+
+body 0 0 1
+	light spot falloff 10 cutoff 15 attenuation 0.1 intensity 1.0
+end
+
+camera pos 0 0 0 lookat 0 5 2 fov 70

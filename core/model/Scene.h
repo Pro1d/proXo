@@ -3,12 +3,25 @@
 
 #include "Camera.h"
 #include "Container.h"
+#include "Skybox.h"
+#include "Material.h"
+#include <map>
+#include <string>
 
 class Scene {
 public:
-	Container world;
-	Container body;
+    Scene();
+    ~Scene();
+    void print();
+    void getCounts(positive & vertices, positive & faces, positive & lights);
+
+	Container * world;
+	Container * body;
 	Camera camera;
+	Skybox * skybox;
+
+	std::map<std::string, Material*> materials;
+	std::map<std::string, Object*> objects;
 };
 
 #endif

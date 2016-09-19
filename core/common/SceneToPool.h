@@ -9,7 +9,7 @@ class SceneToPool {
     public:
         SceneToPool();
         void run(Scene & scene, Pool & pool);
-        void objectToPool(Object & object, Pool & pool);
+        void objectToPool(Object & object, Material & material, Pool & pool);
         void lightToPool(Light & light, Pool & pool);
     private:
         Container * containerStack[50];

@@ -5,13 +5,9 @@ Buffer::Buffer(positive w, positive h) :
 		width(w),
 		height(h)
 {
-	
+
 }
 
 Buffer::~Buffer() {
 	delete[] data;
-}
-
-inline real * Buffer::getPtr(positive x, positive y) {
-	return data + (x + y * width) * 4;
 }

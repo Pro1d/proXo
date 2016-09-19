@@ -2,6 +2,7 @@
 /// Configuration
 
 #define CPU_CORES_COUNT		8
+#define ENABLE_CEL_SHADING  true
 
 
 /// Optimization / precision
@@ -10,7 +11,7 @@
 #define USE_DOUBLE_PRECISION_FLOATING_VALUE
 #define USE_64_BITS_INTEGER_VALUE
 
-#define FASTEST_INV_SQRT			0
+#define FASTEST_INV_SQRT		0
 #define NEWTON_INV_SQRT			1
 #define NEWTON2_INV_SQRT		2
 #define MULT_NEWTON_INV_SQRT	3

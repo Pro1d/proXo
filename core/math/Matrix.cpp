@@ -1,8 +1,18 @@
 #include <cstdlib>
+#include <cstring>
 #include <cmath>
 #include "Matrix.h"
 #include "type.h"
 #include "basics.h"
+
+real _tmpMatrix1[MAT4_SCALARS_COUNT];
+real _tmpMatrix2[MAT4_SCALARS_COUNT];
+
+mat4 newMatrix() {
+    mat4 m = new real[MAT4_SCALARS_COUNT];
+    identity(m);
+    return m;
+}
 
 void identity(mat4 mOut) {
 	mOut[0] =  1; mOut[1] =  0; mOut[2] =  0; mOut[3] =  0;
@@ -51,6 +61,16 @@ void multiplyNoNormalizeMV(mat4 M, vec4 v, vec4 vOut) {
     vOut[3] = v[0]*M[12] + v[1]*M[13] + v[2]*M[14] + M[15];
 }
 
+void copyMatrix(mat4 dst, const mat4 src) {
+    memcpy(dst, src, MAT4_SIZE);
+}
+
+void applyRotate(mat4 mOut, real angle, real x, real y, real z) {
+    setRotate(_tmpMatrix1, angle, x, y, z);
+    multiplyMM(_tmpMatrix1, mOut, _tmpMatrix2);
+    memcpy(mOut, _tmpMatrix2, MAT4_SIZE);
+}
+
 void setRotateX(mat4 mOut, real angle) {
 	real c = cos(angle), s = sin(angle);
 	mOut[0] =  1; mOut[1] =  0; mOut[2] =  0; mOut[3] =  0;
@@ -96,6 +116,13 @@ void setRotate(mat4 mOut, real angle, real x, real y, real z) {
     mOut[15] = 1;
 }
 
+
+void applyTranslate(mat4 mOut, real x, real y, real z) {
+    setTranslate(_tmpMatrix1, x, y, z);
+    multiplyMM(_tmpMatrix1, mOut, _tmpMatrix2);
+    memcpy(mOut, _tmpMatrix2, MAT4_SIZE);
+}
+
 void setTranslate(mat4 mOut, real x, real y, real z) {
 	mOut[0] =  1; mOut[1] =  0; mOut[2] =  0; mOut[3] =  x;
 	mOut[4] =  0; mOut[5] =  1; mOut[6] =  0; mOut[7] =  y;
@@ -103,6 +130,12 @@ void setTranslate(mat4 mOut, real x, real y, real z) {
 	mOut[12] = 0; mOut[13] = 0; mOut[14] = 0; mOut[15] = 1;
 }
 
+
+void applyScale(mat4 mOut, real s) {
+    setScale(_tmpMatrix1, s, s, s);
+    multiplyMM(_tmpMatrix1, mOut, _tmpMatrix2);
+    memcpy(mOut, _tmpMatrix2, MAT4_SIZE);
+}
 void setScale(mat4 mOut, real x, real y, real z) {
 	mOut[0] =  x; mOut[1] =  0; mOut[2] =  0; mOut[3] =  0;
 	mOut[4] =  0; mOut[5] =  y; mOut[6] =  0; mOut[7] =  0;

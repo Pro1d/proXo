@@ -9,6 +9,7 @@ class Pool
     public:
         Pool(positive maxVerticesCount, positive maxFacesCount, positive maxLightsCount);
         virtual ~Pool();
+        void reset();
 
         vec4 vertexPool;
         vec4 normalPool;

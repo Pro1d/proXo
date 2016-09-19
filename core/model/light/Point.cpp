@@ -1,6 +1,6 @@
 #include <algorithm>
 #include "Point.h"
-#include "../math/vector.h"
+#include "../math/Vector.h"
 #include "../math/basics.h"
 
 void PointLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient, real diffuse, real specular, real shininess, vec4 colorOut) {
@@ -28,8 +28,8 @@ void PointLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient, rea
     normalize(point, V);
     // S: specular intensity
     real S = specularIntensity(dot(R, V), shininess) * specular;
-    // C: ambient and diffuse intensity
-    real C = ambient + diffuse * D;
+    // C: diffuse intensity
+    real C = diffuse * D;
 
     // final intensity
     real A = intensity / lightIntensityInv; // todo premult lightColor*intensity

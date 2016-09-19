@@ -7,6 +7,12 @@ class Object {
 	public:
 		Object();
 		~Object();
+        void initialize();
+		void allocateVertices();
+        void allocateNormals();
+        void allocateColors();
+        void allocateTextureMapping();
+        void allocateFaces(positive count);
 
 		vec4 vertices;
 		vec4 normals;
@@ -16,12 +22,6 @@ class Object {
 		positive texture_id;
 		positive verticesCount;
 		positive facesCount;
-		// ambient+diffuse <= 1
-        real ambient;
-        real diffuse;
-        real specular;
-        real shininess;
-		real emissive;
 };
 
 #endif
