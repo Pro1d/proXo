@@ -30,5 +30,6 @@ void applyScale(mat4 mOut, real s);
 void setScale(mat4 mOut, real x, real y, real z);
 real getMatrixScale(mat4 m);
 
+void printMatrix(mat4 m, positive tabCount);
 
 #endif

@@ -19,6 +19,7 @@ class SceneParser
         void parseContainer(Container & container, mat4 matrix, Scene & scene);
         bool parseObject(Container & container, Scene & scene);
         bool parseLight(Container & container, Scene & scene);
+        bool filterComment(const char * w);
         bool nextWord(char * w);
         bool nextInteger(int & out);
         bool nextReal(real & out);

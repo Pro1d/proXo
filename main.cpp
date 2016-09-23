@@ -1,17 +1,13 @@
-#ifdef __cplusplus
-    #include <cstdlib>
-#else
-    #include <stdlib.h>
-#endif
+#include <cstdlib>
 
 #include "parser/SceneParser.h"
 #include "core/model/Scene.h"
 #include "core/realtime/Buffer.h"
-#include "core/realtime/Rasterizer.h"
-#include "core/common/Pool.h"
-#include "core/common/SceneToPool.h"
+#include "core/realtime/Engine.h"
 #include "sdl/wrapper.h"
+#include "sdl/CameraController.h"
 #include <SDL/SDL.h>
+#include "core/math/basics.h"
 
 int main ( int argc, char** argv )
 {
@@ -25,13 +21,24 @@ int main ( int argc, char** argv )
     SceneParser parser;
     Scene scene;
     Buffer buf(640, 480);
-    SceneToPool sceneToPool;
-    Pool pool(16384, 8192, 16);
     if(!parser.readScene("media/","test.scene", scene)) {
         printf("readScene failed!\n");
         return 2;
     }
+    real fov = 70 * PI / 180;
+    real zNear = 0.001;
+    real size = tan(fov/2) * zNear;
+    scene.camera.setFrustrum(zNear, 10, size, size);
+    //scene.camera.setOrthographics(0.001, 10, 2,2);
+    scene.camera.setScreenSize(640, 480);
     scene.print();
+    Engine realTimeEngine(&buf, &scene);
+    realTimeEngine.createMatchingPool();
+
+    CameraController controller;
+    controller.setCamera(&scene.camera);
+    controller.setTranslateSpeed(0.6);
+    controller.setRotateSpeed(30);
 
     // make sure SDL cleans up before exit
     atexit(SDL_Quit);
@@ -46,15 +53,21 @@ int main ( int argc, char** argv )
     }
 
     SDL_Surface * buffer = SDL_CreateRGBSurface(SDL_HWSURFACE|SDL_HWSURFACE, 640, 480, 24, 0,0,0,0);
+    Uint32 time = SDL_GetTicks();
+
+    SDL_EnableKeyRepeat(50, 30);
 
     // program main loop
     bool done = false;
     while (!done)
     {
+        real dT = (real) (SDL_GetTicks()-time) / 1000;
+        time = SDL_GetTicks();
         // message processing loop
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
+            controller.handleEvent(event, dT);
             // check for messages
             switch (event.type)
             {
@@ -76,20 +89,7 @@ int main ( int argc, char** argv )
 
         // DRAWING STARTS HERE
 
-        printf("%s:%d\n", __FILE__, __LINE__);
-        pool.reset();
-        printf("%s:%d\n", __FILE__, __LINE__);
-        sceneToPool.run(scene, pool);
-        printf("%s:%d\n", __FILE__, __LINE__);
-        for(positive i = 0; i < pool.currentFacesCount; i++) {
-            vec3 A = &pool.vertexPool[pool.facePool[i*3+0]*VEC4_SCALARS_COUNT];
-            vec3 B = &pool.vertexPool[pool.facePool[i*3+1]*VEC4_SCALARS_COUNT];
-            vec3 C = &pool.vertexPool[pool.facePool[i*3+2]*VEC4_SCALARS_COUNT];
-            real fakeColor[3] = {1.0, 1.0, 1.0};
-
-            triangle(buf, A,B,C, fakeColor, fakeColor, fakeColor);
-        }
-        printf("%s:%d\n", __FILE__, __LINE__);
+        realTimeEngine.render();
         bufferToBitmap24bpp(buf, buffer, 1);
 
         // clear screen

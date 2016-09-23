@@ -1,7 +1,9 @@
 #include <cstdlib>
+#include <cstdio>
 #include <cstring>
 #include "SceneToPool.h"
 #include "../math/Matrix.h"
+#include "../math/Vector.h"
 #include "../model/TransformationStack.h"
 
 SceneToPool::SceneToPool() : transformation(50) {
@@ -10,42 +12,46 @@ SceneToPool::SceneToPool() : transformation(50) {
 
 void SceneToPool::run(Scene & scene, Pool & pool) {
     Container ** contStackTop = containerStack;
+    transformation.reset();
+
     // push body
     *contStackTop = scene.body;
     contStackTop++;
+    transformation.save();
 
     // push world
     *contStackTop = scene.world;
     contStackTop++;
-    transformation.saveAndPreMult(scene.camera.matrix);
+    transformation.saveAndPostMult(scene.camera.position);
 
     while(contStackTop != containerStack) {
-        contStackTop--;
+        Container * top = *(--contStackTop);
         mat4 matrix = transformation.getMatrix();
-        if(*contStackTop == NULL) {
+
+        if(top == NULL) {
             transformation.restore();
         }
         else {
             // TODO do not push object if not visible (circle/cube min)
             // Go trough object, light and containers
-            for(positive i = (*contStackTop)->objectsCount; --i >= 0; ) {
-                transformation.saveAndPreMult((*contStackTop)->objectMatrices[i]);
-                objectToPool(*(*contStackTop)->objects[i], *(*contStackTop)->objectMaterials[i], pool);
+            for(integer i = top->objectsCount; --i >= 0; ) {
+                transformation.saveAndPostMult(top->objectMatrices[i]);
+                objectToPool(*top->objects[i], *top->objectMaterials[i], pool);
                 transformation.restore();
             }
 
-            for(positive i = (*contStackTop)->lightsCount; --i >= 0; ) {
-                transformation.saveAndPreMult((*contStackTop)->lightMatrices[i]);
-                lightToPool(*(*contStackTop)->lights[i], pool);
+            for(integer i = top->lightsCount; --i >= 0; ) {
+                transformation.saveAndPostMult(top->lightMatrices[i]);
+                lightToPool(*top->lights[i], pool);
                 transformation.restore();
             }
 
             *contStackTop = NULL;
             contStackTop++;
-            for(positive i = (*contStackTop)->containersCount; --i >= 0; ) {
+            for(integer i = top->containersCount; --i >= 0; ) {
                 // push container
-                transformation.pushMult((*contStackTop)->containerMatrices[i], matrix);
-                *contStackTop = (*contStackTop)->containers[i];
+                transformation.pushMult(matrix, top->containerMatrices[i]);
+                *contStackTop = top->containers[i];
                 contStackTop++;
             }
         }
@@ -65,13 +71,25 @@ void SceneToPool::objectToPool(Object & object, Material & material, Pool & pool
 
     for(positive i = 0; i < object.verticesCount; i++) {
         // apply matrix to vertices and normals
-        multiplyMV(matrix, object.vertices+i*VEC4_SCALARS_COUNT, vertices);
-        multiplyMV(matrix, object.normals+i*VEC4_SCALARS_COUNT, normals);
+        multiplyNoNormalizeMV(matrix, object.vertices+i*VEC4_SCALARS_COUNT, vertices);
+        multiplyNoNormalizeMV(matrix, object.normals+i*VEC4_SCALARS_COUNT, normals);
+        normalize(normals);
+        /*if(i == 0) {
+            printf("%f %f %f %f n %f %f %f %f\n", vertices[0], vertices[1], vertices[2], vertices[3]
+                   , normals[0], normals[1], normals[2], normals[3]);
+        }*/
+
         vertices += VEC4_SCALARS_COUNT;
         normals += VEC4_SCALARS_COUNT;
 
         // copy colors and material
-        memcpy(materials, object.colors+i*VEC4_SCALARS_COUNT, 3);
+        if(object.colors != NULL)
+            memcpy(materials, object.colors+i*VEC4_SCALARS_COUNT, 3*sizeof(real));
+        else {
+            materials[0] = 1;
+            materials[1] = 1;
+            materials[2] = 1;
+        }
         materials[3] = material.ambient;
         materials[4] = material.diffuse;
         materials[5] = material.specular;
@@ -94,17 +112,11 @@ void SceneToPool::objectToPool(Object & object, Material & material, Pool & pool
     positive * faces = pool.facePool + pool.currentFacesCount*3;
 
     positive * end = object.faces + object.facesCount * 3;
-    for(positive * f = object.faces; f != end;) {
+    for(positive * f = object.faces; f != end; f += 3, faces += 3) {
         // copy face's vertex indices and add offset
-        *faces = *f + vertexOffset;
-        ++f;
-        ++faces;
-        *faces = *f + vertexOffset;
-        ++f;
-        ++faces;
-        *faces = *f + vertexOffset;
-        ++f;
-        ++faces;
+        faces[0] = f[0] + vertexOffset;
+        faces[1] = f[1] + vertexOffset;
+        faces[2] = f[2] + vertexOffset;
     }
 
     pool.currentFacesCount += object.facesCount;

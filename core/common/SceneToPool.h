@@ -12,8 +12,8 @@ class SceneToPool {
         void objectToPool(Object & object, Material & material, Pool & pool);
         void lightToPool(Light & light, Pool & pool);
     private:
-        Container * containerStack[50];
         TransformationStack transformation;
+        Container * containerStack[50];
 };
 
 #endif // SCENETOPOOL_H

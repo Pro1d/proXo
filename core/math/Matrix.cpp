@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <cstdio>
 #include <cstring>
 #include <cmath>
 #include "Matrix.h"
@@ -44,10 +45,10 @@ void multiplyMM(mat4 A, mat4 B, mat4 mOut) {
 }
 
 void multiplyMV(mat4 M, vec4 v, vec4 vOut) {
-    vOut[0] = v[0]*M[0] + v[1]*M[1] + v[2]*M[2] + M[3];
-    vOut[1] = v[0]*M[4] + v[1]*M[5] + v[2]*M[6] + M[7];
-    vOut[2] = v[0]*M[8] + v[1]*M[9] + v[2]*M[10] + M[11];
-    real vOut_3 = v[0]*M[12] + v[1]*M[13] + v[2]*M[14] + M[15];
+    vOut[0] = v[0]*M[0] + v[1]*M[1] + v[2]*M[2] + v[3]*M[3];
+    vOut[1] = v[0]*M[4] + v[1]*M[5] + v[2]*M[6] + v[3]*M[7];
+    vOut[2] = v[0]*M[8] + v[1]*M[9] + v[2]*M[10] + v[3]*M[11];
+    real vOut_3 = v[0]*M[12] + v[1]*M[13] + v[2]*M[14] + v[3]*M[15];
     vOut[0] /= vOut_3;
     vOut[1] /= vOut_3;
     vOut[2] /= vOut_3;
@@ -55,10 +56,10 @@ void multiplyMV(mat4 M, vec4 v, vec4 vOut) {
 }
 
 void multiplyNoNormalizeMV(mat4 M, vec4 v, vec4 vOut) {
-    vOut[0] = v[0]*M[0] + v[1]*M[1] + v[2]*M[2] + M[3];
-    vOut[1] = v[0]*M[4] + v[1]*M[5] + v[2]*M[6] + M[7];
-    vOut[2] = v[0]*M[8] + v[1]*M[9] + v[2]*M[10] + M[11];
-    vOut[3] = v[0]*M[12] + v[1]*M[13] + v[2]*M[14] + M[15];
+    vOut[0] = v[0]*M[0] + v[1]*M[1] + v[2]*M[2] + v[3]*M[3];
+    vOut[1] = v[0]*M[4] + v[1]*M[5] + v[2]*M[6] + v[3]*M[7];
+    vOut[2] = v[0]*M[8] + v[1]*M[9] + v[2]*M[10] + v[3]*M[11];
+    vOut[3] = v[0]*M[12] + v[1]*M[13] + v[2]*M[14] + v[3]*M[15];
 }
 
 void copyMatrix(mat4 dst, const mat4 src) {
@@ -151,3 +152,15 @@ real getMatrixScale(mat4 m) {
     return sum * sqrt_inv(sum);
 }
 
+void printMatrix(mat4 m, positive tabCount) {
+    for(positive t = 0; t < tabCount; t++)
+        printf("\t");
+    printf("@%p\n", m);
+    for(positive i = 0; i < 4; i++) {
+        for(positive t = 0; t < tabCount; t++)
+            printf("\t");
+        for(positive j = 0; j < 4; j++)
+            printf("%f\t", m[j+i*4]);
+        printf("\n");
+    }
+}

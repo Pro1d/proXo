@@ -1,11 +1,15 @@
 #include <algorithm>
 #include "Light.h"
 #include "../math/type.h"
+#include "../math/Vector.h"
 #include "../math/Matrix.h"
 
 
-Light::~Light() {
+Light::Light() {
+    initialize();
+}
 
+Light::~Light() {
 }
 
 void Light::initialize() {
@@ -54,15 +58,21 @@ void Light::setCutOff(real i) {
 }
 
 void Light::transform(mat4 matrix) {
-    multiplyMV(matrix, position, transformedPosition);
-    multiplyMV(matrix, direction, transformedDirection);
-    transformedReductionFactor *= getMatrixScale(matrix);
+    multiplyNoNormalizeMV(matrix, position, transformedPosition);
+    multiplyNoNormalizeMV(matrix, direction, transformedDirection);
+    normalize(transformedDirection);
+    transformedReductionFactor = reductionFactor * getMatrixScale(matrix)*getMatrixScale(matrix);
 }
 
 real Light::specularIntensity(real RdotV, real shininess) {
-    real k = (1-shininess*(1-RdotV)/8);
-    k *= k;
-    k *= k;
-    k *= k;
-    return std::max((real) 0, k);
+    return RdotV > 0 ? RdotV / (shininess - RdotV*shininess + RdotV) : 0;
+    /*
+    if(RdotV > (real) 0.9) {
+        real k = (1-shininess*(1-RdotV)/8);
+        k *= k;
+        k *= k;
+        return k * k;
+    }
+    else
+        return 0;*/
 }

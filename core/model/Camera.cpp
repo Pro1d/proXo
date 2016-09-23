@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "Camera.h"
 #include "../math/type.h"
 #include "../math/Matrix.h"
@@ -5,17 +6,17 @@
 Camera::Camera() {
     identity(position);
     identity(projection);
-    updateMatrix();
 }
 
 void Camera::setFrustrum(real zNear, real zFar, real width, real height) {
-    projection[0] = 2 * zNear / width;
+    real size = std::max(width, height);
+    projection[0] = 2 * zNear / size;
     projection[1] = 0;
     projection[2] = 0;
     projection[3] = 0;
 
     projection[4] = 0;
-    projection[5] = 2 * zNear / height;
+    projection[5] = 2 * zNear / size;
     projection[6] = 0;
     projection[7] = 0;
 
@@ -32,17 +33,52 @@ void Camera::setFrustrum(real zNear, real zFar, real width, real height) {
     this->zNear = zNear;
     this->zFar = zFar;
     xmax = width / 2;
-    xmin = width / 2;
+    xmin = -width / 2;
     ymax = height / 2;
-    ymin = height / 2;
-
-    updateMatrix();
+    ymin = -height / 2;
 }
 
-void Camera::updateMatrix() {
-    multiplyMM(position, projection, matrix);
+void Camera::setOrthographics(real zNear, real zFar, real width, real height) {
+    real size = std::max(width, height);
+    projection[0] = 2 / size;
+    projection[1] = 0;
+    projection[2] = 0;
+    projection[3] = 0;
+
+    projection[4] = 0;
+    projection[5] = 2 / size;
+    projection[6] = 0;
+    projection[7] = 0;
+
+    projection[8] = 0;
+    projection[9] = 0;
+    projection[10] = -2 / (zFar - zNear);
+    projection[11] = -(zFar + zNear) / (zFar - zNear);
+
+    projection[12] = 0;
+    projection[13] = 0;
+    projection[14] = 0;
+    projection[15] = 1;
+
+    this->zNear = zNear;
+    this->zFar = zFar;
+    xmax = width / 2;
+    xmin = -width / 2;
+    ymax = height / 2;
+    ymin = -height / 2;
 }
 
+void Camera::setScreenSize(real w, real h) {
+    real s = std::max(w, h);
+    applyTranslate(projection, w/2, h/2, 0);
+    projection[0] *= s/2;
+    projection[5] *= -s/2;
+    projection[20] *= s/2;
+}
+
+void Camera::setFieldOfView(real fov) {
+    fieldOfView = fov;
+}
 
 void Camera::lookAt(vec3 target) {
     // cartesian to polar coordiantes
@@ -86,8 +122,4 @@ void Camera::setDirection(vec3 dir) {
         multiplyMM(position, rotations, tmp);
         copyMatrix(position, tmp);
     }
-}
-
-void Camera::setFieldOfView(real fov) {
-    fieldOfView = fov;
 }

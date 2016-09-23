@@ -35,6 +35,7 @@ static const char * keyName[KEY_COUNT] = {
     "t", "s", "r", "tx", "ty", "tz", "rx", "ry", "rz",
     "material", "camera", "fov", "lookat"
 };
+char commmentCharacter = '%';
 
 enum {ST_MAIN, ST_MATERIALS, ST_OBJECTS, ST_WORLD, ST_BODY, ST_CAMERA, ST_SKYBOX, ST_ERROR};
 
@@ -192,7 +193,7 @@ void SceneParser::parseStateCamera(Scene & scene) {
             break;
         case FOV:
             real fov;
-            if(!nextReal(fov) || fov <= 0 || fov >= 90) {
+            if(!nextReal(fov) || fov <= 0 || fov >= 180) {
                 state = ST_ERROR;
                 break;
             }
@@ -347,7 +348,6 @@ void SceneParser::parseContainer(Container & container, mat4 matrix, Scene & sce
     char word[128];
     real x[4];
     while(state != ST_ERROR && nextWord(word)) {
-        printf("%d %s:%d\n", state, __func__, __LINE__);
         int key = wordToKey(word);
         switch(key) {
         case T:
@@ -782,15 +782,26 @@ bool SceneParser::parseLight(Container & container, Scene & scene) {
     return false;
 }
 
-bool SceneParser::nextWord(char * w) {
-    w[0] = '\0';
-    int count = fscanf(file, "%s", w);
-    printf("%d Read word: \"%s\"\n", state, w);
-    if(count == 1) {
+bool SceneParser::filterComment(const char * w) {
+    if(w[0] == commmentCharacter) {
+        skipLine();
         return true;
     }
     else {
-        printf("%d nextWord failed\n", state);
+        return false;
+    }
+}
+
+bool SceneParser::nextWord(char * w) {
+    w[0] = '\0';
+    int count = fscanf(file, "%s", w);
+    if(count == 1) {
+        if(filterComment(w))
+            return nextWord(w);
+        else
+            return true;
+    }
+    else {
         return false;
     }
 }
@@ -798,9 +809,12 @@ bool SceneParser::nextWord(char * w) {
 bool SceneParser::nextInteger(int & out) {
     char w[20];
     if(fscanf(file, "%s", w) == 1) {
-        out = atoi(w);
-        printf("nextInteger %d\n", out);
-        return true;
+        if(filterComment(w))
+            return nextInteger(out);
+        else {
+            out = atoi(w);
+            return true;
+        }
     }
     else {
         printf("%d nextInteger failed\n", state);
@@ -811,9 +825,12 @@ bool SceneParser::nextInteger(int & out) {
 bool SceneParser::nextReal(real & out) {
     char w[20];
     if(fscanf(file, "%s", w) == 1) {
-        out = (real) atof(w);
-        printf("nextReal %f\n", out);
-        return true;
+        if(filterComment(w))
+            return nextReal(out);
+        else {
+            out = (real) atof(w);
+            return true;
+        }
     }
     else {
         printf("%d nextReal failed\n", state);
@@ -826,9 +843,12 @@ bool SceneParser::nextReals(real * out, int count) {
     int total = count;
     while(--count >= 0) {
         if(fscanf(file, "%s", w) == 1) {
-            *out = (real) atof(w);
-            printf("nextReals %d/%d %f\n", count+1, total, *out);
-            out++;
+            if(!filterComment(w)) {
+                *out = (real) atof(w);
+                out++;
+            } else {
+                count++;
+            }
         }
         else {
             printf("%d nextReals failed %d/%d\n", state, count+1, total);
@@ -850,7 +870,6 @@ bool SceneParser::equals(const char * a, const char * b) {
 int SceneParser::wordToKey(char * w) {
     for(int i = 0; i < KEY_COUNT; i++) {
         if(equals(keyName[i], w)) {
-            printf("%d %s=%d\n", state, w, i);
             return i;
         }
     }

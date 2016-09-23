@@ -67,12 +67,17 @@ void Container::print(positive depth) {
     for(positive i = 0; i < objectsCount; i++) {
         for(positive a = 0; a < depth; a++) printf("\t");
         printf("Object: %d vertices, %d faces\n", objects[i]->verticesCount, objects[i]->facesCount);
+        printMatrix(objectMatrices[i], depth+1);
     }
     for(positive i = 0; i < lightsCount; i++) {
         for(positive a = 0; a < depth; a++) printf("\t");
         printf("Light\n");
+        printMatrix(lightMatrices[i], depth+1);
     }
     for(positive i = 0; i < containersCount; i++) {
+        for(positive a = 0; a < depth; a++) printf("\t");
+        printf("Container\n");
+        printMatrix(containerMatrices[i], depth+1);
         containers[i]->print(depth+1);
     }
 }

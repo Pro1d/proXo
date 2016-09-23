@@ -7,7 +7,7 @@ Pool::Pool(positive maxVerticesCount, positive maxFacesCount, positive maxLights
     mappingPool(new real[maxVerticesCount*VEC2_SCALARS_COUNT]),
     texturePool(new positive[maxVerticesCount]),
     currentVerticesCount(0),
-    facePool(new positive[maxFacesCount]),
+    facePool(new positive[maxFacesCount*3]),
     currentFacesCount(0),
     lightPool(new Light*[maxLightsCount]),
     currentLightsCount(0)
@@ -27,7 +27,7 @@ Pool::~Pool()
 }
 
 void Pool::reset() {
+    currentVerticesCount = 0;
     currentFacesCount = 0;
     currentLightsCount = 0;
-    currentVerticesCount = 0;
 }

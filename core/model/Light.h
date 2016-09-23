@@ -5,6 +5,7 @@
 
 class Light {
 public:
+    Light();
     virtual ~Light();
     void initialize();
     void transform(mat4 matrix);

@@ -14,3 +14,7 @@ TransformationStack::~TransformationStack() {
 	delete[] stack;
 }
 
+integer TransformationStack::height() {
+    return (stack_top - stack) / MAT4_SCALARS_COUNT;
+}
+

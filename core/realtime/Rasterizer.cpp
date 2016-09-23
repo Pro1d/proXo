@@ -21,11 +21,11 @@ void triangleSup(Buffer & buffer, const vec3 A, const vec3 B, const vec3 C, cons
 	//real ysmin = round(A[1]);
 	/// coord y du centre (du pixel) [strictement après/avant] A/B (=> [ys-1 <=] A[1] < ys) (si A est au centre d'un pixel, le pixel n'est pas dans le triangle)
 	const real ys = max((real)round(A[1]), (real) 0.0) + (real) 0.5;
-	const integer ye = min((integer)round(B[1]), (integer) buffer.height);
+	const real ye = min((real)round(B[1]), (real) buffer.height) - (real) 0.5;
 	/// coord y du vecteur A->B (=A->C)
 	const real vy = B[1]-A[1];
 	/// A et BC sont sur la même ligne horizontale -> le triangle est plat, il ne contient aucun point
-	if(vy <= 0) return;
+	if(vy <= (real)0.0001) return;
 	const real vy_inv = 1 / vy;
 
 	/// var en x du bord gauche et droite par rapport à y
@@ -48,11 +48,11 @@ void triangleSup(Buffer & buffer, const vec3 A, const vec3 B, const vec3 C, cons
 	real gs = colorA[1] + dgs*vy1, ge = colorA[1] + dge*vy1;
 	real bs = colorA[2] + dbs*vy1, be = colorA[2] + dbe*vy1;
 
-	for(integer y = (integer) ys; y <= ye; y++)
+	for(real y = ys; y <= ye; y++)
 	{
 		/// coord en x du centre du pixel [strictement après/avant] le côté gauche/droit
 		const real lxs = max((real)round(xs), (real) 0.0) + (real) 0.5;
-		const integer  lxe = min((positive)round(xe), buffer.width);
+		const real lxe = min((real)round(xe), (real)buffer.width) - (real) 0.5;
 		const real lvx = xe - xs;
 		const real lvx_inv = 1 / lvx;
 		/// var en z par rapport à x
@@ -72,7 +72,7 @@ void triangleSup(Buffer & buffer, const vec3 A, const vec3 B, const vec3 C, cons
 		real lb = bs + ldb*vx1;
 
 		// Dessine une ligne
-		for(integer lx = (integer) lxs; lx < lxe; lx++) {
+		for(real lx = lxs; lx <= lxe; lx++) {
 			real * pts = buffer.getPtr(lx, y);
 			// depth test
 			if(lz < pts[BUF_Z_OFFSET]) {
@@ -110,11 +110,11 @@ void triangleInf(Buffer & buffer, const vec3 A, const vec3 B, const vec3 C, cons
 	//real ysmin = round(A[1]);
 	/// coord y du centre (du pixel) [strictement après/avant] A/B (=> [ys-1 <=] A[1] < ys) (si A est au centre d'un pixel, le pixel n'est pas dans le triangle)
 	const real ys = max((real)round(B[1]), (real) 0.0) + (real) 0.5;
-	const integer  ye = min((integer)round(A[1]), (integer) buffer.height);
+	const real  ye = min((real)round(A[1]), (real) buffer.height) - (real) 0.5;
 	/// coord y du vecteur B->A.y (=C->Ay)
 	const real vy = A[1]-B[1];
 	/// A et BC sont sur la même ligne horizontale -> le triangle est plat, il ne contient aucun point
-	if(vy <= 0) return;
+	if(vy <= (real)0.0001) return;
 	const real vy_inv = 1 / vy;
 
 	/// var en x du bord gauche et droite par rapport à y
@@ -137,11 +137,11 @@ void triangleInf(Buffer & buffer, const vec3 A, const vec3 B, const vec3 C, cons
 	real gs = colorB[1] + dgs*vy1, ge = colorC[1] + dge*vy1;
 	real bs = colorB[2] + dbs*vy1, be = colorC[2] + dbe*vy1;
 
-	for(integer y = (integer) ys; y <= ye; y++)
+	for(real y = ys; y <= ye; y++)
 	{
 		/// coord en x du centre du pixel [strictement après/avant] le côté gauche/droit
 		const real lxs = max((real)round(xs), (real)0.0) + (real) 0.5;
-		const integer  lxe = min((positive)round(xe), buffer.width);
+		const real lxe = min((real)round(xe), (real)buffer.width) - (real)0.5;
 		const real lvx = xe - xs;
 		const real lvx_inv = 1 / lvx;
 		/// var en z par rapport à x
@@ -161,7 +161,7 @@ void triangleInf(Buffer & buffer, const vec3 A, const vec3 B, const vec3 C, cons
 		real lb = bs + ldb*vx1;
 
 		// Dessine une ligne
-		for(integer lx = (integer) lxs; lx < lxe; lx++) {
+		for(real lx = lxs; lx <= lxe; lx++) {
 			real * pts = buffer.getPtr(lx, y);
 			// depth test
 			if(lz < pts[BUF_Z_OFFSET]) {

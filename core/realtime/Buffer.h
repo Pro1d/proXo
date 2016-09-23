@@ -12,15 +12,17 @@ class Buffer {
 public:
 	Buffer(positive w, positive h);
 	~Buffer();
-	real * getPtr(positive x, positive y);
+	void clear();
 
-    real * data;
+	vec4 getPtr(positive x, positive y);
+
+    vec4 data;
     positive width;
     positive height;
 };
 
-inline real * Buffer::getPtr(positive x, positive y) {
-	return data + (x + y * width) * 4;
+inline vec4 Buffer::getPtr(positive x, positive y) {
+	return data + (x + y * width) * VEC4_SCALARS_COUNT;
 }
 
 #endif
