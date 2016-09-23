@@ -26,19 +26,26 @@ class CameraController {
         void setCamera(Camera * camera);
         void assignKey(int action, int key);
         void setModifiersForStepByStep(int keys);
-        bool handleEvent(SDL_Event & event, real time);
+        bool handleEvent(SDL_Event & event);
         void setTranslateSpeed(real speed);
         void setRotateSpeed(real speed);
+        void updateCamera(real dt);
 
     protected:
-        void actionToMatrix(real t, real r);
+        void actionToMatrix(real dt);
+        real getSpeed(int action, real dt);
 
     private:
         std::map<int, int> keyMapping;
         int stepByStepModifers;
+        int highSpeedModifers;
         Camera * camera;
         bool isActionActive[ACTIONS_COUNT];
+        bool isActionNew[ACTIONS_COUNT];
+        bool isStepByStepEnabled;
+        bool isHighSpeedEnabled;
 
+        real highSpeedFactor;
         real rotationStep;
         real translateStep;
         positive stepDelay;

@@ -5,9 +5,10 @@
 #include <SDL/SDL.h>
 
 CameraController::CameraController() :
+    highSpeedFactor(3),
     rotationStep(10),
     translateStep(0.1),
-    stepDelay(500),
+    stepDelay(300),
     timeLastStep(0),
     rotationSpeed(10),
     translateSpeed(0.1)
@@ -27,9 +28,14 @@ CameraController::CameraController() :
     keyMapping[SDLK_f] = PITCH_UP;
 
     stepByStepModifers = KMOD_LCTRL;
+    highSpeedModifers = KMOD_LALT;
 
-    for(positive i = 0; i < ACTIONS_COUNT; i++)
+    for(positive i = 0; i < ACTIONS_COUNT; i++) {
         isActionActive[i] = false;
+        isActionNew[i] = false;
+    }
+    isStepByStepEnabled = false;
+    isHighSpeedEnabled = false;
 }
 
 CameraController::~CameraController()
@@ -57,10 +63,12 @@ void CameraController::setModifiersForStepByStep(int keys) {
     stepByStepModifers = keys;
 }
 
-bool CameraController::handleEvent(SDL_Event & event, real time) {
+bool CameraController::handleEvent(SDL_Event & event) {
     bool handled = false;
-    int activeModifiers = event.key.keysym.mod;
-    bool stepByStepModeEnabled = ((activeModifiers & stepByStepModifers) == stepByStepModifers);
+
+    for(int i = 0; i < ACTIONS_COUNT; i++)
+        isActionNew[i] = false;
+
     bool down = false;
     switch(event.type) {
     case SDL_KEYDOWN:
@@ -68,6 +76,8 @@ bool CameraController::handleEvent(SDL_Event & event, real time) {
     case SDL_KEYUP:
         if(keyMapping.count(event.key.keysym.sym) > 0) {
             isActionActive[keyMapping[event.key.keysym.sym]] = down;
+            if(!isActionActive[keyMapping[event.key.keysym.sym]])
+                isActionNew[keyMapping[event.key.keysym.sym]] = true;
             handled = true;
         }
         break;
@@ -79,41 +89,69 @@ bool CameraController::handleEvent(SDL_Event & event, real time) {
         break;
     }
 
+    return handled;
+}
+
+real CameraController::getSpeed(int action, real dt) {
+    if(!isActionActive[action])
+        return 0;
+
     // Get motion magnitude
     real t = 0, r = 0;
-    if(stepByStepModeEnabled) {
+    if(isStepByStepEnabled) {
         positive now = SDL_GetTicks();
-        if(now - timeLastStep >= stepDelay) {
+        if(isActionNew[action])
             timeLastStep = now;
+        if(now == timeLastStep || now - timeLastStep >= stepDelay) {
             t = translateStep;
             r = toRadians(rotationStep);
         }
     }
     else {
-        t = time * translateSpeed;
-        r = time * toRadians(rotationSpeed);
+        t = dt * translateSpeed;
+        r = dt * toRadians(rotationSpeed);
     }
 
+    if(isHighSpeedEnabled) {
+        t *= highSpeedFactor;
+        r *= highSpeedFactor;
+    }
+
+    if(action <= MOVE_RIGHT)
+        return t;
+    else
+        return r;
+}
+
+void CameraController::actionToMatrix(real dt) {
+    identity(motionMatrix);
+
+    int activeModifiers = SDL_GetModState();
+    isStepByStepEnabled = ((activeModifiers & stepByStepModifers) == stepByStepModifers);
+    isHighSpeedEnabled = ((activeModifiers & highSpeedModifers) == highSpeedModifers);
+
+
+    applyTranslate(motionMatrix,
+                   getSpeed(MOVE_LEFT, dt)-getSpeed(MOVE_RIGHT, dt),
+                   getSpeed(MOVE_DOWN, dt)-getSpeed(MOVE_UP, dt),
+                   getSpeed(MOVE_FORWARD, dt)-getSpeed(MOVE_BACKWARD, dt));
+
+    applyRotate(motionMatrix, getSpeed(YAW_RIGHT, dt)-getSpeed(YAW_LEFT, dt), 0, 1, 0);
+    applyRotate(motionMatrix, getSpeed(PITCH_UP, dt)-getSpeed(PITCH_DOWN, dt), 1, 0, 0);
+    applyRotate(motionMatrix, getSpeed(ROLL_RIGHT, dt)-getSpeed(ROLL_LEFT, dt), 0, 0, 1);
+}
+
+void CameraController::updateCamera(real dt) {
     // Get the matrix for the current keys
-    actionToMatrix(t, r);
+    actionToMatrix(dt);
 
     // Apply matrix to camera
     real tmpMat[MAT4_SCALARS_COUNT];
     copyMatrix(tmpMat, camera->position);
     multiplyMM(motionMatrix, tmpMat, camera->position);
 
-    return handled;
+    Uint32 now =  SDL_GetTicks();
+    if(now - timeLastStep > stepDelay)
+        timeLastStep = now;
 }
 
-void CameraController::actionToMatrix(real t, real r) {
-    identity(motionMatrix);
-
-    applyTranslate(motionMatrix,
-                   ((int)isActionActive[MOVE_LEFT]-(int)isActionActive[MOVE_RIGHT]) * t,
-                   ((int)isActionActive[MOVE_DOWN]-(int)isActionActive[MOVE_UP]) * t,
-                   ((int)isActionActive[MOVE_FORWARD]-(int)isActionActive[MOVE_BACKWARD]) * t);
-
-    applyRotate(motionMatrix, ((int)isActionActive[YAW_RIGHT]-(int)isActionActive[YAW_LEFT]) * r, 0, 1, 0);
-    applyRotate(motionMatrix, ((int)isActionActive[PITCH_UP]-(int)isActionActive[PITCH_DOWN]) * r, 1, 0, 0);
-    applyRotate(motionMatrix, ((int)isActionActive[ROLL_RIGHT]-(int)isActionActive[ROLL_LEFT]) * r, 0, 0, 1);
-}

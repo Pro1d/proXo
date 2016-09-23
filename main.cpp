@@ -9,13 +9,23 @@
 #include <SDL/SDL.h>
 #include "core/math/basics.h"
 
-int main ( int argc, char** argv )
+int main(int argc, char** argv)
 {
     // initialize SDL video
-    if ( SDL_Init( SDL_INIT_VIDEO ) < 0 )
+    if(SDL_Init(SDL_INIT_VIDEO) < 0)
     {
-        printf( "Unable to init SDL: %s\n", SDL_GetError() );
+        printf("Unable to init SDL: %s\n", SDL_GetError());
         return 1;
+    }
+    // make sure SDL cleans up before exit
+    atexit(SDL_Quit);
+
+    // create a new window
+    SDL_Surface* screen = SDL_SetVideoMode(640, 480, 24,
+                                           SDL_HWACCEL|SDL_HWSURFACE|SDL_DOUBLEBUF);
+    if(!screen ) {
+        printf("Unable to set 640x480 video: %s\n", SDL_GetError());
+        return 4;
     }
 
     SceneParser parser;
@@ -40,22 +50,9 @@ int main ( int argc, char** argv )
     controller.setTranslateSpeed(0.6);
     controller.setRotateSpeed(30);
 
-    // make sure SDL cleans up before exit
-    atexit(SDL_Quit);
-
-    // create a new window
-    SDL_Surface* screen = SDL_SetVideoMode(640, 480, 24,
-                                           SDL_HWACCEL|SDL_HWSURFACE|SDL_DOUBLEBUF);
-    if ( !screen )
-    {
-        printf("Unable to set 640x480 video: %s\n", SDL_GetError());
-        return 4;
-    }
 
     SDL_Surface * buffer = SDL_CreateRGBSurface(SDL_HWSURFACE|SDL_HWSURFACE, 640, 480, 24, 0,0,0,0);
     Uint32 time = SDL_GetTicks();
-
-    SDL_EnableKeyRepeat(50, 30);
 
     // program main loop
     bool done = false;
@@ -67,7 +64,7 @@ int main ( int argc, char** argv )
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
-            controller.handleEvent(event, dT);
+            controller.handleEvent(event);
             // check for messages
             switch (event.type)
             {
@@ -86,6 +83,8 @@ int main ( int argc, char** argv )
                 }
             } // end switch
         } // end of message processing
+
+        controller.updateCamera(dT);
 
         // DRAWING STARTS HERE
 

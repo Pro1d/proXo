@@ -172,7 +172,7 @@ bool StanfordParser::readObject(const char * filename, Object & object) {
         case FACE_LIST:
             int count = atoi(word);
             if(count > 3)
-                printf("Warning, face with >3 vertices!"); // warning: only triangles are supported
+                printf("Warning, face with %d vertices! (%s)\n", count, filename); // warning: only triangles are supported
             for(int i = 0; i < count; i++) {
                 int vertex = nextInteger();
                 if(i < 3)
