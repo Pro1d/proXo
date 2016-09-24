@@ -13,6 +13,7 @@ public:
     void setPosition(vec3 pos);
     void setDirection(vec3 dir);
     void setFieldOfView(real fov);
+    bool isShpereVisible(vec3 center, real radius);
 
     real projection[MAT4_SCALARS_COUNT];
     real position[MAT4_SCALARS_COUNT];

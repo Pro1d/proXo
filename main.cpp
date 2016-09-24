@@ -37,8 +37,9 @@ int main(int argc, char** argv)
     }
     real fov = 70 * PI / 180;
     real zNear = 0.001;
-    real size = tan(fov/2) * zNear;
-    scene.camera.setFrustrum(zNear, 10, size, size);
+    real size = tan(fov/2) * zNear * 2;
+    real ratio = 480.0 / 640.0;
+    scene.camera.setFrustrum(zNear, 10, size, size*ratio);
     //scene.camera.setOrthographics(0.001, 10, 2,2);
     scene.camera.setScreenSize(640, 480);
     scene.print();
@@ -88,7 +89,9 @@ int main(int argc, char** argv)
 
         // DRAWING STARTS HERE
 
+        Uint32 t = SDL_GetTicks();
         realTimeEngine.render();
+        printf("t:%dms\n", SDL_GetTicks() - t);
         bufferToBitmap24bpp(buf, buffer, 1);
 
         // clear screen

@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cmath>
 #include "Camera.h"
 #include "../math/type.h"
 #include "../math/Matrix.h"
@@ -9,14 +10,13 @@ Camera::Camera() {
 }
 
 void Camera::setFrustrum(real zNear, real zFar, real width, real height) {
-    real size = std::max(width, height);
-    projection[0] = 2 * zNear / size;
+    projection[0] = 2 * zNear / width;
     projection[1] = 0;
     projection[2] = 0;
     projection[3] = 0;
 
     projection[4] = 0;
-    projection[5] = 2 * zNear / size;
+    projection[5] = 2 * zNear / height;
     projection[6] = 0;
     projection[7] = 0;
 
@@ -36,17 +36,18 @@ void Camera::setFrustrum(real zNear, real zFar, real width, real height) {
     xmin = -width / 2;
     ymax = height / 2;
     ymin = -height / 2;
+
+    fieldOfView = atan2(width, zNear);
 }
 
 void Camera::setOrthographics(real zNear, real zFar, real width, real height) {
-    real size = std::max(width, height);
-    projection[0] = 2 / size;
+    projection[0] = 2 / width;
     projection[1] = 0;
     projection[2] = 0;
     projection[3] = 0;
 
     projection[4] = 0;
-    projection[5] = 2 / size;
+    projection[5] = 2 / height;
     projection[6] = 0;
     projection[7] = 0;
 
@@ -66,14 +67,15 @@ void Camera::setOrthographics(real zNear, real zFar, real width, real height) {
     xmin = -width / 2;
     ymax = height / 2;
     ymin = -height / 2;
+
+    fieldOfView = 0;
 }
 
 void Camera::setScreenSize(real w, real h) {
-    real s = std::max(w, h);
     applyTranslate(projection, w/2, h/2, 0);
-    projection[0] *= s/2;
-    projection[5] *= -s/2;
-    projection[20] *= s/2;
+
+    projection[0] *= w/2;
+    projection[5] *= -h/2;
 }
 
 void Camera::setFieldOfView(real fov) {
@@ -121,5 +123,18 @@ void Camera::setDirection(vec3 dir) {
         real tmp[MAT4_SCALARS_COUNT];
         multiplyMM(position, rotations, tmp);
         copyMatrix(position, tmp);
+    }
+}
+
+bool Camera::isShpereVisible(vec3 center, real radius) {
+    if(fieldOfView == 0) {
+        return center[0]+radius > xmin || center[0]-radius < xmax
+            || center[1]+radius > ymin || center[1]-radius < ymax
+            || center[2]+radius > zNear || center[2]-radius < zFar;
+    }
+    else {
+        if(center[2]+radius > zNear || center[2]-radius > zFar)
+            return false;
+        //real crossX = cos(fieldOfView) * center[]
     }
 }

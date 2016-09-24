@@ -13,6 +13,7 @@ class Object {
         void allocateColors();
         void allocateTextureMapping();
         void allocateFaces(positive count);
+        void updateBoundingSphere();
 
 		vec4 vertices;
 		vec4 normals;
@@ -22,6 +23,8 @@ class Object {
 		positive texture_id;
 		positive verticesCount;
 		positive facesCount;
+        real boundingSphereCenter[VEC4_SCALARS_COUNT];
+        real boundingSphereRadius;
 };
 
 #endif

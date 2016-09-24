@@ -75,7 +75,7 @@ void triangleSup(Buffer & buffer, const vec3 A, const vec3 B, const vec3 C, cons
 		for(real lx = lxs; lx <= lxe; lx++) {
 			real * pts = buffer.getPtr(lx, y);
 			// depth test
-			if(lz < pts[BUF_Z_OFFSET]) {
+			if(0 <= lz && lz < pts[BUF_Z_OFFSET]) {
 				pts[BUF_Z_OFFSET] = lz;
 				pts[BUF_R_OFFSET] = lr;
 				pts[BUF_G_OFFSET] = lg;
@@ -164,7 +164,7 @@ void triangleInf(Buffer & buffer, const vec3 A, const vec3 B, const vec3 C, cons
 		for(real lx = lxs; lx <= lxe; lx++) {
 			real * pts = buffer.getPtr(lx, y);
 			// depth test
-			if(lz < pts[BUF_Z_OFFSET]) {
+			if(0 <= lz && lz < pts[BUF_Z_OFFSET]) {
 				pts[BUF_Z_OFFSET] = lz;
 				pts[BUF_R_OFFSET] = lr;
 				pts[BUF_G_OFFSET] = lg;

@@ -62,6 +62,11 @@ void SceneToPool::objectToPool(Object & object, Material & material, Pool & pool
     positive vertexOffset = pool.currentVerticesCount;
     mat4 matrix = transformation.getMatrix();
 
+    real center[VEC4_SCALARS_COUNT];
+    multiplyMV(matrix, object.boundingSphereCenter, center);
+    real radius = object.boundingSphereRadius * getMatrixScale(matrix);
+
+
     // Per vertex
     vec4 vertices = pool.vertexPool + vertexOffset * VEC4_SCALARS_COUNT;
     vec4 normals = pool.normalPool + vertexOffset * VEC4_SCALARS_COUNT;

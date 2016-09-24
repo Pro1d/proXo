@@ -21,7 +21,7 @@ void SpotLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient, real
     real D = std::max((real) 0, dot(L, normal));
 
     // Intensity from cut off/fall off
-    real I = -dot(direction, L);
+    real I = -dot(transformedDirection, L);
     if(I < cutOff) {
         // outside
         return;

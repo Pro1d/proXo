@@ -9,19 +9,19 @@ void SunLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient, real 
 
     // L: vector point->transformedPosition
     substract(transformedPosition, point, L);
-    real distToLight = std::max((real) 0, dot(L, direction));
+    real distToLight = std::max((real) 0, dot(L, transformedDirection));
 
     // intensity reduction with distance
     real lightIntensityInv = 1 + distToLight*distToLight * transformedReductionFactor;
 
     // dot product for diffuse intensity
-    real D = std::max((real) 0, dot(direction, normal));
+    real D = std::max((real) 0, -dot(transformedDirection, normal));
 
     // R: reflect of L with normal
-    real N = 2 * dot(direction, normal);
-    R[0] = N * normal[0] - direction[0];
-    R[1] = N * normal[1] - direction[1];
-    R[2] = N * normal[2] - direction[2];
+    real N = 2 * -dot(transformedDirection, normal);
+    R[0] = N * normal[0] - -transformedDirection[0];
+    R[1] = N * normal[1] - -transformedDirection[1];
+    R[2] = N * normal[2] - -transformedDirection[2];
     R[3] = 0;
     // V: normalized vector to camera
     normalize(point, V);
