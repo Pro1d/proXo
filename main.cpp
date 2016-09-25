@@ -31,7 +31,7 @@ int main(int argc, char** argv)
     SceneParser parser;
     Scene scene;
     Buffer buf(640, 480);
-    if(!parser.readScene("media/","test.scene", scene)) {
+    if(!parser.readScene("media/","parc.scene", scene)) {
         printf("readScene failed!\n");
         return 2;
     }
@@ -39,7 +39,7 @@ int main(int argc, char** argv)
     real zNear = 0.001;
     real size = tan(fov/2) * zNear * 2;
     real ratio = 480.0 / 640.0;
-    scene.camera.setFrustrum(zNear, 10, size, size*ratio);
+    scene.camera.setFrustrum(zNear, 100, size, size*ratio);
     //scene.camera.setOrthographics(0.001, 10, 2,2);
     scene.camera.setScreenSize(640, 480);
     scene.print();

@@ -37,7 +37,7 @@ void Camera::setFrustrum(real zNear, real zFar, real width, real height) {
     ymax = height / 2;
     ymin = -height / 2;
 
-    fieldOfView = atan2(width, zNear);
+    fieldOfView = atan2(width/2, zNear);
 }
 
 void Camera::setOrthographics(real zNear, real zFar, real width, real height) {
@@ -133,8 +133,32 @@ bool Camera::isShpereVisible(vec3 center, real radius) {
             || center[2]+radius > zNear || center[2]-radius < zFar;
     }
     else {
-        if(center[2]+radius > zNear || center[2]-radius > zFar)
+        if(-center[2]+radius < zNear || -center[2]-radius > zFar)
             return false;
-        //real crossX = cos(fieldOfView) * center[]
+
+        // TODO optimize
+        real lr = sqrt_inv(zNear*zNear + xmin*xmin);
+        real left[3] = {xmin, 0, -zNear};
+        real crossLeft = (left[2]*center[0]-center[2]*left[0])*lr;
+        if(crossLeft > radius)
+            return false;
+
+        real right[3] = {xmax, 0, -zNear};
+        real crossRight = (center[2]*right[0]-right[2]*center[0])*lr;
+        if(crossRight > radius)
+            return false;
+
+        real bt = sqrt_inv(zNear*zNear + ymin*ymin);
+        real bottom[3] = {0, ymin, -zNear};
+        real crossBottom = (bottom[2]*center[1]-center[2]*bottom[1])*bt;
+        if(crossBottom > radius)
+            return false;
+
+        real top[3] = {0, ymax, -zNear};
+        real crossTop = (center[2]*top[1]-top[2]*center[1])*bt;
+        if(crossTop > radius)
+            return false;
+
+        return true;
     }
 }

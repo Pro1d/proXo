@@ -152,6 +152,14 @@ real getMatrixScale(mat4 m) {
     return sum * sqrt_inv(sum);
 }
 
+real getMatrixSquaredScale(mat4 m) {
+    real sum = m[0]*m[0] + m[1]*m[1] + m[2]*m[2];
+    sum += m[4]*m[4] + m[5]*m[5] + m[6]*m[6];
+    sum += m[8]*m[8] + m[9]*m[9] + m[10]*m[10];
+
+    return sum;
+}
+
 void printMatrix(mat4 m, positive tabCount) {
     for(positive t = 0; t < tabCount; t++)
         printf("\t");

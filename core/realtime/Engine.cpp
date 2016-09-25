@@ -5,6 +5,7 @@
 #include "../common/SceneToPool.h"
 #include "../common/Pool.h"
 #include "../math/type.h"
+#include "../math/Vector.h"
 
 Engine::Engine(Buffer * imageBuffer, Scene * scene) :
     pool(NULL), scene(scene), imageBuffer(imageBuffer)
@@ -85,6 +86,10 @@ void Engine::drawTriangles() {
         vec4 v1 = pool->vertexPool + face[0]*VEC4_SCALARS_COUNT;
         vec4 v2 = pool->vertexPool + face[1]*VEC4_SCALARS_COUNT;
         vec4 v3 = pool->vertexPool + face[2]*VEC4_SCALARS_COUNT;
+
+        // Back-face culling
+        if(isFaceOrientationZPositive(v1, v2, v3))
+            continue;
 
         vec3 c1 = pool->materialPool + face[0]*VEC8_SCALARS_COUNT;
         vec3 c2 = pool->materialPool + face[1]*VEC8_SCALARS_COUNT;

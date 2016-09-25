@@ -14,6 +14,11 @@ void AmbientLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient, r
         // L: vector point->transformedPosition
         substract(transformedPosition, point, L);
         real distToLight2 = squaredLength(L);
+
+        // light is too far, attenuation makes it invisible
+        if(transformedReductionFactor > 0 && distToLight2 > transformedDistanceMax)
+            return;
+
         // intensity reduction with distance
         real lightIntensityInv = 1 + distToLight2*transformedReductionFactor;
 

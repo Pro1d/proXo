@@ -32,11 +32,10 @@ void SceneToPool::run(Scene & scene, Pool & pool) {
             transformation.restore();
         }
         else {
-            // TODO do not push object if not visible (circle/cube min)
             // Go trough object, light and containers
             for(integer i = top->objectsCount; --i >= 0; ) {
                 transformation.saveAndPostMult(top->objectMatrices[i]);
-                objectToPool(*top->objects[i], *top->objectMaterials[i], pool);
+                objectToPool(*top->objects[i], *top->objectMaterials[i], pool, scene.camera);
                 transformation.restore();
             }
 
@@ -58,14 +57,16 @@ void SceneToPool::run(Scene & scene, Pool & pool) {
     }
 }
 
-void SceneToPool::objectToPool(Object & object, Material & material, Pool & pool) {
+void SceneToPool::objectToPool(Object & object, Material & material, Pool & pool, Camera & camera) {
     positive vertexOffset = pool.currentVerticesCount;
     mat4 matrix = transformation.getMatrix();
 
+    // Do not add object to pool if object is not visible
     real center[VEC4_SCALARS_COUNT];
     multiplyMV(matrix, object.boundingSphereCenter, center);
     real radius = object.boundingSphereRadius * getMatrixScale(matrix);
-
+    if(!camera.isShpereVisible(center, radius))
+        return;
 
     // Per vertex
     vec4 vertices = pool.vertexPool + vertexOffset * VEC4_SCALARS_COUNT;

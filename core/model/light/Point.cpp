@@ -9,17 +9,23 @@ void PointLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient, rea
     // L: vector point->transformedPosition
     substract(transformedPosition, point, L);
     real distToLight2 = squaredLength(L);
+
+    // light is too far, attenuation makes it invisible
+    if(transformedReductionFactor > 0 && distToLight2 > transformedDistanceMax)
+        return;
+
     real distToLightInv = sqrt_inv(distToLight2);
     // intensity reduction with distance
     real lightIntensityInv = 1 + distToLight2*transformedReductionFactor;
 
     // normalize L
     multiply(L, distToLightInv);
+    real LdotNormal = dot(L, normal);
     // dot product for diffuse intensity
-    real D = std::max((real) 0, dot(L, normal));
+    real D = std::max((real) 0, LdotNormal);
 
     // R: reflect of L with normal
-    real N = 2 * dot(L, normal);
+    real N = 2 * LdotNormal;
     R[0] = N * normal[0] - L[0];
     R[1] = N * normal[1] - L[1];
     R[2] = N * normal[2] - L[2];

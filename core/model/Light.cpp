@@ -18,6 +18,7 @@ void Light::initialize() {
     color[2] = 1;
     intensity = 1;
     reductionFactor = 0;
+    distanceMax = 0;
     direction[0] = 1;
     direction[1] = 0;
     direction[2] = 0;
@@ -46,9 +47,16 @@ void Light::setColor(vec3 c) {
 
 void Light::setIntensity(real i) {
     intensity = i;
+    updateDistanceMax();
 }
 void Light::setReductionFactor(real i) {
     reductionFactor = i;
+    updateDistanceMax();
+}
+void Light::updateDistanceMax() {
+    real k = 1.0 / 255;
+    if(reductionFactor > 0)
+        distanceMax = (intensity - k) / (k * reductionFactor);
 }
 void Light::setFallOff(real i) {
     fallOff = cos(toRadians(i));
@@ -61,7 +69,9 @@ void Light::transform(mat4 matrix) {
     multiplyNoNormalizeMV(matrix, position, transformedPosition);
     multiplyNoNormalizeMV(matrix, direction, transformedDirection);
     normalize(transformedDirection);
-    transformedReductionFactor = reductionFactor * getMatrixScale(matrix)*getMatrixScale(matrix);
+    real squaredScale = getMatrixSquaredScale(matrix);
+    transformedDistanceMax = distanceMax / squaredScale;
+    transformedReductionFactor = reductionFactor * squaredScale;
 }
 
 real Light::specularIntensity(real RdotV, real shininess) {

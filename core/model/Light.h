@@ -23,9 +23,11 @@ protected:
     real transformedPosition[VEC4_SCALARS_COUNT];
     real transformedDirection[VEC4_SCALARS_COUNT];
     real transformedReductionFactor;
+    real transformedDistanceMax;
     real color[VEC4_SCALARS_COUNT];
     real intensity;
     real reductionFactor;//  1 / (d^2 * factor + 1);
+    real distanceMax;
     real fallOff, cutOff;
     real direction[VEC4_SCALARS_COUNT];
     real position[VEC4_SCALARS_COUNT];

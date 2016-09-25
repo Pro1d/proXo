@@ -11,14 +11,19 @@ void SunLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient, real 
     substract(transformedPosition, point, L);
     real distToLight = std::max((real) 0, dot(L, transformedDirection));
 
+    // light is too far, attenuation makes it invisible
+    if(transformedReductionFactor > 0 && distToLight*distToLight > transformedDistanceMax)
+        return;
+
     // intensity reduction with distance
     real lightIntensityInv = 1 + distToLight*distToLight * transformedReductionFactor;
 
     // dot product for diffuse intensity
-    real D = std::max((real) 0, -dot(transformedDirection, normal));
+    real dirDotNormal = -dot(transformedDirection, normal);
+    real D = std::max((real) 0, dirDotNormal);
 
     // R: reflect of L with normal
-    real N = 2 * -dot(transformedDirection, normal);
+    real N = 2 * dirDotNormal;
     R[0] = N * normal[0] - -transformedDirection[0];
     R[1] = N * normal[1] - -transformedDirection[1];
     R[2] = N * normal[2] - -transformedDirection[2];

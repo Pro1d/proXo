@@ -20,6 +20,7 @@ class Object {
 		vec4 colors;
 		vec2 texture_mapping;
 		positive * faces;
+		vec4 faceNormals;
 		positive texture_id;
 		positive verticesCount;
 		positive facesCount;

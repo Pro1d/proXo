@@ -28,6 +28,8 @@ bool StanfordParser::readObject(const char * filename, Object & object) {
         return false;
     }
 
+    std::vector<positive> additionnalFaces;
+
     char word[128];
     int state = HEADER;
     int key;
@@ -171,12 +173,19 @@ bool StanfordParser::readObject(const char * filename, Object & object) {
 
         case FACE_LIST:
             int count = atoi(word);
-            if(count > 3)
-                printf("Warning, face with %d vertices! (%s)\n", count, filename); // warning: only triangles are supported
+            positive firstVertex, previousVertex;
             for(int i = 0; i < count; i++) {
                 int vertex = nextInteger();
+                if(i == 0)
+                    firstVertex = vertex;
                 if(i < 3)
                     object.faces[faceReadCount * 3 + i] = vertex;
+                else {
+                    additionnalFaces.push_back(firstVertex);
+                    additionnalFaces.push_back(previousVertex);
+                    additionnalFaces.push_back(vertex);
+                }
+                previousVertex = vertex;
             }
             faceReadCount++;
             if(faceReadCount == (int) object.facesCount)
@@ -188,6 +197,15 @@ bool StanfordParser::readObject(const char * filename, Object & object) {
             break;
     }
     fclose(file);
+
+    if(additionnalFaces.size() > 0) {
+        positive * moreFaces = new positive[(object.facesCount+additionnalFaces.size()/3)*3];
+        memcpy(moreFaces, object.faces, object.facesCount*3*sizeof(positive));
+        memcpy(moreFaces+object.facesCount*3, additionnalFaces.data(), additionnalFaces.size()*sizeof(positive));
+        delete[] object.faces;
+        object.faces = moreFaces;
+        object.facesCount += additionnalFaces.size()/3;
+    }
 
     if(state != END)
         return false;

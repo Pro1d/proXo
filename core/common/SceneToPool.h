@@ -9,7 +9,7 @@ class SceneToPool {
     public:
         SceneToPool();
         void run(Scene & scene, Pool & pool);
-        void objectToPool(Object & object, Material & material, Pool & pool);
+        void objectToPool(Object & object, Material & material, Pool & pool, Camera & camera);
         void lightToPool(Light & light, Pool & pool);
     private:
         TransformationStack transformation;

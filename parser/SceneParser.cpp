@@ -539,12 +539,15 @@ bool SceneParser::parseObject(Container & container, Scene & scene) {
             material = scene.materials[name];
             break;
         case LIGHT:
+            object->updateBoundingSphere();
             container.addObject(object, matrix, material);
             return parseLight(container, scene);
         case OBJECT:
+            object->updateBoundingSphere();
             container.addObject(object, matrix, material);
             return parseObject(container, scene);
         case CONTAINER: {
+            object->updateBoundingSphere();
             container.addObject(object, matrix, material);
             int o,c,l;
             if(!nextInteger(o) || !nextInteger(c) || !nextInteger(l)) {
@@ -557,6 +560,7 @@ bool SceneParser::parseObject(Container & container, Scene & scene) {
             parseContainer(*cont, mat, scene);
             } return false;
         case END:
+            object->updateBoundingSphere();
             container.addObject(object, matrix, material);
             return true;
         default:

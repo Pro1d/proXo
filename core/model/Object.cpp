@@ -59,6 +59,7 @@ void Object::allocateTextureMapping() {
 
 void Object::allocateFaces(positive count) {
     faces = new positive[count * 3];
+    faceNormals = new real[count * VEC4_SCALARS_COUNT];
 }
 
 void Object::updateBoundingSphere() {
@@ -89,7 +90,7 @@ void Object::updateBoundingSphere() {
         radiusSquaredMax = std::max(radiusSquaredMax, squaredLength(v));
     }
 
-    boundingSphereRadius = 1 / sqrt_inv(radiusSquaredMax);
+    boundingSphereRadius = radiusSquaredMax * sqrt_inv(radiusSquaredMax);
 
     /** Other possible method: Ritter's bounding sphere algorithm
         1. Pick a point x from P, search a point y in P, which has the largest distance from x;
