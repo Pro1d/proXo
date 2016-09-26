@@ -2,11 +2,32 @@
 #include <cmath>
 #include "Camera.h"
 #include "../math/type.h"
+#include "../math/basics.h"
 #include "../math/Matrix.h"
 
-Camera::Camera() {
+Camera::Camera() :
+    fieldOfView(70*PI/180),
+    zNear(0.5), zFar(100),
+    screenWidth(512), screenHeight(512) {
     identity(position);
     identity(projection);
+}
+
+void Camera::updateProjection() {
+    if(fieldOfView > 0) {
+        real size = tan(fieldOfView/2) * zNear * 2;
+        real ratio = screenHeight / screenWidth;
+        setFrustrum(zNear, zFar, size, size*ratio);
+    }
+    else {
+        real size = 2;
+        real ratio = screenHeight / screenWidth;
+        setOrthographics(zNear, zFar, size, size*ratio);
+    }
+
+    applyTranslate(projection, screenWidth/2, screenHeight/2, 0);
+    projection[0] *= screenWidth/2;
+    projection[5] *= -screenHeight/2;
 }
 
 void Camera::setFrustrum(real zNear, real zFar, real width, real height) {
@@ -32,12 +53,13 @@ void Camera::setFrustrum(real zNear, real zFar, real width, real height) {
 
     this->zNear = zNear;
     this->zFar = zFar;
+
     xmax = width / 2;
     xmin = -width / 2;
     ymax = height / 2;
     ymin = -height / 2;
 
-    fieldOfView = atan2(width/2, zNear);
+    fieldOfView = 2*atan2(width/2, zNear);
 }
 
 void Camera::setOrthographics(real zNear, real zFar, real width, real height) {
@@ -72,22 +94,31 @@ void Camera::setOrthographics(real zNear, real zFar, real width, real height) {
 }
 
 void Camera::setScreenSize(real w, real h) {
-    applyTranslate(projection, w/2, h/2, 0);
-
-    projection[0] *= w/2;
-    projection[5] *= -h/2;
+    screenWidth = w;
+    screenHeight = h;
+    updateProjection();
 }
 
 void Camera::setFieldOfView(real fov) {
     fieldOfView = fov;
+    updateProjection();
+}
+
+real Camera::getFieldOfView() {
+    return fieldOfView;
+}
+
+void Camera::setDepthMax(real zFar) {
+    this->zFar = zFar;
+    this->zNear = zFar / 200;
 }
 
 void Camera::lookAt(vec3 target) {
     // cartesian to polar coordiantes
     real d[3] = {
-        -position[3] - target[0],
-        -position[7] - target[1],
-        -position[11] - target[2]
+        position[3] + target[0],
+        position[7] + target[1],
+        position[11] + target[2]
     };
     setDirection(d);
 }
@@ -113,15 +144,16 @@ void Camera::setDirection(vec3 dir) {
     else {
         // R, Theta, Phi
         //real r = d2 * sqrt_inv(d2);
-        real t = atan2(z, 1 / sqrt_inv(x*x+y*y));
+        real t = acos(z * sqrt_inv(d2));
         real p = atan2(y, x);
+
         real rotations[MAT4_SCALARS_COUNT];
         identity(rotations);
 
-        applyRotate(rotations, -t, 0,1,0);
-        applyRotate(rotations, -p, 0,0,1);
+        applyRotate(rotations, PI/2-p, 0,0,1);
+        applyRotate(rotations, t-PI, 1,0,0);
         real tmp[MAT4_SCALARS_COUNT];
-        multiplyMM(position, rotations, tmp);
+        multiplyMM(rotations, position, tmp);
         copyMatrix(position, tmp);
     }
 }

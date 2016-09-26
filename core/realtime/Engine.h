@@ -5,6 +5,7 @@
 #include "../model/Scene.h"
 #include "../common/SceneToPool.h"
 #include "../common/Pool.h"
+#include "../sys/Multithreading.h"
 
 class Engine
 {
@@ -17,13 +18,11 @@ class Engine
         void vertexLighting();
         void drawTriangles();
 
-    protected:
-
-    private:
         Pool * pool;
         Scene * scene;
         Buffer * imageBuffer;
         SceneToPool sceneToPool;
+        MultiThread multithread;
 };
 
 #endif // ENGINE_H

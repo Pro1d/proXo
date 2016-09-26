@@ -17,7 +17,7 @@ enum {
     COLOR, COLOR255, AMBIENT, DIFFUSE, SPECULAR, SHININESS, EMISSIVE, NORMAL,
     OBJECT, CONTAINER, END,
     T, S, R, TX, TY, TZ, RX, RY, RZ,
-    MATERIAL, CAMERA, FOV, LOOKAT,
+    MATERIAL, CAMERA, FOV, LOOKAT, ZMAX,
     /** Ray Tracing
     REFRACTIVE_INDEX, REFRACTIVE_INDEX_R, REFRACTIVE_INDEX_G, REFRACTIVE_INDEX_B,
     REFLECT, REFLECT_R, REFLECT_G, REFLECT_B,
@@ -33,7 +33,7 @@ static const char * keyName[KEY_COUNT] = {
     "color", "color255", "ambient", "diffuse", "specular", "shininess", "emissive", "normal",
     "object", "container", "end",
     "t", "s", "r", "tx", "ty", "tz", "rx", "ry", "rz",
-    "material", "camera", "fov", "lookat"
+    "material", "camera", "fov", "lookat", "zmax",
 };
 char commmentCharacter = '%';
 
@@ -197,7 +197,15 @@ void SceneParser::parseStateCamera(Scene & scene) {
                 state = ST_ERROR;
                 break;
             }
-            scene.camera.setFieldOfView(fov);
+            scene.camera.setFieldOfView(toRadians(fov));
+            break;
+        case ZMAX:
+            real z;
+            if(!nextReal(z)) {
+                state = ST_ERROR;
+                break;
+            }
+            scene.camera.setDepthMax(z);
             break;
         default:
             state = ST_ERROR;

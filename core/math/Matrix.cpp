@@ -48,7 +48,7 @@ void multiplyMV(mat4 M, vec4 v, vec4 vOut) {
     vOut[0] = v[0]*M[0] + v[1]*M[1] + v[2]*M[2] + v[3]*M[3];
     vOut[1] = v[0]*M[4] + v[1]*M[5] + v[2]*M[6] + v[3]*M[7];
     vOut[2] = v[0]*M[8] + v[1]*M[9] + v[2]*M[10] + v[3]*M[11];
-    real vOut_3 = v[0]*M[12] + v[1]*M[13] + v[2]*M[14] + v[3]*M[15];
+    real vOut_3 = fabs(v[0]*M[12] + v[1]*M[13] + v[2]*M[14] + v[3]*M[15]);// TODO remove abs()
     vOut[0] /= vOut_3;
     vOut[1] /= vOut_3;
     vOut[2] /= vOut_3;

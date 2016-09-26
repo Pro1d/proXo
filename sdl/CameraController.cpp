@@ -11,31 +11,19 @@ CameraController::CameraController() :
     stepDelay(300),
     timeLastStep(0),
     rotationSpeed(10),
-    translateSpeed(0.1)
+    translateSpeed(0.1),
+    mouseSensivity(0.08),
+    isStepByStepEnabled(false),
+    isHighSpeedEnabled(false),
+    isMouseGrabbed(false)
 {
-    keyMapping[SDLK_w] = MOVE_FORWARD;
-    keyMapping[SDLK_s] = MOVE_BACKWARD;
-    keyMapping[SDLK_a] = MOVE_LEFT;
-    keyMapping[SDLK_d] = MOVE_RIGHT;
-    keyMapping[SDLK_SPACE] = MOVE_UP;
-    keyMapping[SDLK_v] = MOVE_DOWN;
-
-    keyMapping[SDLK_q] = YAW_LEFT;
-    keyMapping[SDLK_e] = YAW_RIGHT;
-    keyMapping[SDLK_z] = ROLL_LEFT;
-    keyMapping[SDLK_x] = ROLL_RIGHT;
-    keyMapping[SDLK_r] = PITCH_DOWN;
-    keyMapping[SDLK_f] = PITCH_UP;
-
-    stepByStepModifers = KMOD_LCTRL;
-    highSpeedModifers = KMOD_LALT;
-
+    rotateMouse[0] = 0;
+    rotateMouse[1] = 0;
+    rotateMouse[2] = 0;
     for(positive i = 0; i < ACTIONS_COUNT; i++) {
         isActionActive[i] = false;
         isActionNew[i] = false;
     }
-    isStepByStepEnabled = false;
-    isHighSpeedEnabled = false;
 }
 
 CameraController::~CameraController()
@@ -59,8 +47,16 @@ void CameraController::assignKey(int action, int key) {
     keyMapping[key] = action;
 }
 
+void CameraController::assignMouse(int action, int button) {
+    mouseMapping[button] = action;
+}
+
 void CameraController::setModifiersForStepByStep(int keys) {
     stepByStepModifers = keys;
+}
+
+void CameraController::setModifiersHighSpeed(int keys) {
+    highSpeedModifers = keys;
 }
 
 bool CameraController::handleEvent(SDL_Event & event) {
@@ -82,10 +78,40 @@ bool CameraController::handleEvent(SDL_Event & event) {
         }
         break;
     case SDL_MOUSEMOTION:
+        if(event.motion.xrel != 0 && isMouseGrabbed) {
+            if(mouseMapping.count(MOUSE_X) > 0) {
+                int action = mouseMapping[MOUSE_X];
+                if(ROTATE_BACKWARD <= action && action <= ROTATE_LEFT) {
+                    rotateMouse[(action-ROTATE_BACKWARD)/2] += (((action-ROTATE_BACKWARD)&1) ? -1 : 1) * mouseSensivity * event.motion.xrel;
+                }
+            }
+        }
+        if(event.motion.yrel != 0 && isMouseGrabbed) {
+            if(mouseMapping.count(MOUSE_Y) > 0) {
+                int action = mouseMapping[MOUSE_Y];
+                if(ROTATE_BACKWARD <= action && action <= ROTATE_LEFT) {
+                    rotateMouse[(action-ROTATE_BACKWARD)/2] += (((action-ROTATE_BACKWARD)&1) ? -1 : 1) * mouseSensivity * event.motion.yrel;
+                }
+            }
+        }
         break;
     case SDL_MOUSEBUTTONDOWN:
         down = true;
     case SDL_MOUSEBUTTONUP:
+        if(mouseMapping.count(event.button.button) > 0) {
+            switch(mouseMapping[event.button.button]) {
+            case GRAB_MOUSE:
+                grabMouse(down);
+                break;
+            case FOV_DECREASE:
+                camera->setFieldOfView(std::max(toRadians(10), camera->getFieldOfView()-toRadians(10)));
+                break;
+            case FOV_INCREASE:
+                camera->setFieldOfView(std::min(toRadians(170), camera->getFieldOfView()+toRadians(10)));
+                break;
+            }
+            handled = true;
+        }
         break;
     }
 
@@ -131,14 +157,19 @@ void CameraController::actionToMatrix(real dt) {
     isHighSpeedEnabled = ((activeModifiers & highSpeedModifers) == highSpeedModifers);
 
 
+
+    applyRotate(motionMatrix, getSpeed(ROLL_RIGHT, dt)-getSpeed(ROLL_LEFT, dt)+toRadians(rotateMouse[0]), 0, 0, 1);
+    applyRotate(motionMatrix, getSpeed(YAW_RIGHT, dt)-getSpeed(YAW_LEFT, dt) + toRadians(rotateMouse[1]), 0, 1, 0);
+    applyRotate(motionMatrix, getSpeed(PITCH_UP, dt)-getSpeed(PITCH_DOWN, dt) +toRadians(rotateMouse[2]), 1, 0, 0);
+
     applyTranslate(motionMatrix,
                    getSpeed(MOVE_LEFT, dt)-getSpeed(MOVE_RIGHT, dt),
                    getSpeed(MOVE_DOWN, dt)-getSpeed(MOVE_UP, dt),
                    getSpeed(MOVE_FORWARD, dt)-getSpeed(MOVE_BACKWARD, dt));
 
-    applyRotate(motionMatrix, getSpeed(YAW_RIGHT, dt)-getSpeed(YAW_LEFT, dt), 0, 1, 0);
-    applyRotate(motionMatrix, getSpeed(PITCH_UP, dt)-getSpeed(PITCH_DOWN, dt), 1, 0, 0);
-    applyRotate(motionMatrix, getSpeed(ROLL_RIGHT, dt)-getSpeed(ROLL_LEFT, dt), 0, 0, 1);
+    rotateMouse[0] = 0;
+    rotateMouse[1] = 0;
+    rotateMouse[2] = 0;
 }
 
 void CameraController::updateCamera(real dt) {
@@ -155,3 +186,13 @@ void CameraController::updateCamera(real dt) {
         timeLastStep = now;
 }
 
+void CameraController::grabMouse(bool grab) {
+    if(grab) {
+        int x, y;
+        SDL_GetMouseState(&x, &y);
+        SDL_WarpMouse(x, y);
+    }
+    SDL_ShowCursor(!grab);
+    SDL_WM_GrabInput(grab ? SDL_GRAB_ON : SDL_GRAB_OFF);
+    isMouseGrabbed = grab;
+}

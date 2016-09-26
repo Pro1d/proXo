@@ -2,6 +2,7 @@
 /// Configuration
 
 #define CPU_CORES_COUNT		8
+#define THREADS_COUNT        CPU_CORES_COUNT
 #define ENABLE_CEL_SHADING  true
 
 

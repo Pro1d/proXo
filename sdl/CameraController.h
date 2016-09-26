@@ -8,16 +8,18 @@
 
 enum {
     MOVE_FORWARD, MOVE_BACKWARD, MOVE_UP, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT,
-    ROTATE_FORWARD, ROTATE_BACKWARD, ROTATE_UP, ROTATE_DOWN, ROTATE_LEFT, ROTATE_RIGHT,
+    ROTATE_BACKWARD, ROTATE_FORWARD, ROTATE_UP, ROTATE_DOWN, ROTATE_RIGHT, ROTATE_LEFT,
     ACTIONS_COUNT
 };
+enum {GRAB_MOUSE = ACTIONS_COUNT, FOV_INCREASE, FOV_DECREASE};
+enum {MOUSE_X=-1, MOUSE_Y=-2};
 
-#define ROLL_RIGHT      ROTATE_FORWARD
 #define ROLL_LEFT       ROTATE_BACKWARD
+#define ROLL_RIGHT      ROTATE_FORWARD
 #define YAW_LEFT        ROTATE_UP
 #define YAW_RIGHT       ROTATE_DOWN
-#define PITCH_DOWN      ROTATE_LEFT
 #define PITCH_UP        ROTATE_RIGHT
+#define PITCH_DOWN      ROTATE_LEFT
 
 class CameraController {
     public:
@@ -25,17 +27,21 @@ class CameraController {
         virtual ~CameraController();
         void setCamera(Camera * camera);
         void assignKey(int action, int key);
+        void assignMouse(int action, int button);
         void setModifiersForStepByStep(int keys);
+        void setModifiersHighSpeed(int keys);
         bool handleEvent(SDL_Event & event);
         void setTranslateSpeed(real speed);
         void setRotateSpeed(real speed);
         void updateCamera(real dt);
+        void grabMouse(bool grab);
 
     protected:
         void actionToMatrix(real dt);
         real getSpeed(int action, real dt);
 
     private:
+        std::map<int, int> mouseMapping;
         std::map<int, int> keyMapping;
         int stepByStepModifers;
         int highSpeedModifers;
@@ -44,6 +50,7 @@ class CameraController {
         bool isActionNew[ACTIONS_COUNT];
         bool isStepByStepEnabled;
         bool isHighSpeedEnabled;
+        bool isMouseGrabbed;
 
         real highSpeedFactor;
         real rotationStep;
@@ -52,6 +59,8 @@ class CameraController {
         positive timeLastStep;
         real rotationSpeed;
         real translateSpeed;
+        real mouseSensivity;
+        real rotateMouse[3];
 
         real motionMatrix[MAT4_SCALARS_COUNT];
 };

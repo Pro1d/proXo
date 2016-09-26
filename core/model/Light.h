@@ -15,6 +15,7 @@ public:
     void setColor(vec3 c);
     void setIntensity(real i);
     void setReductionFactor(real i);
+    void updateDistanceMax();
     void setFallOff(real i);
     void setCutOff(real i);
 protected:

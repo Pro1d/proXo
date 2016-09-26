@@ -9,6 +9,10 @@
 #include <SDL/SDL.h>
 #include "core/math/basics.h"
 
+#define SCREEN_WIDTH    800
+#define SCREEN_HEIGHT   480
+#define SAMPLE_SIZE     2
+
 int main(int argc, char** argv)
 {
     // initialize SDL video
@@ -21,38 +25,52 @@ int main(int argc, char** argv)
     atexit(SDL_Quit);
 
     // create a new window
-    SDL_Surface* screen = SDL_SetVideoMode(640, 480, 24,
+    SDL_Surface* screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 24,
                                            SDL_HWACCEL|SDL_HWSURFACE|SDL_DOUBLEBUF);
     if(!screen ) {
-        printf("Unable to set 640x480 video: %s\n", SDL_GetError());
+        printf("Unable to set %dx%d video: %s\n", SCREEN_WIDTH, SCREEN_HEIGHT, SDL_GetError());
         return 4;
     }
 
     SceneParser parser;
     Scene scene;
-    Buffer buf(640, 480);
     if(!parser.readScene("media/","parc.scene", scene)) {
         printf("readScene failed!\n");
         return 2;
     }
-    real fov = 70 * PI / 180;
-    real zNear = 0.001;
-    real size = tan(fov/2) * zNear * 2;
-    real ratio = 480.0 / 640.0;
-    scene.camera.setFrustrum(zNear, 100, size, size*ratio);
-    //scene.camera.setOrthographics(0.001, 10, 2,2);
-    scene.camera.setScreenSize(640, 480);
+    Buffer buf(SCREEN_WIDTH*SAMPLE_SIZE, SCREEN_HEIGHT*SAMPLE_SIZE);
+    scene.camera.setScreenSize(SCREEN_WIDTH*SAMPLE_SIZE, SCREEN_HEIGHT*SAMPLE_SIZE);
     scene.print();
     Engine realTimeEngine(&buf, &scene);
     realTimeEngine.createMatchingPool();
 
     CameraController controller;
     controller.setCamera(&scene.camera);
-    controller.setTranslateSpeed(0.6);
+    controller.setTranslateSpeed(1.5);
     controller.setRotateSpeed(30);
 
+    controller.assignKey(MOVE_FORWARD,  SDLK_w);
+    controller.assignKey(MOVE_BACKWARD, SDLK_s);
+    controller.assignKey(MOVE_LEFT,     SDLK_a);
+    controller.assignKey(MOVE_RIGHT,    SDLK_d);
+    controller.assignKey(MOVE_UP,       SDLK_SPACE);
+    controller.assignKey(MOVE_DOWN,     SDLK_v);
+    controller.assignKey(YAW_LEFT,      SDLK_q);
+    controller.assignKey(YAW_RIGHT,     SDLK_e);
+    controller.assignKey(ROLL_LEFT,     SDLK_z);
+    controller.assignKey(ROLL_RIGHT,    SDLK_x);
+    controller.assignKey(PITCH_DOWN,    SDLK_r);
+    controller.assignKey(PITCH_UP,      SDLK_f);
+    controller.setModifiersForStepByStep(KMOD_LCTRL);
+    controller.setModifiersHighSpeed(KMOD_LALT);
+    controller.assignMouse(FOV_INCREASE, SDL_BUTTON_WHEELDOWN);
+    controller.assignMouse(FOV_DECREASE, SDL_BUTTON_WHEELUP);
+    controller.assignMouse(GRAB_MOUSE, SDL_BUTTON_RIGHT);
+    controller.assignMouse(PITCH_UP, MOUSE_Y);
+    controller.assignMouse(YAW_LEFT, MOUSE_X);
 
-    SDL_Surface * buffer = SDL_CreateRGBSurface(SDL_HWSURFACE|SDL_HWSURFACE, 640, 480, 24, 0,0,0,0);
+
+    SDL_Surface * buffer = SDL_CreateRGBSurface(SDL_HWSURFACE, SCREEN_WIDTH, SCREEN_HEIGHT, 24, 0,0,0,0);
     Uint32 time = SDL_GetTicks();
 
     // program main loop
@@ -92,7 +110,8 @@ int main(int argc, char** argv)
         Uint32 t = SDL_GetTicks();
         realTimeEngine.render();
         printf("t:%dms\n", SDL_GetTicks() - t);
-        bufferToBitmap24bpp(buf, buffer, 1);
+        bufferToBitmap24bpp(buf, buffer, SAMPLE_SIZE);
+        printf("t:%dms\n", SDL_GetTicks() - t);
 
         // clear screen
         SDL_FillRect(screen, 0, SDL_MapRGB(screen->format, 0, 0, 0));

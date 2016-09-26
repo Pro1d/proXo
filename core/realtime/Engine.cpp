@@ -6,9 +6,11 @@
 #include "../common/Pool.h"
 #include "../math/type.h"
 #include "../math/Vector.h"
+#include "../sys/Multithreading.h"
+#include "../config/global.h"
 
 Engine::Engine(Buffer * imageBuffer, Scene * scene) :
-    pool(NULL), scene(scene), imageBuffer(imageBuffer)
+    pool(NULL), scene(scene), imageBuffer(imageBuffer), multithread(THREADS_COUNT)
 {
     //ctor
 }
@@ -32,7 +34,7 @@ void Engine::createMatchingPool()
     scene->getCounts(vertices, faces, lights);
     pool = new Pool(vertices, faces, lights);
 }
-#include <cstdio>
+
 void Engine::render() {
     pool->reset();
 
@@ -45,12 +47,13 @@ void Engine::render() {
     drawTriangles();
 }
 
-void Engine::vertexLighting() {
+void vertexLigthingThread(void * data, positive threadId, positive threadsCount) {
+    Engine * that = (Engine*) data;
     real v[VEC4_SCALARS_COUNT];
-    vec4 vertex = pool->vertexPool;
-    vec4 material = pool->materialPool;
+    vec4 vertex = that->pool->vertexPool+VEC4_SCALARS_COUNT*threadId;
+    vec4 material = that->pool->materialPool+VEC8_SCALARS_COUNT*threadId;
 
-    for(positive i = 0; i < pool->currentVerticesCount; i++) {
+    for(positive i = threadId; i < that->pool->currentVerticesCount; i+=threadsCount) {
 
         // Emissive light
         real emissive = material[7];
@@ -61,8 +64,8 @@ void Engine::vertexLighting() {
         };
 
         // Add lights
-        for(positive j = 0; j < pool->currentLightsCount; j++)
-            pool->lightPool[j]->lighting(material, pool->normalPool+i*VEC4_SCALARS_COUNT, vertex,
+        for(positive j = 0; j < that->pool->currentLightsCount; j++)
+            that->pool->lightPool[j]->lighting(material, that->pool->normalPool+i*VEC4_SCALARS_COUNT, vertex,
                                          material[3], material[4], material[5], material[6], color);
 
         // Save resulting color
@@ -70,30 +73,39 @@ void Engine::vertexLighting() {
         material[1] = color[1];
         material[2] = color[2];
 
-        multiplyMV(scene->camera.projection, vertex, v);
+        multiplyMV(that->scene->camera.projection, vertex, v);
         memcpy(vertex, v, VEC4_SIZE);
 
-        vertex += VEC4_SCALARS_COUNT;
-        material += VEC8_SCALARS_COUNT;
+        vertex += VEC4_SCALARS_COUNT*threadsCount;
+        material += VEC8_SCALARS_COUNT*threadsCount;
     }
 
 }
 
-void Engine::drawTriangles() {
-    integer i = pool->currentFacesCount;
-    while(--i >= 0) {
-        positive * face = pool->facePool + i * 3;
-        vec4 v1 = pool->vertexPool + face[0]*VEC4_SCALARS_COUNT;
-        vec4 v2 = pool->vertexPool + face[1]*VEC4_SCALARS_COUNT;
-        vec4 v3 = pool->vertexPool + face[2]*VEC4_SCALARS_COUNT;
+void Engine::vertexLighting() {
+    multithread.execute(vertexLigthingThread, (void*) this);
+}
+
+void drawTriangleThread(void * data, positive threadId, positive threadsCount) {
+    Engine * that = (Engine*) data;
+    integer i = that->pool->currentFacesCount+threadId;
+    while((i-=threadsCount) >= 0) {
+        positive * face = that->pool->facePool + i * 3;
+        vec4 v1 = that->pool->vertexPool + face[0]*VEC4_SCALARS_COUNT;
+        vec4 v2 = that->pool->vertexPool + face[1]*VEC4_SCALARS_COUNT;
+        vec4 v3 = that->pool->vertexPool + face[2]*VEC4_SCALARS_COUNT;
 
         // Back-face culling
         if(isFaceOrientationZPositive(v1, v2, v3))
             continue;
+        if((v1[2] < 0 && v2[2] < 0 && v3[2] < 0)
+            || (v1[2] > 1 && v2[2] > 1 && v3[2] > 1))
+            continue;
 
-        vec3 c1 = pool->materialPool + face[0]*VEC8_SCALARS_COUNT;
-        vec3 c2 = pool->materialPool + face[1]*VEC8_SCALARS_COUNT;
-        vec3 c3 = pool->materialPool + face[2]*VEC8_SCALARS_COUNT;
+
+        vec3 c1 = that->pool->materialPool + face[0]*VEC8_SCALARS_COUNT;
+        vec3 c2 = that->pool->materialPool + face[1]*VEC8_SCALARS_COUNT;
+        vec3 c3 = that->pool->materialPool + face[2]*VEC8_SCALARS_COUNT;
 
         /** Normal for debug * /
         real c1[3] = {
@@ -112,6 +124,27 @@ void Engine::drawTriangles() {
             n3[2]*0.5+0.5
         };*/
 
-        triangle(*imageBuffer, v1, v2, v3, c1, c2, c3);
+        /** Deth for debug * /
+        real c1[3] = {
+            v1[2],
+            v1[2],
+            v1[2]
+        };
+        real c2[3] = {
+            v2[2],
+            v2[2],
+            v2[2]
+        };
+        real c3[3] = {
+            v3[2],
+            v3[2],
+            v3[2]
+        };*/
+
+        triangle(*that->imageBuffer, v1, v2, v3, c1, c2, c3);
     }
+}
+
+void Engine::drawTriangles() {
+    multithread.execute(drawTriangleThread, (void*) this);
 }
