@@ -15,8 +15,8 @@ class Pool
         vec4 normalPool;
         vec8 materialPool; // r, g, b, ambient, diffuse, specular, shininess, emissive
         vec2 mappingPool;
-        positive * texturePool;
         positive currentVerticesCount;
+        //positive * texturePool;
         positive * facePool;
         positive currentFacesCount;
         Light ** lightPool;

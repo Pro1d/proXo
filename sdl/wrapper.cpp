@@ -7,40 +7,47 @@
 void bufferToBitmap24bpp(Buffer & buffer, SDL_Surface * bmp, positive sampleSize) {
     SDL_LockSurface(bmp);
 
-    positive W = std::min(buffer.width/sampleSize, (positive) bmp->w);
-    positive H = std::min(buffer.height/sampleSize, (positive) bmp->h);
-    positive samplePixelsCount = sampleSize*sampleSize;
+    positive sampleSizeExp = 0;
+    while((1 << sampleSizeExp) < sampleSize)
+        sampleSizeExp++;
+    sampleSize = (1 << sampleSizeExp);
+    positive samplePixelsCountExp = sampleSizeExp+sampleSizeExp;
 
-    for(positive y = 0; y < H; y++)
-    for(positive x = 0; x < W; x++)
-    {
-        real color[4] = {0,0,0,0};
-        for(positive by = y*sampleSize; by < (y+1)*sampleSize; by++)
-        for(positive bx = x*sampleSize; bx < (x+1)*sampleSize; bx++)
+    positive eW = std::min(buffer.width >> sampleSizeExp, (positive) bmp->w) << sampleSizeExp;
+    positive eH = std::min(buffer.height >> sampleSizeExp, (positive) bmp->h) << sampleSizeExp;
+    Uint8 bpp = 3;
+    vec4 data = buffer.data+1;
+
+    for(positive bsy = 0, bey = sampleSize; bsy < eH; bsy = bey, bey += sampleSize) {
+        Uint8 * pixel = (Uint8*) bmp->pixels + (bsy>>sampleSizeExp)*bmp->pitch;
+        for(positive x = 0; x < eW; x += sampleSize)
         {
-            positive idx = (bx + by * buffer.width) * VEC4_SCALARS_COUNT + 1;
-            color[0] += buffer.data[idx+0];
-            color[1] += buffer.data[idx+1];
-            color[2] += buffer.data[idx+2];
-        }
-        color[0] /= samplePixelsCount;
-        color[1] /= samplePixelsCount;
-        color[2] /= samplePixelsCount;
-        Uint8 r = clamp01(color[0]) * 255;
-        Uint8 g = clamp01(color[1]) * 255;
-        Uint8 b = clamp01(color[2]) * 255;
+            real color[3] = {0,0,0};
+            for(positive by = bsy; by < bey; by++) {
+                positive idx = (by * buffer.width + x) * VEC4_SCALARS_COUNT;
+                for(positive bx = 0; bx < sampleSize; bx++)
+                {
+                    color[0] += data[idx+0];
+                    color[1] += data[idx+1];
+                    color[2] += data[idx+2];
+                    idx += VEC4_SCALARS_COUNT;
+                }
+            }
 
+            Uint8 r = color[0] <= 0 ? 0 : std::min((positive) (color[0] * 255) >> samplePixelsCountExp, (positive) 255);
+            Uint8 g = color[1] <= 0 ? 0 : std::min((positive) (color[1] * 255) >> samplePixelsCountExp, (positive) 255);
+            Uint8 b = color[2] <= 0 ? 0 : std::min((positive) (color[2] * 255) >> samplePixelsCountExp, (positive) 255);
 
-        Uint8 bpp = 3;
-        Uint8 *p = (Uint8*) bmp->pixels + y * bmp->pitch + x * bpp;
-        if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {
-            p[0] = r;
-            p[1] = g;
-            p[2] = b;
-        } else {
-            p[0] = b;
-            p[1] = g;
-            p[2] = r;
+            if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {
+                pixel[0] = r;
+                pixel[1] = g;
+                pixel[2] = b;
+            } else {
+                pixel[0] = b;
+                pixel[1] = g;
+                pixel[2] = r;
+            }
+            pixel += bpp;
         }
     }
 

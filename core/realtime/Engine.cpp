@@ -90,7 +90,7 @@ void drawTriangleThread(void * data, positive threadId, positive threadsCount) {
     Engine * that = (Engine*) data;
     integer i = that->pool->currentFacesCount+threadId;
     while((i-=threadsCount) >= 0) {
-        positive * face = that->pool->facePool + i * 3;
+        positive * face = that->pool->facePool + i * 4;
         vec4 v1 = that->pool->vertexPool + face[0]*VEC4_SCALARS_COUNT;
         vec4 v2 = that->pool->vertexPool + face[1]*VEC4_SCALARS_COUNT;
         vec4 v3 = that->pool->vertexPool + face[2]*VEC4_SCALARS_COUNT;

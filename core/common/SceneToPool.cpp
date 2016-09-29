@@ -73,7 +73,6 @@ void SceneToPool::objectToPool(Object & object, Material & material, Pool & pool
     vec4 normals = pool.normalPool + vertexOffset * VEC4_SCALARS_COUNT;
     vec8 materials = pool.materialPool + vertexOffset * VEC8_SCALARS_COUNT;
     vec2 mappings = pool.mappingPool + vertexOffset * VEC2_SCALARS_COUNT;
-    positive * textures = pool.texturePool + vertexOffset;
 
     for(positive i = 0; i < object.verticesCount; i++) {
         // apply matrix to vertices and normals
@@ -106,23 +105,22 @@ void SceneToPool::objectToPool(Object & object, Material & material, Pool & pool
         // copy colors, mappings and textures
         if(object.texture_mapping != NULL)
             memcpy(mappings, object.texture_mapping+i*VEC2_SCALARS_COUNT, VEC2_SIZE);
-        *textures = object.texture_id;
         mappings += VEC2_SCALARS_COUNT;
-        textures += 1;
     }
 
     pool.currentVerticesCount += object.verticesCount;
 
 
     // Per face
-    positive * faces = pool.facePool + pool.currentFacesCount*3;
+    positive * faces = pool.facePool + pool.currentFacesCount*4;
 
     positive * end = object.faces + object.facesCount * 3;
-    for(positive * f = object.faces; f != end; f += 3, faces += 3) {
+    for(positive * f = object.faces; f != end; f += 3, faces += 4) {
         // copy face's vertex indices and add offset
         faces[0] = f[0] + vertexOffset;
         faces[1] = f[1] + vertexOffset;
         faces[2] = f[2] + vertexOffset;
+        faces[3] = object.texture_id;
     }
 
     pool.currentFacesCount += object.facesCount;

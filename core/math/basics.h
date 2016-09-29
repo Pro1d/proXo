@@ -4,7 +4,7 @@
 #include "type.h"
 
 #include "inv_sqrt.h"
-#define PI  3.1415926535897932384626433832795
+#define PI          3.1415926535897932384626433832795
 
 real clamp01(real x);
 real clamp(real x, real low, real high);

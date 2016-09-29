@@ -9,8 +9,8 @@
 #include <SDL/SDL.h>
 #include "core/math/basics.h"
 
-#define SCREEN_WIDTH    800
-#define SCREEN_HEIGHT   480
+#define SCREEN_WIDTH    1366
+#define SCREEN_HEIGHT   768
 #define SAMPLE_SIZE     2
 
 int main(int argc, char** argv)
