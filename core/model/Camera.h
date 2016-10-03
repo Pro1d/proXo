@@ -24,7 +24,6 @@ public:
     real projection[MAT4_SCALARS_COUNT];
     real position[MAT4_SCALARS_COUNT];
 
-private:
     real fieldOfView;
 	real zNear, zFar;
 	real xmin, xmax;

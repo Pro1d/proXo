@@ -12,10 +12,10 @@ CameraController::CameraController() :
     timeLastStep(0),
     rotationSpeed(10),
     translateSpeed(0.1),
-    mouseSensivity(0.08),
     isStepByStepEnabled(false),
     isHighSpeedEnabled(false),
-    isMouseGrabbed(false)
+    isMouseGrabbed(false),
+    mouseSensivity(0.08)
 {
     rotateMouse[0] = 0;
     rotateMouse[1] = 0;

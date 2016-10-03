@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstring>
 #include "../core/math/Matrix.h"
+#include "../core/math/Vector.h"
 #include "SceneParser.h"
 #include "StanfordParser.h"
 #include "../core/model/Light.h"
@@ -660,6 +661,7 @@ bool SceneParser::parseLight(Container & container, Scene & scene) {
                 state = ST_ERROR;
                 break;
             }
+            normalize(x);
             light->setDirection(x);
             break;
         case POS:

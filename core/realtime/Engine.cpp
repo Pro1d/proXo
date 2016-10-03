@@ -38,7 +38,7 @@ void Engine::createMatchingPool()
 void Engine::render() {
     pool->reset();
 
-    sceneToPool.run(*scene, *pool);
+    sceneToPool.run(*scene, *pool, true);
 
     imageBuffer->clear();
 
@@ -51,12 +51,12 @@ void vertexLigthingThread(void * data, positive threadId, positive threadsCount)
     Engine * that = (Engine*) data;
     real v[VEC4_SCALARS_COUNT];
     vec4 vertex = that->pool->vertexPool+VEC4_SCALARS_COUNT*threadId;
-    vec4 material = that->pool->materialPool+VEC8_SCALARS_COUNT*threadId;
+    vec16 material = that->pool->materialPool+VEC16_SCALARS_COUNT*threadId;
 
     for(positive i = threadId; i < that->pool->currentVerticesCount; i+=threadsCount) {
 
         // Emissive light
-        real emissive = material[7];
+        real emissive = material[MAT_POOL_INDEX_EMISSIVE];
         real color[VEC3_SCALARS_COUNT] = {
             material[0]*emissive,
             material[1]*emissive,
@@ -66,7 +66,11 @@ void vertexLigthingThread(void * data, positive threadId, positive threadsCount)
         // Add lights
         for(positive j = 0; j < that->pool->currentLightsCount; j++)
             that->pool->lightPool[j]->lighting(material, that->pool->normalPool+i*VEC4_SCALARS_COUNT, vertex,
-                                         material[3], material[4], material[5], material[6], color);
+                                         material[MAT_POOL_INDEX_AMBIENT],
+                                         material[MAT_POOL_INDEX_DIFFUSE],
+                                         material[MAT_POOL_INDEX_SPECULAR],
+                                         material[MAT_POOL_INDEX_SHININESS],
+                                         color);
 
         // Save resulting color
         material[0] = color[0];
@@ -77,7 +81,7 @@ void vertexLigthingThread(void * data, positive threadId, positive threadsCount)
         memcpy(vertex, v, VEC4_SIZE);
 
         vertex += VEC4_SCALARS_COUNT*threadsCount;
-        material += VEC8_SCALARS_COUNT*threadsCount;
+        material += VEC16_SCALARS_COUNT*threadsCount;
     }
 
 }
@@ -103,9 +107,9 @@ void drawTriangleThread(void * data, positive threadId, positive threadsCount) {
             continue;
 
 
-        vec3 c1 = that->pool->materialPool + face[0]*VEC8_SCALARS_COUNT;
-        vec3 c2 = that->pool->materialPool + face[1]*VEC8_SCALARS_COUNT;
-        vec3 c3 = that->pool->materialPool + face[2]*VEC8_SCALARS_COUNT;
+        vec3 c1 = that->pool->materialPool + face[0]*VEC16_SCALARS_COUNT;
+        vec3 c2 = that->pool->materialPool + face[1]*VEC16_SCALARS_COUNT;
+        vec3 c3 = that->pool->materialPool + face[2]*VEC16_SCALARS_COUNT;
 
         /** Normal for debug * /
         real c1[3] = {

@@ -4,6 +4,7 @@
 #include "core/model/Scene.h"
 #include "core/realtime/Buffer.h"
 #include "core/realtime/Engine.h"
+#include "core/raytracer/RayTracer.h"
 #include "sdl/wrapper.h"
 #include "sdl/CameraController.h"
 #include <SDL/SDL.h>
@@ -43,6 +44,8 @@ int main(int argc, char** argv)
     scene.print();
     Engine realTimeEngine(&buf, &scene);
     realTimeEngine.createMatchingPool();
+    RayTracer rayTracer(&buf, &scene);
+    rayTracer.createMatchingPool();
 
     CameraController controller;
     controller.setCamera(&scene.camera);
@@ -72,6 +75,7 @@ int main(int argc, char** argv)
 
     SDL_Surface * buffer = SDL_CreateRGBSurface(SDL_HWSURFACE, SCREEN_WIDTH, SCREEN_HEIGHT, 24, 0,0,0,0);
     Uint32 time = SDL_GetTicks();
+    bool rayTracingRenderView = false;
 
     // program main loop
     bool done = false;
@@ -96,8 +100,26 @@ int main(int argc, char** argv)
             case SDL_KEYDOWN:
                 {
                     // exit if ESCAPE is pressed
-                    if (event.key.keysym.sym == SDLK_ESCAPE)
+                    switch(event.key.keysym.sym) {
+                    case SDLK_ESCAPE:
                         done = true;
+                        break;
+                    case SDLK_F4:
+                        if((SDL_GetModState() & KMOD_ALT) != KMOD_NONE)
+                            done = true;
+                        break;
+                    case SDLK_F10:
+                        if(!rayTracingRenderView) {
+                            rayTracer.render();
+                            rayTracingRenderView = true;
+                        }
+                        else {
+                            rayTracingRenderView = false;
+                        }
+                        break;
+                    default:
+                        break;
+                    }
                     break;
                 }
             } // end switch
@@ -107,11 +129,16 @@ int main(int argc, char** argv)
 
         // DRAWING STARTS HERE
 
-        Uint32 t = SDL_GetTicks();
-        realTimeEngine.render();
-        printf("t:%dms\n", SDL_GetTicks() - t);
-        bufferToBitmap24bpp(buf, buffer, SAMPLE_SIZE);
-        printf("t:%dms\n", SDL_GetTicks() - t);
+        if(!rayTracingRenderView) {
+            Uint32 t = SDL_GetTicks();
+            realTimeEngine.render();
+            printf("t:%dms\n", SDL_GetTicks() - t);
+            bufferToBitmap24bpp(buf, buffer, SAMPLE_SIZE);
+            printf("t:%dms\n", SDL_GetTicks() - t);
+        }
+        else {
+            bufferToBitmap24bpp(buf, buffer, SAMPLE_SIZE);
+        }
 
         // clear screen
         SDL_FillRect(screen, 0, SDL_MapRGB(screen->format, 0, 0, 0));

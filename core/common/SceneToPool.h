@@ -8,8 +8,8 @@
 class SceneToPool {
     public:
         SceneToPool();
-        void run(Scene & scene, Pool & pool);
-        void objectToPool(Object & object, Material & material, Pool & pool, Camera & camera);
+        void run(Scene & scene, Pool & pool, bool skipNotVisibleObject);
+        void objectToPool(Object & object, Material & material, Pool & pool, Camera & camera, bool skipNotVisibleObject);
         void lightToPool(Light & light, Pool & pool);
     private:
         TransformationStack transformation;

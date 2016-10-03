@@ -3,7 +3,7 @@
 Pool::Pool(positive maxVerticesCount, positive maxFacesCount, positive maxLightsCount) :
     vertexPool(new real[maxVerticesCount*VEC4_SCALARS_COUNT]),
     normalPool(new real[maxVerticesCount*VEC4_SCALARS_COUNT]),
-    materialPool(new real[maxVerticesCount*VEC8_SCALARS_COUNT]),
+    materialPool(new real[maxVerticesCount*VEC16_SCALARS_COUNT]),
     mappingPool(new real[maxVerticesCount*VEC2_SCALARS_COUNT]),
     currentVerticesCount(0),
     facePool(new positive[maxFacesCount*4]),

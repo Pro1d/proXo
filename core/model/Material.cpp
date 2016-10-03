@@ -1,4 +1,5 @@
 #include "Material.h"
+#include <limits>
 
 Material::Material() :
     ambient(1),
@@ -7,7 +8,8 @@ Material::Material() :
     shininess(128),
     emissive(0),
     reflect(0),
-	refractiveIndex(1)
+	refractiveIndex(1),
+	depthAbsorbtion(std::numeric_limits<real>::infinity())
 {
 
 }

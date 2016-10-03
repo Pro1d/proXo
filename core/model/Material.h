@@ -15,6 +15,7 @@ class Material
 
 		real reflect; // vec3 rgb ?
 		real refractiveIndex; // vec3 rgb ?
+		real depthAbsorbtion;
     protected:
 
     private:

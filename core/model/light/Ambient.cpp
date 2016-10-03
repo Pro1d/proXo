@@ -2,6 +2,11 @@
 #include "Ambient.h"
 #include "../math/Vector.h"
 #include "../math/basics.h"
+#include <limits>
+
+
+AmbientLight::AmbientLight() : Light(false) {
+}
 
 void AmbientLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient, real diffuse, real specular, real shininess, vec4 colorOut) {
     // Ambient
@@ -30,4 +35,8 @@ void AmbientLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient, r
     colorOut[0] += (color[0] * A) * this->color[0];
     colorOut[1] += (color[1] * A) * this->color[1];
     colorOut[2] += (color[2] * A) * this->color[2];
+}
+
+real AmbientLight::getDirectionToSource(vec4 point, vec4 directionOut) {
+    return std::numeric_limits<real>::infinity();
 }

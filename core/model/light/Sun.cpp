@@ -1,8 +1,12 @@
 #include "../Light.h"
 #include "Sun.h"
 #include <algorithm>
+#include <limits>
 #include "../math/Vector.h"
 #include "../math/basics.h"
+
+SunLight::SunLight() : Light(true) {
+}
 
 void SunLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient, real diffuse, real specular, real shininess, vec4 colorOut) {
     real L[4], R[4], V[4];
@@ -31,7 +35,7 @@ void SunLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient, real 
     // V: normalized vector to camera
     normalize(point, V);
     // S: specular intensity
-    real S = specularIntensity(dot(R, V), shininess) * specular;
+    real S = specularIntensity(-dot(R, V), shininess) * specular;
     // C: diffuse intensity
     real C = diffuse * D;
 
@@ -44,4 +48,12 @@ void SunLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient, real 
     colorOut[0] += ((color[0] * C) + S) * this->color[0];
     colorOut[1] += ((color[1] * C) + S) * this->color[1];
     colorOut[2] += ((color[2] * C) + S) * this->color[2];
+}
+
+real SunLight::getDirectionToSource(vec4 point, vec4 directionOut) {
+    directionOut[0] = -transformedDirection[0];
+    directionOut[1] = -transformedDirection[1];
+    directionOut[2] = -transformedDirection[2];
+    directionOut[3] = 1;
+    return std::numeric_limits<real>::infinity();
 }

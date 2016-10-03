@@ -5,7 +5,7 @@
 #include "../math/Matrix.h"
 
 
-Light::Light() {
+Light::Light(bool castShadow) : castShadow(castShadow) {
     initialize();
 }
 

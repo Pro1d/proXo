@@ -4,6 +4,8 @@
 #include "../math/Vector.h"
 #include "../math/basics.h"
 
+SpotLight::SpotLight() : Light(true) {
+}
 
 void SpotLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient, real diffuse, real specular, real shininess, vec4 colorOut) {
     real L[4], R[4], V[4];
@@ -52,7 +54,7 @@ void SpotLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient, real
     normalize(point, V);
 
     // S: specular intensity
-    real S = specularIntensity(dot(R, V), shininess) * specular;
+    real S = specularIntensity(-dot(R, V), shininess) * specular;
     // C: diffuse intensity
     real C = diffuse * D;
 
@@ -65,4 +67,12 @@ void SpotLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient, real
     colorOut[0] += ((color[0] * C) + S) * this->color[0];
     colorOut[1] += ((color[1] * C) + S) * this->color[1];
     colorOut[2] += ((color[2] * C) + S) * this->color[2];
+}
+
+real SpotLight::getDirectionToSource(vec4 point, vec4 directionOut) {
+    substract(transformedPosition, point, directionOut);
+    real norm2 = squaredLength(directionOut);
+    real norm_inv = sqrt_inv(norm2);
+    multiply(directionOut, norm_inv);
+    return norm_inv * norm2;
 }

@@ -10,7 +10,7 @@ SceneToPool::SceneToPool() : transformation(50) {
 
 }
 
-void SceneToPool::run(Scene & scene, Pool & pool) {
+void SceneToPool::run(Scene & scene, Pool & pool, bool skipNotVisibleObject) {
     Container ** contStackTop = containerStack;
     transformation.reset();
 
@@ -35,7 +35,7 @@ void SceneToPool::run(Scene & scene, Pool & pool) {
             // Go trough object, light and containers
             for(integer i = top->objectsCount; --i >= 0; ) {
                 transformation.saveAndPostMult(top->objectMatrices[i]);
-                objectToPool(*top->objects[i], *top->objectMaterials[i], pool, scene.camera);
+                objectToPool(*top->objects[i], *top->objectMaterials[i], pool, scene.camera, skipNotVisibleObject);
                 transformation.restore();
             }
 
@@ -57,21 +57,23 @@ void SceneToPool::run(Scene & scene, Pool & pool) {
     }
 }
 
-void SceneToPool::objectToPool(Object & object, Material & material, Pool & pool, Camera & camera) {
+void SceneToPool::objectToPool(Object & object, Material & material, Pool & pool, Camera & camera, bool skipNotVisibleObject) {
     positive vertexOffset = pool.currentVerticesCount;
     mat4 matrix = transformation.getMatrix();
 
-    // Do not add object to pool if object is not visible
-    real center[VEC4_SCALARS_COUNT];
-    multiplyMV(matrix, object.boundingSphereCenter, center);
-    real radius = object.boundingSphereRadius * getMatrixScale(matrix);
-    if(!camera.isShpereVisible(center, radius))
-        return;
+    if(skipNotVisibleObject) {
+        // Do not add object to pool if object is not visible
+        real center[VEC4_SCALARS_COUNT];
+        multiplyMV(matrix, object.boundingSphereCenter, center);
+        real radius = object.boundingSphereRadius * getMatrixScale(matrix);
+        if(!camera.isShpereVisible(center, radius))
+            return;
+    }
 
     // Per vertex
     vec4 vertices = pool.vertexPool + vertexOffset * VEC4_SCALARS_COUNT;
     vec4 normals = pool.normalPool + vertexOffset * VEC4_SCALARS_COUNT;
-    vec8 materials = pool.materialPool + vertexOffset * VEC8_SCALARS_COUNT;
+    vec16 materials = pool.materialPool + vertexOffset * VEC16_SCALARS_COUNT;
     vec2 mappings = pool.mappingPool + vertexOffset * VEC2_SCALARS_COUNT;
 
     for(positive i = 0; i < object.verticesCount; i++) {
@@ -95,12 +97,15 @@ void SceneToPool::objectToPool(Object & object, Material & material, Pool & pool
             materials[1] = 1;
             materials[2] = 1;
         }
-        materials[3] = material.ambient;
-        materials[4] = material.diffuse;
-        materials[5] = material.specular;
-        materials[6] = material.shininess;
-        materials[7] = material.emissive;
-        materials += VEC8_SCALARS_COUNT;
+        materials[MAT_POOL_INDEX_AMBIENT] = material.ambient;
+        materials[MAT_POOL_INDEX_DIFFUSE] = material.diffuse;
+        materials[MAT_POOL_INDEX_SPECULAR] = material.specular;
+        materials[MAT_POOL_INDEX_SHININESS] = material.shininess;
+        materials[MAT_POOL_INDEX_EMISSIVE] = material.emissive;
+        materials[MAT_POOL_INDEX_REFLECT] = material.reflect;
+        materials[MAT_POOL_INDEX_REFRACTIVE] = material.refractiveIndex;
+        materials[MAT_POOL_INDEX_ABSORPTION] = material.depthAbsorbtion;
+        materials += VEC16_SCALARS_COUNT;
 
         // copy colors, mappings and textures
         if(object.texture_mapping != NULL)
