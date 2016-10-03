@@ -12,7 +12,7 @@
 
 #define SCREEN_WIDTH    1366
 #define SCREEN_HEIGHT   768
-#define SAMPLE_SIZE     2
+#define SAMPLE_SIZE     1
 
 int main(int argc, char** argv)
 {

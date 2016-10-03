@@ -2,6 +2,9 @@
 #include "../math/type.h"
 #include "../math/Vector.h"
 #include "Intersection.h"
+#include "Physic.h"
+
+#define EPSILON ((real) 1 / 255)
 
 RayTracer::RayTracer(Buffer * imageBuffer, Scene * scene) : scene(scene), pool(NULL), tree(NULL), imageBuffer(imageBuffer), multithread(THREADS_COUNT) {
 
@@ -52,22 +55,25 @@ void threadRenderTask(void * data, positive threadId, positive threadsCount) {
 
             vec4 pxl = that->imageBuffer->getPtr(x, y);
 
-            that->getColor(rayOrig, rayDir, 1, pxl+1, pxl, stack);
+            that->getColor(rayOrig, rayDir, 1, 1, NULL, pxl+1, pxl, stack);
         }
     }
 }
 #include <cstdio>
-positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex, vec3 colorOut, real * depthOut, TreeStack & stack) {
+positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex, real maxIntensity, positive * lastFace, vec3 colorOut, real * depthOut, TreeStack & stack) {
+    colorOut[0] = 0;
+    colorOut[1] = 0;
+    colorOut[2] = 0;
+
+    if(maxIntensity < (real)1/255)
+        return 0;
+
     IntersectionData intersect;
-    intersectTree(orig, dir, tree, stack, pool->vertexPool, NULL, intersect);
+    intersectTree(orig, dir, tree, stack, pool->vertexPool, lastFace, intersect);
 
     /// TODO translucent, couleur perçu absorbée par épaisseur d'objet pas complètement transparent
     /// -> color when go out of object, 1-(1-color)*exp(depth)
     /// or -> color after reccursive call to getcolor, 1-(1-resultingColor) * expDepth
-
-    colorOut[0] = 0;
-    colorOut[1] = 0;
-    colorOut[2] = 0;
 
     if(intersect.intersectionSide != 0) {
         positive Ia = intersect.face[0];
@@ -110,6 +116,7 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex, v
             0
         };
         normalize(normal);
+        multiply(normal, intersect.intersectionSide);
         /// Add texture
         positive texture = intersect.face[3];
 
@@ -117,6 +124,8 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex, v
         colorOut[1] = color[1] * mat.emissive;
         colorOut[2] = color[2] * mat.emissive;
         // lights/shadow // depthAbsorption == +inf && reflect < 1 ; specular=reflect [*(1-refractRatioFromLight)] (ignore specular)
+
+        if(mat.depthAbsorbtion > 1 - EPSILON)
         for(positive i = 0; i < pool->currentLightsCount; i++) {
             real directIntensity = (1 - mat.reflect);
 
@@ -134,23 +143,37 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex, v
                 // todo ambient light has no shadow!
             }
         }
-        /*
-        // refractive // reflect < 1 && refractRatio > 0 && depthAbsorption < +inf
-        real refractDir[VEC4_SCALARS_COUNT];
-        real refractRatio;
-        refract(dir, normal, currentRefractiveIndex, mat.refractiveIndex, refractDir, &refractRatio);
-        real refractIntensity = (1 - mat.reflect) * refractRatio;
-        real refractColor[VEC3_SCALARS_COUNT];
-        real refractDepth;
-        getColor(point, refractDir, mat.refractiveIndex, refractColor, &refractDepth, stack);
 
-        // reflect // reflect > 0 || (refractRation < 1 && depthAbsorption < +inf)
+        // refractive // reflect < 1 && refractRatio > 0 && depthAbsorbtion < +inf
+        real refractDir[VEC4_SCALARS_COUNT];
+        real refractRatio = 1;
+
+        if(mat.depthAbsorbtion < (1-EPSILON)) {
+            refractRatio = refractRay(dir, normal, currentRefractiveIndex, mat.refractiveIndex, refractDir);
+            real refractIntensity = (1 - mat.reflect) * refractRatio;
+            if(refractIntensity > EPSILON) {
+                real refractColor[VEC3_SCALARS_COUNT];
+                real refractDepth;
+                real absorption = mat.depthAbsorbtion == 0 ? 0 : pow(mat.depthAbsorbtion, refractDepth);// with material color
+                getColor(point, refractDir, mat.refractiveIndex, refractIntensity * (1 - absorption) * maxIntensity, intersect.face, refractColor, &refractDepth, stack);
+                colorOut[0] += refractColor[0] * refractIntensity * (1 - absorption);
+                colorOut[1] += refractColor[1] * refractIntensity * (1 - absorption);
+                colorOut[2] += refractColor[2] * refractIntensity * (1 - absorption);
+            }
+        }
+
+        // reflect // reflect > 0 || (refractRation < 1 && depthAbsorbtion < +inf)
         real reflectDir[VEC4_SCALARS_COUNT];
         reflect(dir, normal, reflectDir);
         real reflectIntensity = mat.reflect + (1 - mat.reflect) * (1 - refractRatio);
-        real reflectColor[VEC3_SCALARS_COUNT];
-        real reflectDepth;
-        getColor(point, reflectDir, currentRefractiveIndex, reflectDepth, &refractDepth, stack);*/
+        if(reflectIntensity > EPSILON) {
+            real reflectColor[VEC3_SCALARS_COUNT];
+            real reflectDepth;
+            getColor(point, reflectDir, currentRefractiveIndex, reflectIntensity*maxIntensity, intersect.face, reflectColor, &reflectDepth, stack);
+            colorOut[0] += reflectColor[0] * reflectIntensity;
+            colorOut[1] += reflectColor[1] * reflectIntensity;
+            colorOut[2] += reflectColor[2] * reflectIntensity;
+        }
     }
     else {
         // skybox

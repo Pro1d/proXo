@@ -9,7 +9,7 @@ Material::Material() :
     emissive(0),
     reflect(0),
 	refractiveIndex(1),
-	depthAbsorbtion(std::numeric_limits<real>::infinity())
+	depthAbsorbtion(1)
 {
 
 }

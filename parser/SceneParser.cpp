@@ -16,6 +16,7 @@ enum {
     LIGHT, SUN, POINT, SPOT,
     DIR, POS,  CUTOFF, FALLOFF, ATTENUATION, INTENSITY,
     COLOR, COLOR255, AMBIENT, DIFFUSE, SPECULAR, SHININESS, EMISSIVE, NORMAL,
+    REFLECT, REFRACTIVE_INDEX, ABSORBTION,
     OBJECT, CONTAINER, END,
     T, S, R, TX, TY, TZ, RX, RY, RZ,
     MATERIAL, CAMERA, FOV, LOOKAT, ZMAX,
@@ -32,6 +33,7 @@ static const char * keyName[KEY_COUNT] = {
     "light", "sun", "point", "spot",
     "dir", "pos", "cutoff", "falloff", "attenuation", "intensity",
     "color", "color255", "ambient", "diffuse", "specular", "shininess", "emissive", "normal",
+    "reflect", "refractive_index", "absorbtion",
     "object", "container", "end",
     "t", "s", "r", "tx", "ty", "tz", "rx", "ry", "rz",
     "material", "camera", "fov", "lookat", "zmax",
@@ -268,6 +270,27 @@ void SceneParser::parseStateMaterials(Scene & scene) {
                 break;
             }
             scene.materials[currentName]->shininess = r;
+            break;
+        case REFRACTIVE_INDEX:
+            if(!nextReal(r) || currentName.empty()) {
+                state = ST_ERROR;
+                break;
+            }
+            scene.materials[currentName]->refractiveIndex = r;
+            break;
+        case REFLECT:
+            if(!nextReal(r) || currentName.empty()) {
+                state = ST_ERROR;
+                break;
+            }
+            scene.materials[currentName]->reflect = r;
+            break;
+        case ABSORBTION:
+            if(!nextReal(r) || currentName.empty()) {
+                state = ST_ERROR;
+                break;
+            }
+            scene.materials[currentName]->depthAbsorbtion = r;
             break;
         case END:
             state = ST_MAIN;
