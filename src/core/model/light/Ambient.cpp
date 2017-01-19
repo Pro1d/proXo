@@ -1,7 +1,7 @@
 #include "../Light.h"
 #include "Ambient.h"
-#include "../math/Vector.h"
-#include "../math/basics.h"
+#include "core/math/Vector.h"
+#include "core/math/basics.h"
 #include <limits>
 
 

@@ -2,8 +2,8 @@
 #include "Sun.h"
 #include <algorithm>
 #include <limits>
-#include "../math/Vector.h"
-#include "../math/basics.h"
+#include "core/math/Vector.h"
+#include "core/math/basics.h"
 
 SunLight::SunLight() : Light(true) {
 }

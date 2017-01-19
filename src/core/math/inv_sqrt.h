@@ -8,7 +8,7 @@ double sqrt_inv(double x);
 float sqrt_inv(float x);
 
 #include <cmath>
-#include <unistd.h>
+#include <cstdint>
 
 
 #if INV_SQRT_METHOD == DEFAULT_MATH_INV_SQRT

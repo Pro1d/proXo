@@ -3,7 +3,6 @@
 #include <cstdlib>
 #include <vector>
 #include "StanfordParser.h"
-#include "../model/Object.h"
 
 #define SUPPORTED_FORMAT_VERSION        "1.0"
 

@@ -1,12 +1,12 @@
-# Linker flags
-LDFLAGS =-lSDL -lSDLmain -lm -lpthread
-# Compiler flags
-CXXFLAGS +=-Wall -std=c++11 -I.
-
 # Source directory
 SOURCE_DIR:=./src
 # Object directory
 OBJECT_DIR:=./obj
+
+# Linker flags
+LDFLAGS =-lSDL -lSDLmain -lm -lpthread
+# Compiler flags
+CXXFLAGS +=-Wall -Wno-strict-aliasing -std=c++11 -I$(SOURCE_DIR)
 
 # Enable debug with make DEBUG=1, default: disabled
 DEBUG ?= 0
@@ -58,5 +58,5 @@ $(OBJECT_DIR)/%.o: $(SOURCE_DIR)/%.cpp
 	@rm -f $(OBJECT_DIR)/$*.d.tmp
 
 clean:
-	@echo -e "\e[1;34mRemove all *.o and *.d files\e[1;34m"
+	@echo -e '\e[1;34mRemove all *.o and *.d files\e[1;34m'
 	@rm -f $(OBJECTS) $(OBJECTS:.o=.d)

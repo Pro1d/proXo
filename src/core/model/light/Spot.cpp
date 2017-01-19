@@ -1,8 +1,8 @@
 #include "../Light.h"
 #include "Spot.h"
 #include <algorithm>
-#include "../math/Vector.h"
-#include "../math/basics.h"
+#include "core/math/Vector.h"
+#include "core/math/basics.h"
 
 SpotLight::SpotLight() : Light(true) {
 }

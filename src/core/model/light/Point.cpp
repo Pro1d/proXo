@@ -1,7 +1,7 @@
 #include <algorithm>
 #include "Point.h"
-#include "../math/Vector.h"
-#include "../math/basics.h"
+#include "core/math/Vector.h"
+#include "core/math/basics.h"
 
 PointLight::PointLight() : Light(true) {
 }
