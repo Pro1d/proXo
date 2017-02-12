@@ -38,7 +38,7 @@ static const char * keyName[KEY_COUNT] = {
     "t", "s", "r", "tx", "ty", "tz", "rx", "ry", "rz",
     "material", "camera", "fov", "lookat", "zmax",
 };
-char commmentCharacter = '%';
+char commmentCharacter = '#';
 
 enum {ST_MAIN, ST_MATERIALS, ST_OBJECTS, ST_WORLD, ST_BODY, ST_CAMERA, ST_SKYBOX, ST_ERROR};
 

@@ -132,9 +132,9 @@ int main(int argc, char** argv)
         if(!rayTracingRenderView) {
             Uint32 t = SDL_GetTicks();
             realTimeEngine.render();
-            printf("t:%dms\n", SDL_GetTicks() - t);
+            printf("t:%dms ", SDL_GetTicks() - t);
             bufferToBitmap24bpp(buf, buffer, SAMPLE_SIZE);
-            printf("t:%dms\n", SDL_GetTicks() - t);
+            printf("%dms\n", SDL_GetTicks() - t);
         }
         else {
             bufferToBitmap24bpp(buf, buffer, SAMPLE_SIZE);
