@@ -14,8 +14,11 @@ It loads `.ply` files ([Stanford PLY - Wikipedia](https://en.wikipedia.org/wiki/
 ## Coming soon
  * *Textures (diffuse, specular, normal, ...) for the ray tracer*
  * *Documentation for scene file format*
- * *Better refraction support*
+ * *Better refraction support (nested material)*
+ * *Implement sky box* 
+ * *Improve KD-Tree for ray tracer*
  * *Sample:*
   * *Help for keyboard control*
   * *Add few scenes and 3d models in this repository*
+  * *Add screenshots*
  * Complete this ToDo list...
