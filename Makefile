@@ -17,7 +17,7 @@ ifeq ($(DEBUG), 1)
 	CXXFLAGS+= -g -D__DEBUG__ -O0
 else
 	OBJECT_DIR:=$(OBJECT_DIR)/release
-	CXXFLAGS+= -O3 
+	CXXFLAGS+= -O3 -march=corei7 -fexpensive-optimizations
 endif
 
 # binary name and location
@@ -58,5 +58,5 @@ $(OBJECT_DIR)/%.o: $(SOURCE_DIR)/%.cpp
 	@rm -f $(OBJECT_DIR)/$*.d.tmp
 
 clean:
-	@echo -e '\e[1;34mRemove all *.o and *.d files\e[1;34m'
+	@echo -e '\e[1;34mRemove all *.o and *.d files\e[0m'
 	@rm -f $(OBJECTS) $(OBJECTS:.o=.d)
