@@ -844,41 +844,41 @@ bool SceneParser::nextWord(char * w) {
 }
 
 bool SceneParser::nextInteger(int & out) {
-    char w[20];
+	char w[20];
 	char * endptr;
 	bool success = false;
 
-    if(fscanf(file, "%s", w) == 1) {
-        if(filterComment(w))
-            return nextInteger(out);
-        else {
-            out = strtoll(w, &endptr, 10);
-            success = (*endptr == '\0');
-        }
-    }
+	if(fscanf(file, "%s", w) == 1) {
+		if(filterComment(w))
+			return nextInteger(out);
+		else {
+			out = strtoll(w, &endptr, 10);
+			success = (*endptr == '\0');
+		}
+	}
 
-    if(!success)
-        printf("%d nextInteger failed\n", state);
+	if(!success)
+		printf("%d nextInteger failed\n", state);
 
 	return success;
 }
 
 bool SceneParser::nextReal(real & out) {
-    char w[20];
+	char w[20];
 	char * endptr;
 	bool success = false;
 
-    if(fscanf(file, "%s", w) == 1) {
-        if(filterComment(w))
-            return nextReal(out);
-        else {
+	if(fscanf(file, "%s", w) == 1) {
+		if(filterComment(w))
+			return nextReal(out);
+		else {
 			out = strtod(w, &endptr);
-            success = (*endptr == '\0');
-        }
-    }
+			success = (*endptr == '\0');
+		}
+	}
 
-    if(!success)
-        printf("%d nextReal failed\n", state);
+	if(!success)
+		printf("%d nextReal failed\n", state);
 
 	return success;
 }
