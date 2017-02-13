@@ -8,7 +8,7 @@ void bufferToBitmap24bpp(Buffer & buffer, SDL_Surface * bmp, positive sampleSize
     SDL_LockSurface(bmp);
 
     positive sampleSizeExp = 0;
-    while((1 << sampleSizeExp) < sampleSize)
+    while(((positive) 1 << sampleSizeExp) < sampleSize)
         sampleSizeExp++;
     sampleSize = (1 << sampleSizeExp);
     positive samplePixelsCountExp = sampleSizeExp+sampleSizeExp;

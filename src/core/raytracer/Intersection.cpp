@@ -80,8 +80,8 @@ void pushSubTree(vec3 orig, vec3 dir, KDTree * tree, TreeStack & stack) {
         real distMiddle = intersectAxialParallelepiped(orig, dir, tree->middleSubTree->bounds+BOUND_X_MIN, tree->middleSubTree->bounds+BOUND_X_MAX);
         bool intersectMiddle = distMiddle >= 0;
 
-        if(distFirst < distSecond && intersectFirst || !intersectSecond) {
-            if(distMiddle < distFirst && intersectMiddle || !intersectFirst) {
+        if((distFirst < distSecond && intersectFirst) || !intersectSecond) {
+            if((distMiddle < distFirst && intersectMiddle) || !intersectFirst) {
                 if(intersectSecond)
                     stack.push(tree->secondSubTree, distSecond);
                 if(intersectFirst)
@@ -89,7 +89,7 @@ void pushSubTree(vec3 orig, vec3 dir, KDTree * tree, TreeStack & stack) {
                 if(intersectMiddle)
                     stack.push(tree->middleSubTree, distMiddle);
             }
-            else if(distMiddle < distSecond && intersectMiddle || !intersectSecond) {
+            else if((distMiddle < distSecond && intersectMiddle) || !intersectSecond) {
                 if(intersectSecond)
                     stack.push(tree->secondSubTree, distSecond);
                 if(intersectMiddle)
@@ -107,7 +107,7 @@ void pushSubTree(vec3 orig, vec3 dir, KDTree * tree, TreeStack & stack) {
             }
         }
         else {
-            if(distMiddle < distSecond && intersectMiddle || !intersectSecond) {
+            if((distMiddle < distSecond && intersectMiddle) || !intersectSecond) {
                 if(intersectFirst)
                     stack.push(tree->firstSubTree, distFirst);
                 if(intersectSecond)
@@ -115,7 +115,7 @@ void pushSubTree(vec3 orig, vec3 dir, KDTree * tree, TreeStack & stack) {
                 if(intersectMiddle)
                     stack.push(tree->middleSubTree, distMiddle);
             }
-            else if(distMiddle < distFirst && intersectMiddle || !intersectFirst) {
+            else if((distMiddle < distFirst && intersectMiddle) || !intersectFirst) {
                 if(intersectFirst)
                     stack.push(tree->firstSubTree, distFirst);
                 if(intersectMiddle)
@@ -134,7 +134,7 @@ void pushSubTree(vec3 orig, vec3 dir, KDTree * tree, TreeStack & stack) {
         }
     }
     else {
-        if(distFirst < distSecond && intersectFirst || !intersectSecond) {
+        if((distFirst < distSecond && intersectFirst) || !intersectSecond) {
             if(intersectSecond)
                 stack.push(tree->secondSubTree, distSecond);
             if(intersectFirst)
