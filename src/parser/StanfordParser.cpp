@@ -218,14 +218,30 @@ bool StanfordParser::nextWord(char * w) {
 
 int StanfordParser::nextInteger() {
     char w[20];
-    fscanf(file, "%s", w);
-    return atoi(w);
+	char * endptr;
+	
+	if(!nextWord(w))
+		return 0;
+
+	integer value = strtoll(w, &endptr, 10);
+	if(endptr == w || *endptr != '\0')
+		return 0;
+
+    return value;
 }
 
 real StanfordParser::nextReal() {
     char w[20];
-    fscanf(file, "%s", w);
-    return (real) atof(w);
+	char * endptr;
+	
+	if(!nextWord(w))
+		return 0.0;
+
+	real value = strtod(w, &endptr);
+	if(endptr == w || *endptr != '\0')
+		return 0.0;
+
+	return value;
 }
 
 void StanfordParser::skipLine() {

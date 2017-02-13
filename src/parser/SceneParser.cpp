@@ -845,53 +845,67 @@ bool SceneParser::nextWord(char * w) {
 
 bool SceneParser::nextInteger(int & out) {
     char w[20];
+	char * endptr;
+	bool success = false;
+
     if(fscanf(file, "%s", w) == 1) {
         if(filterComment(w))
             return nextInteger(out);
         else {
-            out = atoi(w);
-            return true;
+            out = strtoll(w, &endptr, 10);
+            success = (*endptr == '\0');
         }
     }
-    else {
+
+    if(!success)
         printf("%d nextInteger failed\n", state);
-        return false;
-    }
+
+	return success;
 }
 
 bool SceneParser::nextReal(real & out) {
     char w[20];
+	char * endptr;
+	bool success = false;
+
     if(fscanf(file, "%s", w) == 1) {
         if(filterComment(w))
             return nextReal(out);
         else {
-            out = (real) atof(w);
-            return true;
+			out = strtod(w, &endptr);
+            success = (*endptr == '\0');
         }
     }
-    else {
+
+    if(!success)
         printf("%d nextReal failed\n", state);
-        return false;
-    }
+
+	return success;
 }
 
 bool SceneParser::nextReals(real * out, int count) {
     char w[20];
+	char * endptr;
     int total = count;
     while(--count >= 0) {
+		bool success = false;
         if(fscanf(file, "%s", w) == 1) {
             if(!filterComment(w)) {
-                *out = (real) atof(w);
+                *out = (real) strtod(w, &endptr);
                 out++;
+				success = (*endptr == '\0');
             } else {
                 count++;
+				success = true;
             }
         }
-        else {
+
+		if(!success) {
             printf("%d nextReals failed %d/%d\n", state, count+1, total);
             return false;
         }
     }
+
     return true;
 }
 
