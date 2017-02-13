@@ -5,6 +5,9 @@
 #include <SDL/SDL.h>
 
 CameraController::CameraController() :
+    isStepByStepEnabled(false),
+    isHighSpeedEnabled(false),
+    isMouseGrabbed(false),
     highSpeedFactor(3),
     rotationStep(10),
     translateStep(0.1),
@@ -12,9 +15,6 @@ CameraController::CameraController() :
     timeLastStep(0),
     rotationSpeed(10),
     translateSpeed(0.1),
-    isStepByStepEnabled(false),
-    isHighSpeedEnabled(false),
-    isMouseGrabbed(false),
     mouseSensivity(0.08)
 {
     rotateMouse[0] = 0;
@@ -79,6 +79,7 @@ bool CameraController::handleEvent(SDL_Event & event) {
         break;
     case SDL_MOUSEMOTION:
         if(event.motion.xrel != 0 && isMouseGrabbed) {
+			printf("mouse %d (%d) %d (%d)\n", event.motion.x, event.motion.xrel, event.motion.y, event.motion.yrel);
             if(mouseMapping.count(MOUSE_X) > 0) {
                 int action = mouseMapping[MOUSE_X];
                 if(ROTATE_BACKWARD <= action && action <= ROTATE_LEFT) {
@@ -187,11 +188,6 @@ void CameraController::updateCamera(real dt) {
 }
 
 void CameraController::grabMouse(bool grab) {
-    if(grab) {
-        int x, y;
-        SDL_GetMouseState(&x, &y);
-        SDL_WarpMouse(x, y);
-    }
     SDL_ShowCursor(!grab);
     SDL_WM_GrabInput(grab ? SDL_GRAB_ON : SDL_GRAB_OFF);
     isMouseGrabbed = grab;
