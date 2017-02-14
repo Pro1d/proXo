@@ -1,7 +1,7 @@
 #include <cstdio>
 #include "Container.h"
-#include "../math/type.h"
-#include "../math/Matrix.h"
+#include "core/math/type.h"
+#include "core/math/Matrix.h"
 #include "Object.h"
 #include "Light.h"
 

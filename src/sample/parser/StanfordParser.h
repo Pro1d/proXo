@@ -1,7 +1,7 @@
 #ifndef __STANFORD_PARSER_H__
 #define __STANFORD_PARSER_H__
 
-#include "../core/model/Object.h"
+#include "core/model/Object.h"
 
 
 class StanfordParser {

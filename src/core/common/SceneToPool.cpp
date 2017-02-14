@@ -2,9 +2,9 @@
 #include <cstdio>
 #include <cstring>
 #include "SceneToPool.h"
-#include "../math/Matrix.h"
-#include "../math/Vector.h"
-#include "../model/TransformationStack.h"
+#include "core/math/Matrix.h"
+#include "core/math/Vector.h"
+#include "core/model/TransformationStack.h"
 
 SceneToPool::SceneToPool() : transformation(50) {
 

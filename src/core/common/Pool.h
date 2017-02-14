@@ -1,8 +1,8 @@
 #ifndef POOL_H
 #define POOL_H
 
-#include "../math/type.h"
-#include "../model/Light.h"
+#include "core/math/type.h"
+#include "core/model/Light.h"
 
 enum {
     MAT_POOL_INDEX_RED,

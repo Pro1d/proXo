@@ -2,8 +2,8 @@
 #include <algorithm>
 #include <cstring>
 #include <cstdio>
-#include "../common/Pool.h"
-#include "../math/type.h"
+#include "core/common/Pool.h"
+#include "core/math/type.h"
 
 KDTree::KDTree(Pool & pool, positive * faces, positive faceBegin, positive faceEnd, KDTree * parent) :
     middleSubTree(NULL),

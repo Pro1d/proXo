@@ -1,8 +1,8 @@
 #ifndef __SPOT_H__
 #define __SPOT_H__
 
-#include "../Light.h"
-#include "../../math/type.h"
+#include "core/model/Light.h"
+#include "core/math/type.h"
 
 class SpotLight : public Light {
 public:

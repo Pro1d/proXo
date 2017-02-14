@@ -2,8 +2,8 @@
 #define CAMERACONTROLLER_H
 
 #include <map>
-#include "../core/math/type.h"
-#include "../core/model/Camera.h"
+#include "core/math/type.h"
+#include "core/model/Camera.h"
 #include <SDL/SDL.h>
 
 enum {

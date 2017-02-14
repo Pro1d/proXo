@@ -1,8 +1,8 @@
 #ifndef __POINT_H__
 #define __POINT_H__
 
-#include "../Light.h"
-#include "../../math/type.h"
+#include "core/model/Light.h"
+#include "core/math/type.h"
 
 class PointLight : public Light {
 public:

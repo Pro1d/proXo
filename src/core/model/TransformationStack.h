@@ -2,8 +2,8 @@
 #define __TRANSFORMATION_STACK_H__
 
 #include <cstring>
-#include "../math/type.h"
-#include "../math/Matrix.h"
+#include "core/math/type.h"
+#include "core/math/Matrix.h"
 
 class TransformationStack {
 	public:

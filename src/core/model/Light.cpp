@@ -1,8 +1,8 @@
 #include <algorithm>
 #include "Light.h"
-#include "../math/type.h"
-#include "../math/Vector.h"
-#include "../math/Matrix.h"
+#include "core/math/type.h"
+#include "core/math/Vector.h"
+#include "core/math/Matrix.h"
 
 
 Light::Light(bool castShadow) : castShadow(castShadow) {

@@ -1,9 +1,9 @@
 #include <algorithm>
 #include <cmath>
 #include "Camera.h"
-#include "../math/type.h"
-#include "../math/basics.h"
-#include "../math/Matrix.h"
+#include "core/math/type.h"
+#include "core/math/basics.h"
+#include "core/math/Matrix.h"
 
 Camera::Camera() :
     fieldOfView(70*PI/180),

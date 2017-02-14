@@ -1,8 +1,8 @@
 #ifndef __AMBIENT_H__
 #define __AMBIENT_H__
 
-#include "../Light.h"
-#include "../../math/type.h"
+#include "core/model/Light.h"
+#include "core/math/type.h"
 
 class AmbientLight : public Light {
 public:

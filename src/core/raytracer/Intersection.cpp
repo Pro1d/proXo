@@ -1,6 +1,6 @@
 #include "Intersection.h"
-#include "../math/Vector.h"
-#include "../math/type.h"
+#include "core/math/Vector.h"
+#include "core/math/type.h"
 #include <limits>
 #include <algorithm>
 

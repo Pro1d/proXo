@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <SDL/SDL.h>
-#include "../core/realtime/Buffer.h"
-#include "../core/math/basics.h"
+#include "core/realtime/Buffer.h"
+#include "core/math/basics.h"
 #include "wrapper.h"
 
 void bufferToBitmap24bpp(Buffer & buffer, SDL_Surface * bmp, positive sampleSize) {

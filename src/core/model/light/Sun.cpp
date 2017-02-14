@@ -1,4 +1,4 @@
-#include "../Light.h"
+#include "core/model/Light.h"
 #include "Sun.h"
 #include <algorithm>
 #include <limits>

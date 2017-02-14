@@ -1,7 +1,7 @@
 #ifndef __CAMERA_H__
 #define __CAMERA_H__
 
-#include "../math/type.h"
+#include "core/math/type.h"
 
 class Camera {
 public:

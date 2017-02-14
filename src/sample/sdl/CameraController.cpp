@@ -1,7 +1,7 @@
 #include "CameraController.h"
 #include <cmath>
-#include "../core/math/basics.h"
-#include "../core/math/Matrix.h"
+#include "core/math/basics.h"
+#include "core/math/Matrix.h"
 #include <SDL/SDL.h>
 
 CameraController::CameraController() :

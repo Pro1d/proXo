@@ -1,7 +1,7 @@
 #ifndef __MULTITHREADING_H__
 #define __MULTITHREADING_H__
 
-#include "../math/type.h"
+#include "core/math/type.h"
 #include <thread>
 #include <mutex>
 #include <condition_variable>

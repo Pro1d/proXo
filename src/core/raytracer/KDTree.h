@@ -1,8 +1,8 @@
 #ifndef __KDTREE_H__
 #define __KDTREE_H__
 
-#include "../common/Pool.h"
-#include "../math/type.h"
+#include "core/common/Pool.h"
+#include "core/math/type.h"
 #include <cstdlib>
 
 #define MINIMUM_FACES_TREE      10

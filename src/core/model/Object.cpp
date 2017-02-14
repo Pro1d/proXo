@@ -1,8 +1,8 @@
 #include <cstdlib>
 #include <algorithm>
 #include "Object.h"
-#include "../math/type.h"
-#include "../math/Vector.h"
+#include "core/math/type.h"
+#include "core/math/Vector.h"
 
 Object::Object(/*const char * filename, positive texture_id*/) :
 		vertices(NULL),

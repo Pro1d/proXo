@@ -1,6 +1,6 @@
 #include "Physic.h"
-#include "../math/type.h"
-#include "../math/Vector.h"
+#include "core/math/type.h"
+#include "core/math/Vector.h"
 
 real refractRay(vec3 incident, vec3 normal, real n1, real n2, vec3 refractOut) {
     real e = n1/n2;

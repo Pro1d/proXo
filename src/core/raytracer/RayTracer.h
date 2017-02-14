@@ -1,11 +1,11 @@
 #ifndef __RAY_TRACER_H__
 #define __RAY_TRACER_H__
 
-#include "../model/Scene.h"
-#include "../common/Pool.h"
-#include "../common/SceneToPool.h"
-#include "../sys/Multithreading.h"
-#include "../realtime/Buffer.h"
+#include "core/model/Scene.h"
+#include "core/common/Pool.h"
+#include "core/common/SceneToPool.h"
+#include "core/sys/Multithreading.h"
+#include "core/realtime/Buffer.h"
 #include "KDTree.h"
 
 class RayTracer {

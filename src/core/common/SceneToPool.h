@@ -1,9 +1,9 @@
 #ifndef __SCENE_TO_POOL_H__
 #define __SCENE_TO_POOL_H__
 
-#include "../model/Scene.h"
-#include "../common/Pool.h"
-#include "../model/TransformationStack.h"
+#include "core/model/Scene.h"
+#include "core/common/Pool.h"
+#include "core/model/TransformationStack.h"
 
 class SceneToPool {
     public:

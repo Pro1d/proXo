@@ -1,5 +1,5 @@
 #include "Multithreading.h"
-#include "../math/type.h"
+#include "core/math/type.h"
 #include <thread>
 
 void threadHost(ThreadParams * p) {

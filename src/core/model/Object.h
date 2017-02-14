@@ -1,7 +1,7 @@
 #ifndef __OBJECT_H__
 #define __OBJECT_H__
 
-#include "../math/type.h"
+#include "core/math/type.h"
 
 class Object {
 	public:

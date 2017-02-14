@@ -1,7 +1,7 @@
 #ifndef __INTERSECTION_H__
 #define __INTERSECTION_H__
 
-#include "../math/type.h"
+#include "core/math/type.h"
 #include "KDTree.h"
 
 class IntersectionData {

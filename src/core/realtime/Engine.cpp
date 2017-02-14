@@ -1,13 +1,13 @@
 #include "Engine.h"
 #include "Buffer.h"
 #include "Rasterizer.h"
-#include "../model/Scene.h"
-#include "../common/SceneToPool.h"
-#include "../common/Pool.h"
-#include "../math/type.h"
-#include "../math/Vector.h"
-#include "../sys/Multithreading.h"
-#include "../config/global.h"
+#include "core/model/Scene.h"
+#include "core/common/SceneToPool.h"
+#include "core/common/Pool.h"
+#include "core/math/type.h"
+#include "core/math/Vector.h"
+#include "core/sys/Multithreading.h"
+#include "core/config/global.h"
 
 Engine::Engine(Buffer * imageBuffer, Scene * scene) :
     pool(NULL), scene(scene), imageBuffer(imageBuffer), multithread(THREADS_COUNT)

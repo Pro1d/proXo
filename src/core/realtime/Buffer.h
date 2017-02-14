@@ -1,7 +1,7 @@
 #ifndef __BUFFER_H__
 #define __BUFFER_H__
 
-#include "../math/type.h"
+#include "core/math/type.h"
 
 #define BUF_Z_OFFSET	0
 #define BUF_R_OFFSET	1

@@ -1,4 +1,4 @@
-#include "../Light.h"
+#include "core/model/Light.h"
 #include "Ambient.h"
 #include "core/math/Vector.h"
 #include "core/math/basics.h"

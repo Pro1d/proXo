@@ -1,4 +1,4 @@
-#include "../math/type.h"
+#include "core/math/type.h"
 #include "Buffer.h"
 #include <algorithm>
 #include <cmath>

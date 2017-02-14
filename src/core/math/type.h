@@ -1,7 +1,7 @@
 #ifndef __TYPE_H__
 #define	__TYPE_H__
 
-#include "../config/global.h"
+#include "core/config/global.h"
 
 #ifdef USE_DOUBLE_PRECISION_FLOATING_VALUE
 typedef double real;

@@ -1,7 +1,7 @@
 #ifndef __LIGHT_H__
 #define __LIGHT_H__
 
-#include "../math/type.h"
+#include "core/math/type.h"
 
 class Light {
 public:

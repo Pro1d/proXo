@@ -1,7 +1,7 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-#include "../math/type.h"
+#include "core/math/type.h"
 
 class Material
 {

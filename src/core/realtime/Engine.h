@@ -2,10 +2,10 @@
 #define ENGINE_H
 
 #include "Buffer.h"
-#include "../model/Scene.h"
-#include "../common/SceneToPool.h"
-#include "../common/Pool.h"
-#include "../sys/Multithreading.h"
+#include "core/model/Scene.h"
+#include "core/common/SceneToPool.h"
+#include "core/common/Pool.h"
+#include "core/sys/Multithreading.h"
 
 class Engine
 {

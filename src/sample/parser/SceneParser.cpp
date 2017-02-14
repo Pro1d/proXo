@@ -1,14 +1,14 @@
 #include <cstdio>
 #include <cstring>
-#include "../core/math/Matrix.h"
-#include "../core/math/Vector.h"
+#include "core/math/Matrix.h"
+#include "core/math/Vector.h"
 #include "SceneParser.h"
 #include "StanfordParser.h"
-#include "../core/model/Light.h"
-#include "../core/model/light/Spot.h"
-#include "../core/model/light/Sun.h"
-#include "../core/model/light/Point.h"
-#include "../core/model/light/Ambient.h"
+#include "core/model/Light.h"
+#include "core/model/light/Spot.h"
+#include "core/model/light/Sun.h"
+#include "core/model/light/Point.h"
+#include "core/model/light/Ambient.h"
 
 enum {
     MATERIALS, OBJECTS, BODY, WORLD, SKYBOX,

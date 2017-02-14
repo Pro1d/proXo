@@ -1,7 +1,7 @@
 #ifndef SCENEPARSER_H
 #define SCENEPARSER_H
 
-#include "../core/model/Scene.h"
+#include "core/model/Scene.h"
 #include <cstdio>
 
 class SceneParser

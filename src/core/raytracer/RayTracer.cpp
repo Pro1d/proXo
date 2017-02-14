@@ -1,6 +1,6 @@
 #include "RayTracer.h"
-#include "../math/type.h"
-#include "../math/Vector.h"
+#include "core/math/type.h"
+#include "core/math/Vector.h"
 #include "Intersection.h"
 #include "Physic.h"
 

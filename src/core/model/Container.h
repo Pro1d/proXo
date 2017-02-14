@@ -1,7 +1,7 @@
 #ifndef __CONTAINER_H__
 #define __CONTAINER_H__
 
-#include "../math/type.h"
+#include "core/math/type.h"
 #include "Object.h"
 #include "Container.h"
 #include "Light.h"

@@ -1,6 +1,6 @@
 #include <cstring>
-#include "../math/type.h"
-#include "../math/Matrix.h"
+#include "core/math/type.h"
+#include "core/math/Matrix.h"
 #include "TransformationStack.h"
 
 TransformationStack::TransformationStack(positive stack_size) :
