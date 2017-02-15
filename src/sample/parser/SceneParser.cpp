@@ -33,7 +33,7 @@ static const char * keyName[KEY_COUNT] = {
     "light", "sun", "point", "spot",
     "dir", "pos", "cutoff", "falloff", "attenuation", "intensity",
     "color", "color255", "ambient", "diffuse", "specular", "shininess", "emissive", "normal",
-    "reflect", "refractive_index", "absorbtion",
+    "reflect", "refractive_index", "absorption",
     "object", "container", "end",
     "t", "s", "r", "tx", "ty", "tz", "rx", "ry", "rz",
     "material", "camera", "fov", "lookat", "zmax",
