@@ -23,6 +23,19 @@ void Buffer::clear() {
     }
 }
 
+void Buffer::clear(positive yStart, positive yEnd) {
+	positive i = yStart*width*VEC4_SCALARS_COUNT;
+	positive end = yEnd*width*VEC4_SCALARS_COUNT;
+
+	while(i < end) {
+		data[i] = 1;
+		data[i+1] = 0;
+		data[i+2] = 0;
+		data[i+2] = 0;
+		i += VEC4_SCALARS_COUNT;
+	}
+}
+
 void Buffer::merge(Buffer & buffer) {
     vec4 cursor = data;
     vec4 end = data + width*height*VEC4_SCALARS_COUNT;

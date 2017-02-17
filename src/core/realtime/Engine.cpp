@@ -35,12 +35,18 @@ void Engine::createMatchingPool()
     pool = new Pool(vertices, faces, lights);
 }
 
+void clearBufferThread(void * data, positive threadId, positive threadsCount) {
+	Engine * that = (Engine*) data;
+	that->imageBuffer->clear(threadId * that->imageBuffer->height / threadsCount,
+			(threadId+1) * that->imageBuffer->height / threadsCount);
+}
+
 void Engine::render() {
     pool->reset();
 
     sceneToPool.run(*scene, *pool, true);
 
-    imageBuffer->clear();
+	multithread.execute(clearBufferThread, (void*) this);
 
     vertexLighting();
 

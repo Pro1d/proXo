@@ -13,6 +13,7 @@ public:
 	Buffer(positive w, positive h);
 	~Buffer();
 	void clear();
+	void clear(positive yStart, positive yEnd);
 	void merge(Buffer & buffer);
 
 	vec4 getPtr(positive x, positive y);
