@@ -77,6 +77,8 @@ int main(int argc, char** argv)
     Uint32 time = SDL_GetTicks();
     bool rayTracingRenderView = false;
 
+	BufferToBitmap btb(buf, buffer, SAMPLE_SIZE);
+
     // program main loop
     bool done = false;
     while (!done)
@@ -133,8 +135,9 @@ int main(int argc, char** argv)
             Uint32 t = SDL_GetTicks();
             realTimeEngine.render();
             printf("t:%dms ", SDL_GetTicks() - t);
-            bufferToBitmap24bpp(buf, buffer, SAMPLE_SIZE);
-            printf("%dms\n", SDL_GetTicks() - t);
+			t = SDL_GetTicks();
+            btb.convert();
+            printf("%dms \n", SDL_GetTicks() - t);
         }
         else {
             bufferToBitmap24bpp(buf, buffer, SAMPLE_SIZE);

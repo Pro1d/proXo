@@ -31,7 +31,7 @@ void Buffer::clear(positive yStart, positive yEnd) {
 		data[i] = 1;
 		data[i+1] = 0;
 		data[i+2] = 0;
-		data[i+2] = 0;
+		data[i+3] = 0;
 		i += VEC4_SCALARS_COUNT;
 	}
 }
