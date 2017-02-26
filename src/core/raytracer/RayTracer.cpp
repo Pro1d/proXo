@@ -6,7 +6,14 @@
 
 #define EPSILON ((real) 1 / 255)
 
-RayTracer::RayTracer(Buffer * imageBuffer, Scene * scene) : scene(scene), pool(NULL), tree(NULL), imageBuffer(imageBuffer), multithread(THREADS_COUNT) {
+RayTracer::RayTracer(Buffer * imageBuffer, Scene * scene) :
+	scene(scene),
+	pool(NULL),
+	tree(NULL),
+	imageBuffer(imageBuffer),
+	multithread(THREADS_COUNT),
+	sceneToPool(multithread)
+{
 
 }
 

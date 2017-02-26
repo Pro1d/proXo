@@ -21,8 +21,8 @@ public:
     Pool * pool;
     KDTree * tree;
     Buffer * imageBuffer;
-    SceneToPool sceneToPool;
     MultiThread multithread;
+    SceneToPool sceneToPool;
 };
 
 #endif // __ENGINE_H__

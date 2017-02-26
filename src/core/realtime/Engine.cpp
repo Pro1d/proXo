@@ -10,7 +10,11 @@
 #include "core/config/global.h"
 
 Engine::Engine(Buffer * imageBuffer, Scene * scene) :
-    pool(NULL), scene(scene), imageBuffer(imageBuffer), multithread(THREADS_COUNT)
+    pool(NULL),
+	scene(scene), 
+	imageBuffer(imageBuffer),
+	multithread(THREADS_COUNT),
+	sceneToPool(multithread)
 {
     //ctor
 }

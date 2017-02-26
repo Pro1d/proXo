@@ -21,8 +21,8 @@ class Engine
         Pool * pool;
         Scene * scene;
         Buffer * imageBuffer;
-        SceneToPool sceneToPool;
         MultiThread multithread;
+        SceneToPool sceneToPool;
 };
 
 #endif // ENGINE_H
