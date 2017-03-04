@@ -1,12 +1,12 @@
 #ifndef __MATRIX_H__
 #define __MATRIX_H__
 
-#include "type.h"
-#include <cstdlib>
-#include <cmath>
 #include "Matrix.h"
-#include "type.h"
 #include "basics.h"
+#include "type.h"
+#include "type.h"
+#include <cmath>
+#include <cstdlib>
 
 mat4 newMatrix();
 void identity(mat4 mOut);

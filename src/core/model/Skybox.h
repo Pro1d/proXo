@@ -3,8 +3,8 @@
 
 class Skybox {
 public:
-    vec4 getColor(vec4 dir);
-    vec4 data;
+	vec4 getColor(vec4 dir);
+	vec4 data;
 };
 
 #endif
