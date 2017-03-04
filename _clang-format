@@ -8,7 +8,7 @@ IndentCaseLabels: true
 AlignConsecutiveAssignments: true
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: Stroustrup
-ColumnLimit: 100
+ColumnLimit: 80
 NamespaceIndentation: All
 ReflowComments: true
 SortIncludes: true
