@@ -5,6 +5,7 @@
 
 class Texture {
 public:
+	// the size must be a power of 2 (see Texture::isSizeValid)
 	Texture(vec4 data, positive size);
 
 	inline vec4 getValue(integer u, integer v)
@@ -15,6 +16,8 @@ public:
 	{
 		return getValue((integer)(u * size_), (integer)(v * size_));
 	}
+
+	static bool isSizeValid(positive size);
 
 private:
 	vec4 data_;

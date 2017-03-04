@@ -3,16 +3,16 @@
 
 using namespace std;
 
-Texture::Texture(vec4 data, positive size) : data_(data), size_(size), log2size_(0)
+Texture::Texture(vec4 data, positive size)
+    : data_(data), size_(size), log2size_(0), sizeMask_(size - 1)
 {
-	while(((positive) 1 << log2size_) < size_)
+	while(size >>= 1)
 		log2size_++;
+}
 
-	positive correct_size = (positive) 1 << log2size_;
-	sizeMask_             = correct_size - 1;
-
-	if(size_ != correct_size) {
-		size_ = correct_size;
-		cerr << "Error: texture size must be power of 2." << endl;
-	}
+bool Texture::isSizeValid(positive size)
+{
+	// size must be a power of 2 <=> size must have only one bit set to 1
+	// Here is a cute hack to verify it
+	return size > 0 && (size & (~size+1)) == size;
 }
