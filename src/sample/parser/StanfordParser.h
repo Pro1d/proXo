@@ -2,6 +2,7 @@
 #define __STANFORD_PARSER_H__
 
 #include "core/model/Object.h"
+#include <cstdio>
 
 class StanfordParser {
 public:
