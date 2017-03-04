@@ -1,0 +1,25 @@
+### Configuration file for clang-format ###
+
+BasedOnStyle: WebKit
+Language: Cpp
+
+IndentWidth: 4
+IndentCaseLabels: true
+AlignConsecutiveAssignments: true
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeBraces: Stroustrup
+ColumnLimit: 100
+NamespaceIndentation: All
+ReflowComments: true
+SortIncludes: true
+SpaceAfterCStyleCast: true
+SpaceBeforeParens: Never
+SpaceInEmptyParentheses: false
+Standard: Cpp11
+TabWidth: 4
+UseTab: ForIndentation
+AllowShortFunctionsOnASingleLine: Inline
+BreakBeforeTernaryOperators: false
+BreakConstructorInitializersBeforeComma: false
+
+
