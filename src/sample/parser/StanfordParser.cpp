@@ -41,10 +41,11 @@ enum {
 	T,
 	KEY_COUNT
 };
-static const char* keyName[KEY_COUNT] = { "ply", "format", "ascii", "comment", "end_header",
-	"element", "vertex", "face", "edge", "property", "list", "vertex_indices", "float", "double",
-	"char", "uchar", "short", "ushort", "int", "uint", "x", "y", "z", "red", "green", "blue", "nx",
-	"ny", "nz", "s", "t" };
+static const char* keyName[KEY_COUNT] = { "ply", "format", "ascii", "comment",
+	"end_header", "element", "vertex", "face", "edge", "property", "list",
+	"vertex_indices", "float", "double", "char", "uchar", "short", "ushort",
+	"int", "uint", "x", "y", "z", "red", "green", "blue", "nx", "ny", "nz", "s",
+	"t" };
 
 bool StanfordParser::readObject(const char* filename, Object& object)
 {
@@ -156,39 +157,50 @@ bool StanfordParser::readObject(const char* filename, Object& object)
 					real value = (i == 0) ? atof(word) : nextReal();
 					switch(vertexKeys[i]) {
 						case X:
-							object.vertices[vertexReadCount * VEC4_SCALARS_COUNT + 0] = value;
+							object.vertices[vertexReadCount * VEC4_SCALARS_COUNT
+							    + 0] = value;
 							break;
 						case Y:
-							object.vertices[vertexReadCount * VEC4_SCALARS_COUNT + 1] = value;
+							object.vertices[vertexReadCount * VEC4_SCALARS_COUNT
+							    + 1] = value;
 							break;
 						case Z:
-							object.vertices[vertexReadCount * VEC4_SCALARS_COUNT + 2] = value;
+							object.vertices[vertexReadCount * VEC4_SCALARS_COUNT
+							    + 2] = value;
 							break;
 						case NX:
-							object.normals[vertexReadCount * VEC4_SCALARS_COUNT + 0] = value;
+							object.normals[vertexReadCount * VEC4_SCALARS_COUNT
+							    + 0] = value;
 							break;
 						case NY:
-							object.normals[vertexReadCount * VEC4_SCALARS_COUNT + 1] = value;
+							object.normals[vertexReadCount * VEC4_SCALARS_COUNT
+							    + 1] = value;
 							break;
 						case NZ:
-							object.normals[vertexReadCount * VEC4_SCALARS_COUNT + 2] = value;
+							object.normals[vertexReadCount * VEC4_SCALARS_COUNT
+							    + 2] = value;
 							break;
 						case RED:
-							object.colors[vertexReadCount * VEC4_SCALARS_COUNT + 0] = value / 255;
+							object.colors[vertexReadCount * VEC4_SCALARS_COUNT
+							    + 0] = value / 255;
 							break;
 						case GREEN:
-							object.colors[vertexReadCount * VEC4_SCALARS_COUNT + 1] = value / 255;
+							object.colors[vertexReadCount * VEC4_SCALARS_COUNT
+							    + 1] = value / 255;
 							break;
 						case BLUE:
-							object.colors[vertexReadCount * VEC4_SCALARS_COUNT + 2] = value / 255;
+							object.colors[vertexReadCount * VEC4_SCALARS_COUNT
+							    + 2] = value / 255;
 							break;
 						case S:
-							object.texture_mapping[vertexReadCount * VEC2_SCALARS_COUNT + 0] =
-							    value;
+							object.texture_mapping[vertexReadCount
+							        * VEC2_SCALARS_COUNT
+							    + 0] = value;
 							break;
 						case T:
-							object.texture_mapping[vertexReadCount * VEC2_SCALARS_COUNT + 1] =
-							    value;
+							object.texture_mapping[vertexReadCount
+							        * VEC2_SCALARS_COUNT
+							    + 1] = value;
 							break;
 					}
 				}
@@ -227,8 +239,10 @@ bool StanfordParser::readObject(const char* filename, Object& object)
 	fclose(file);
 
 	if(additionnalFaces.size() > 0) {
-		positive* moreFaces = new positive[(object.facesCount + additionnalFaces.size() / 3) * 3];
-		memcpy(moreFaces, object.faces, object.facesCount * 3 * sizeof(positive));
+		positive* moreFaces =
+		    new positive[(object.facesCount + additionnalFaces.size() / 3) * 3];
+		memcpy(
+		    moreFaces, object.faces, object.facesCount * 3 * sizeof(positive));
 		memcpy(moreFaces + object.facesCount * 3, additionnalFaces.data(),
 		    additionnalFaces.size() * sizeof(positive));
 		delete[] object.faces;

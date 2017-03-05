@@ -5,9 +5,10 @@
 #include <cmath>
 
 CameraController::CameraController()
-    : isStepByStepEnabled(false), isHighSpeedEnabled(false), isMouseGrabbed(false),
-      highSpeedFactor(3), rotationStep(10), translateStep(0.1), stepDelay(300), timeLastStep(0),
-      rotationSpeed(10), translateSpeed(0.1), mouseSensivity(0.08)
+    : isStepByStepEnabled(false), isHighSpeedEnabled(false),
+      isMouseGrabbed(false), highSpeedFactor(3), rotationStep(10),
+      translateStep(0.1), stepDelay(300), timeLastStep(0), rotationSpeed(10),
+      translateSpeed(0.1), mouseSensivity(0.08)
 {
 	rotateMouse[0] = 0;
 	rotateMouse[1] = 0;
@@ -79,14 +80,14 @@ bool CameraController::handleEvent(SDL_Event& event)
 			break;
 		case SDL_MOUSEMOTION:
 			if(event.motion.xrel != 0 && isMouseGrabbed) {
-				printf("mouse %d (%d) %d (%d)\n", event.motion.x, event.motion.xrel, event.motion.y,
-				    event.motion.yrel);
+				printf("mouse %d (%d) %d (%d)\n", event.motion.x,
+				    event.motion.xrel, event.motion.y, event.motion.yrel);
 				if(mouseMapping.count(MOUSE_X) > 0) {
 					int action = mouseMapping[MOUSE_X];
 					if(ROTATE_BACKWARD <= action && action <= ROTATE_LEFT) {
 						rotateMouse[(action - ROTATE_BACKWARD) / 2] +=
-						    (((action - ROTATE_BACKWARD) & 1) ? -1 : 1) * mouseSensivity
-						    * event.motion.xrel;
+						    (((action - ROTATE_BACKWARD) & 1) ? -1 : 1)
+						    * mouseSensivity * event.motion.xrel;
 					}
 				}
 			}
@@ -95,8 +96,8 @@ bool CameraController::handleEvent(SDL_Event& event)
 					int action = mouseMapping[MOUSE_Y];
 					if(ROTATE_BACKWARD <= action && action <= ROTATE_LEFT) {
 						rotateMouse[(action - ROTATE_BACKWARD) / 2] +=
-						    (((action - ROTATE_BACKWARD) & 1) ? -1 : 1) * mouseSensivity
-						    * event.motion.yrel;
+						    (((action - ROTATE_BACKWARD) & 1) ? -1 : 1)
+						    * mouseSensivity * event.motion.yrel;
 					}
 				}
 			}
@@ -110,12 +111,12 @@ bool CameraController::handleEvent(SDL_Event& event)
 						grabMouse(down);
 						break;
 					case FOV_DECREASE:
-						camera->setFieldOfView(
-						    std::max(toRadians(10), camera->getFieldOfView() - toRadians(10)));
+						camera->setFieldOfView(std::max(toRadians(10),
+						    camera->getFieldOfView() - toRadians(10)));
 						break;
 					case FOV_INCREASE:
-						camera->setFieldOfView(
-						    std::min(toRadians(170), camera->getFieldOfView() + toRadians(10)));
+						camera->setFieldOfView(std::min(toRadians(170),
+						    camera->getFieldOfView() + toRadians(10)));
 						break;
 				}
 				handled = true;
@@ -163,17 +164,23 @@ void CameraController::actionToMatrix(real dt)
 	identity(motionMatrix);
 
 	int activeModifiers = SDL_GetModState();
-	isStepByStepEnabled = ((activeModifiers & stepByStepModifers) == stepByStepModifers);
-	isHighSpeedEnabled  = ((activeModifiers & highSpeedModifers) == highSpeedModifers);
+	isStepByStepEnabled =
+	    ((activeModifiers & stepByStepModifers) == stepByStepModifers);
+	isHighSpeedEnabled =
+	    ((activeModifiers & highSpeedModifers) == highSpeedModifers);
 
-	applyRotate(motionMatrix,
-	    getSpeed(ROLL_RIGHT, dt) - getSpeed(ROLL_LEFT, dt) + toRadians(rotateMouse[0]), 0, 0, 1);
-	applyRotate(motionMatrix,
-	    getSpeed(YAW_RIGHT, dt) - getSpeed(YAW_LEFT, dt) + toRadians(rotateMouse[1]), 0, 1, 0);
-	applyRotate(motionMatrix,
-	    getSpeed(PITCH_UP, dt) - getSpeed(PITCH_DOWN, dt) + toRadians(rotateMouse[2]), 1, 0, 0);
+	applyRotate(motionMatrix, getSpeed(ROLL_RIGHT, dt) - getSpeed(ROLL_LEFT, dt)
+	        + toRadians(rotateMouse[0]),
+	    0, 0, 1);
+	applyRotate(motionMatrix, getSpeed(YAW_RIGHT, dt) - getSpeed(YAW_LEFT, dt)
+	        + toRadians(rotateMouse[1]),
+	    0, 1, 0);
+	applyRotate(motionMatrix, getSpeed(PITCH_UP, dt) - getSpeed(PITCH_DOWN, dt)
+	        + toRadians(rotateMouse[2]),
+	    1, 0, 0);
 
-	applyTranslate(motionMatrix, getSpeed(MOVE_LEFT, dt) - getSpeed(MOVE_RIGHT, dt),
+	applyTranslate(motionMatrix,
+	    getSpeed(MOVE_LEFT, dt) - getSpeed(MOVE_RIGHT, dt),
 	    getSpeed(MOVE_DOWN, dt) - getSpeed(MOVE_UP, dt),
 	    getSpeed(MOVE_FORWARD, dt) - getSpeed(MOVE_BACKWARD, dt));
 

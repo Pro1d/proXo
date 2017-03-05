@@ -9,11 +9,12 @@ using std::max;
 /** A : UP, B : LEFT, C : RIGHT, By=Cy
  *	remplit les pixels dont le centre est contenu dans le triangle
  **/
-void triangleSup(Buffer& buffer, const vec3 A, const vec3 B, const vec3 C, const vec3 colorA,
-    const vec3 colorB, const vec3 colorC)
+void triangleSup(Buffer& buffer, const vec3 A, const vec3 B, const vec3 C,
+    const vec3 colorA, const vec3 colorB, const vec3 colorC)
 {
 	/// suffix -> s : start (côté gauche/haut), e : end (côté droit/bas)
-	/// preffix -> v : vecteur, d : delta (variation), l : ligne (concerne la ligne actuelle)
+	/// preffix -> v : vecteur, d : delta (variation), l : ligne (concerne la
+	/// ligne actuelle)
 
 	/// ys in[i-0.5; i-0.5[ -> ys' = i -> ys'=ys'+0.5
 	/// ye in[i-0.5; i-0.5[ -> ye' = i -> ye'=ye'-0.5
@@ -21,13 +22,15 @@ void triangleSup(Buffer& buffer, const vec3 A, const vec3 B, const vec3 C, const
 
 	/// coord y de bord sup du pixel dont le centre est strictement après A
 	// real ysmin = round(A[1]);
-	/// coord y du centre (du pixel) [strictement après/avant] A/B (=> [ys-1 <=] A[1] < ys) (si A
+	/// coord y du centre (du pixel) [strictement après/avant] A/B (=> [ys-1 <=]
+	/// A[1] < ys) (si A
 	/// est au centre d'un pixel, le pixel n'est pas dans le triangle)
 	const real ys = max((real) round(A[1]), (real) 0.0) + (real) 0.5;
 	const real ye = min((real) round(B[1]), (real) buffer.height) - (real) 0.5;
 	/// coord y du vecteur A->B (=A->C)
 	const real vy = B[1] - A[1];
-	/// A et BC sont sur la même ligne horizontale -> le triangle est plat, il ne contient aucun
+	/// A et BC sont sur la même ligne horizontale -> le triangle est plat, il
+	/// ne contient aucun
 	/// point
 	if(vy <= (real) 0.0001)
 		return;
@@ -38,11 +41,15 @@ void triangleSup(Buffer& buffer, const vec3 A, const vec3 B, const vec3 C, const
 	/// var en z du bord gauche et droite par rapport à y
 	const real dzs = (B[2] - A[2]) * vy_inv, dze = (C[2] - A[2]) * vy_inv;
 	/// var de la couleur par rapport à y
-	const real drs = (colorB[0] - colorA[0]) * vy_inv, dre = (colorC[0] - colorA[0]) * vy_inv;
-	const real dgs = (colorB[1] - colorA[1]) * vy_inv, dge = (colorC[1] - colorA[1]) * vy_inv;
-	const real dbs = (colorB[2] - colorA[2]) * vy_inv, dbe = (colorC[2] - colorA[2]) * vy_inv;
+	const real drs = (colorB[0] - colorA[0]) * vy_inv,
+	           dre = (colorC[0] - colorA[0]) * vy_inv;
+	const real dgs = (colorB[1] - colorA[1]) * vy_inv,
+	           dge = (colorC[1] - colorA[1]) * vy_inv;
+	const real dbs = (colorB[2] - colorA[2]) * vy_inv,
+	           dbe = (colorC[2] - colorA[2]) * vy_inv;
 
-	/// différence de y entre le sommet du triangle et le premier pixel de la première ligne
+	/// différence de y entre le sommet du triangle et le premier pixel de la
+	/// première ligne
 	const real vy1 = (ys - A[1]);
 	/// coord en x du centre du premier pixel de la première ligne
 	real xs = A[0] + dxs * vy1, xe = A[0] + dxe * vy1;
@@ -54,9 +61,11 @@ void triangleSup(Buffer& buffer, const vec3 A, const vec3 B, const vec3 C, const
 	real bs = colorA[2] + dbs * vy1, be = colorA[2] + dbe * vy1;
 
 	for(real y = ys; y <= ye; y++) {
-		/// coord en x du centre du pixel [strictement après/avant] le côté gauche/droit
-		const real lxs     = max((real) round(xs), (real) 0.0) + (real) 0.5;
-		const real lxe     = min((real) round(xe), (real) buffer.width) - (real) 0.5;
+		/// coord en x du centre du pixel [strictement après/avant] le côté
+		/// gauche/droit
+		const real lxs = max((real) round(xs), (real) 0.0) + (real) 0.5;
+		const real lxe =
+		    min((real) round(xe), (real) buffer.width) - (real) 0.5;
 		const real lvx     = xe - xs;
 		const real lvx_inv = 1 / lvx;
 		/// var en z par rapport à x
@@ -68,9 +77,11 @@ void triangleSup(Buffer& buffer, const vec3 A, const vec3 B, const vec3 C, const
 
 		/// Différence entre le bord de gauche et le premier pixel de la ligne
 		const real vx1 = (lxs - xs);
-		/// coord z du point associé au centre du premier pixel de la première  ligne
+		/// coord z du point associé au centre du premier pixel de la première
+		/// ligne
 		real lz = zs + ldz * vx1;
-		/// couleur du point associé au centre du premier pixel de la première  ligne
+		/// couleur du point associé au centre du premier pixel de la première
+		/// ligne
 		real lr = rs + ldr * vx1;
 		real lg = gs + ldg * vx1;
 		real lb = bs + ldb * vx1;
@@ -107,11 +118,12 @@ void triangleSup(Buffer& buffer, const vec3 A, const vec3 B, const vec3 C, const
 /** A : DOWN, B : LEFT, C : RIGHT, By=Cy
  *	remplit les pixels dont le centre^+ est contenu dans le triangle
  **/
-void triangleInf(Buffer& buffer, const vec3 A, const vec3 B, const vec3 C, const vec3 colorA,
-    const vec3 colorB, const vec3 colorC)
+void triangleInf(Buffer& buffer, const vec3 A, const vec3 B, const vec3 C,
+    const vec3 colorA, const vec3 colorB, const vec3 colorC)
 {
 	/// suffix -> s : start (côté gauche/haut), e : end (côté droit/bas)
-	/// preffix -> v : vecteur, d : delta (variation), l : ligne (concerne la ligne actuelle)
+	/// preffix -> v : vecteur, d : delta (variation), l : ligne (concerne la
+	/// ligne actuelle)
 
 	/// ys in[i-0.5; i-0.5[ -> ys' = i -> ys'=ys'+0.5
 	/// ye in[i-0.5; i-0.5[ -> ye' = i -> ye'=ye'-0.5
@@ -119,13 +131,15 @@ void triangleInf(Buffer& buffer, const vec3 A, const vec3 B, const vec3 C, const
 
 	/// coord y de bord sup du pixel dont le centre est strictement après A
 	// real ysmin = round(A[1]);
-	/// coord y du centre (du pixel) [strictement après/avant] A/B (=> [ys-1 <=] A[1] < ys) (si A
+	/// coord y du centre (du pixel) [strictement après/avant] A/B (=> [ys-1 <=]
+	/// A[1] < ys) (si A
 	/// est au centre d'un pixel, le pixel n'est pas dans le triangle)
 	const real ys = max((real) round(B[1]), (real) 0.0) + (real) 0.5;
 	const real ye = min((real) round(A[1]), (real) buffer.height) - (real) 0.5;
 	/// coord y du vecteur B->A.y (=C->Ay)
 	const real vy = A[1] - B[1];
-	/// A et BC sont sur la même ligne horizontale -> le triangle est plat, il ne contient aucun
+	/// A et BC sont sur la même ligne horizontale -> le triangle est plat, il
+	/// ne contient aucun
 	/// point
 	if(vy <= (real) 0.0001)
 		return;
@@ -136,11 +150,15 @@ void triangleInf(Buffer& buffer, const vec3 A, const vec3 B, const vec3 C, const
 	/// var en z du bord gauche et droite par rapport à y
 	const real dzs = (A[2] - B[2]) * vy_inv, dze = (A[2] - C[2]) * vy_inv;
 	/// var de la couleur par rapport à y
-	const real drs = (colorA[0] - colorB[0]) * vy_inv, dre = (colorA[0] - colorC[0]) * vy_inv;
-	const real dgs = (colorA[1] - colorB[1]) * vy_inv, dge = (colorA[1] - colorC[1]) * vy_inv;
-	const real dbs = (colorA[2] - colorB[2]) * vy_inv, dbe = (colorA[2] - colorC[2]) * vy_inv;
+	const real drs = (colorA[0] - colorB[0]) * vy_inv,
+	           dre = (colorA[0] - colorC[0]) * vy_inv;
+	const real dgs = (colorA[1] - colorB[1]) * vy_inv,
+	           dge = (colorA[1] - colorC[1]) * vy_inv;
+	const real dbs = (colorA[2] - colorB[2]) * vy_inv,
+	           dbe = (colorA[2] - colorC[2]) * vy_inv;
 
-	/// différence de y entre le haut du triangle et le premier pixel de la première ligne
+	/// différence de y entre le haut du triangle et le premier pixel de la
+	/// première ligne
 	const real vy1 = (ys - B[1]);
 	/// coord en x du centre du premier pixel de la première ligne
 	real xs = B[0] + dxs * vy1, xe = C[0] + dxe * vy1;
@@ -152,9 +170,11 @@ void triangleInf(Buffer& buffer, const vec3 A, const vec3 B, const vec3 C, const
 	real bs = colorB[2] + dbs * vy1, be = colorC[2] + dbe * vy1;
 
 	for(real y = ys; y <= ye; y++) {
-		/// coord en x du centre du pixel [strictement après/avant] le côté gauche/droit
-		const real lxs     = max((real) round(xs), (real) 0.0) + (real) 0.5;
-		const real lxe     = min((real) round(xe), (real) buffer.width) - (real) 0.5;
+		/// coord en x du centre du pixel [strictement après/avant] le côté
+		/// gauche/droit
+		const real lxs = max((real) round(xs), (real) 0.0) + (real) 0.5;
+		const real lxe =
+		    min((real) round(xe), (real) buffer.width) - (real) 0.5;
 		const real lvx     = xe - xs;
 		const real lvx_inv = 1 / lvx;
 		/// var en z par rapport à x
@@ -166,9 +186,11 @@ void triangleInf(Buffer& buffer, const vec3 A, const vec3 B, const vec3 C, const
 
 		/// Différence entre le bord de gauche et le premier pixel de la ligne
 		const real vx1 = (lxs - xs);
-		/// coord z du point associé au centre du premier pixel de la première  ligne
+		/// coord z du point associé au centre du premier pixel de la première
+		/// ligne
 		real lz = zs + ldz * vx1;
-		/// couleur du point associé au centre du premier pixel de la première  ligne
+		/// couleur du point associé au centre du premier pixel de la première
+		/// ligne
 		real lr = rs + ldr * vx1;
 		real lg = gs + ldg * vx1;
 		real lb = bs + ldb * vx1;
@@ -203,8 +225,8 @@ void triangleInf(Buffer& buffer, const vec3 A, const vec3 B, const vec3 C, const
 	}
 }
 
-void triangleSortedPoints(Buffer& buffer, const vec3 A, const vec3 B, const vec3 C,
-    const vec3 colorA, const vec3 colorB, const vec3 colorC)
+void triangleSortedPoints(Buffer& buffer, const vec3 A, const vec3 B,
+    const vec3 C, const vec3 colorA, const vec3 colorB, const vec3 colorC)
 {
 	// cas A[1] == B[1] == C[1] => ne dessine rien
 	/// côté inférieur horizontal
@@ -231,11 +253,15 @@ void triangleSortedPoints(Buffer& buffer, const vec3 A, const vec3 B, const vec3
 	/// pas de côté horizontal
 	else {
 		if(C[1] < B[1]) {
-			/// On calcule I, le point de AC de même y que B <=> AI.y = k * AC.y = AB.y
+			/// On calcule I, le point de AC de même y que B <=> AI.y = k * AC.y
+			/// = AB.y
 			real k    = (C[1] - A[1]) / (B[1] - A[1]); /// rmq : 0 < k < 1
-			real I[3] = { (B[0] - A[0]) * k + A[0], C[1], (B[2] - A[2]) * k + A[2] };
-			real colorI[VEC3_SCALARS_COUNT] = { (colorB[0] - colorA[0]) * k + colorA[0],
-				(colorB[1] - colorA[1]) * k + colorA[1], (colorB[2] - colorA[2]) * k + colorA[2] };
+			real I[3] = { (B[0] - A[0]) * k + A[0], C[1],
+				(B[2] - A[2]) * k + A[2] };
+			real colorI[VEC3_SCALARS_COUNT] = { (colorB[0] - colorA[0]) * k
+				    + colorA[0],
+				(colorB[1] - colorA[1]) * k + colorA[1],
+				(colorB[2] - colorA[2]) * k + colorA[2] };
 
 			/// I est à gauche de C
 			if(I[0] < C[0]) {
@@ -253,11 +279,15 @@ void triangleSortedPoints(Buffer& buffer, const vec3 A, const vec3 B, const vec3
 			}
 		}
 		else {
-			/// On calcule I, le point de AC de même y que B <=> AI.y = k * AC.y = AB.y
+			/// On calcule I, le point de AC de même y que B <=> AI.y = k * AC.y
+			/// = AB.y
 			real k    = (B[1] - A[1]) / (C[1] - A[1]); /// rmq : 0 < k < 1
-			real I[3] = { (C[0] - A[0]) * k + A[0], B[1], (C[2] - A[2]) * k + A[2] };
-			real colorI[VEC3_SCALARS_COUNT] = { (colorC[0] - colorA[0]) * k + colorA[0],
-				(colorC[1] - colorA[1]) * k + colorA[1], (colorC[2] - colorA[2]) * k + colorA[2] };
+			real I[3] = { (C[0] - A[0]) * k + A[0], B[1],
+				(C[2] - A[2]) * k + A[2] };
+			real colorI[VEC3_SCALARS_COUNT] = { (colorC[0] - colorA[0]) * k
+				    + colorA[0],
+				(colorC[1] - colorA[1]) * k + colorA[1],
+				(colorC[2] - colorA[2]) * k + colorA[2] };
 
 			/// I est à gauche de B
 			if(I[0] < B[0]) {
@@ -277,16 +307,20 @@ void triangleSortedPoints(Buffer& buffer, const vec3 A, const vec3 B, const vec3
 	}
 }
 /**
-the coordinates of vertices are (A.x,A.y), (B.x,B.y), (C.x,C.y) we assume that A.y<=B.y<=C.y (you
+the coordinates of vertices are (A.x,A.y), (B.x,B.y), (C.x,C.y) we assume that
+A.y<=B.y<=C.y (you
 should sort them first)
-vertex A has color (A[0],A[1],A[2]), B (B[0],B[1],B[2]), C (C[0],C[1],C[2]), where X[0] is color's
-red component, X[1] is color's green component and X[2] is color's blue component
+vertex A has color (A[0],A[1],A[2]), B (B[0],B[1],B[2]), C (C[0],C[1],C[2]),
+where X[0] is color's
+red component, X[1] is color's green component and X[2] is color's blue
+component
 dx1,dx2,dx3 are deltas used in interpolation of x-coordinate
-dr1,dr2,dr3, dg1,dg2,dg3, db1,db2,db3 are deltas used in interpolation of color's components
+dr1,dr2,dr3, dg1,dg2,dg3, db1,db2,db3 are deltas used in interpolation of
+color's components
 putpixel(P) plots a pixel with coordinates (P.x,P.y) and color (P[0],P[1],P[2])
 S=A means that S.x=A.x; S.y=A.y; S[0]=A[0]; S[1]=A[1]; S[2]=A[2];*/
-void triangle(Buffer& buffer, const vec3 A, const vec3 B, const vec3 C, const vec3 colorA,
-    const vec3 colorB, const vec3 colorC)
+void triangle(Buffer& buffer, const vec3 A, const vec3 B, const vec3 C,
+    const vec3 colorA, const vec3 colorB, const vec3 colorC)
 {
 
 	if(A[1] <= B[1]) {

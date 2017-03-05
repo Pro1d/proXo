@@ -15,8 +15,9 @@ public:
 	void setScene(Scene* scene);
 	void createMatchingPool();
 	void render();
-	positive getColor(vec3 orig, vec3 dir, real currentRefractiveIndex, real maxIntensity,
-	    positive* lastFace, vec3 colorOut, real* depthOut, TreeStack& stack);
+	positive getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
+	    real maxIntensity, positive* lastFace, vec3 colorOut, real* depthOut,
+	    TreeStack& stack);
 
 	Scene* scene;
 	Pool* pool;

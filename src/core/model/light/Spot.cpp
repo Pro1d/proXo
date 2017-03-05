@@ -8,8 +8,8 @@ SpotLight::SpotLight() : Light(true)
 {
 }
 
-void SpotLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient, real diffuse,
-    real specular, real shininess, vec4 colorOut)
+void SpotLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient,
+    real diffuse, real specular, real shininess, vec4 colorOut)
 {
 	real L[4], R[4], V[4];
 
@@ -62,7 +62,8 @@ void SpotLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient, real
 	real C = diffuse * D;
 
 	// final intensity
-	real A = I * intensity / lightIntensityInv; // todo premult lightColor*intensity
+	real A =
+	    I * intensity / lightIntensityInv; // todo premult lightColor*intensity
 	C *= A;
 	S *= A;
 

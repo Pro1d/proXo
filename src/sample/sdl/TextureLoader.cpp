@@ -6,9 +6,8 @@
 
 using namespace std;
 
-
-
-// TODO methods for texture diffuse (color), ambient (occlusion), normal (need normalize), specular (reflection), shininness (surface noise diffusion)
+// TODO methods for texture diffuse (color), ambient (occlusion), normal (need
+// normalize), specular (reflection), shininness (surface noise diffusion)
 Texture* loadTextureFromBitmap(string const& filename)
 {
 	// Load image with SDL
@@ -23,7 +22,7 @@ Texture* loadTextureFromBitmap(string const& filename)
 		     << endl;
 
 	const positive size = (positive) bmp->w;
-	vec4 data = new real[size * size * VEC4_SCALARS_COUNT];
+	vec4 data           = new real[size * size * VEC4_SCALARS_COUNT];
 
 	for(positive y = 0; y < size; y++) {
 		for(positive x = 0; x < size; x++) {

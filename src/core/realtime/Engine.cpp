@@ -10,8 +10,8 @@
 #include "core/sys/Multithreading.h"
 
 Engine::Engine(Buffer* imageBuffer, Scene* scene)
-    : pool(NULL), scene(scene), imageBuffer(imageBuffer), multithread(THREADS_COUNT),
-      sceneToPool(multithread)
+    : pool(NULL), scene(scene), imageBuffer(imageBuffer),
+      multithread(THREADS_COUNT), sceneToPool(multithread)
 {
 	// ctor
 }
@@ -39,7 +39,8 @@ void Engine::createMatchingPool()
 void clearBufferThread(void* data, positive threadId, positive threadsCount)
 {
 	Engine* that = (Engine*) data;
-	that->imageBuffer->clear(threadId * that->imageBuffer->height / threadsCount,
+	that->imageBuffer->clear(
+	    threadId * that->imageBuffer->height / threadsCount,
 	    (threadId + 1) * that->imageBuffer->height / threadsCount);
 }
 
@@ -63,19 +64,22 @@ void vertexLigthingThread(void* data, positive threadId, positive threadsCount)
 	vec4 vertex    = that->pool->vertexPool + VEC4_SCALARS_COUNT * threadId;
 	vec16 material = that->pool->materialPool + VEC16_SCALARS_COUNT * threadId;
 
-	for(positive i = threadId; i < that->pool->currentVerticesCount; i += threadsCount) {
+	for(positive i = threadId; i < that->pool->currentVerticesCount;
+	    i += threadsCount) {
 
 		// Emissive light
 		real emissive                  = material[MAT_POOL_INDEX_EMISSIVE];
-		real color[VEC3_SCALARS_COUNT] = { material[0] * emissive, material[1] * emissive,
-			material[2] * emissive };
+		real color[VEC3_SCALARS_COUNT] = { material[0] * emissive,
+			material[1] * emissive, material[2] * emissive };
 
 		// Add lights
 		for(positive j = 0; j < that->pool->currentLightsCount; j++)
 			that->pool->lightPool[j]->lighting(material,
 			    that->pool->normalPool + i * VEC4_SCALARS_COUNT, vertex,
-			    material[MAT_POOL_INDEX_AMBIENT], material[MAT_POOL_INDEX_DIFFUSE],
-			    material[MAT_POOL_INDEX_SPECULAR], material[MAT_POOL_INDEX_SHININESS], color);
+			    material[MAT_POOL_INDEX_AMBIENT],
+			    material[MAT_POOL_INDEX_DIFFUSE],
+			    material[MAT_POOL_INDEX_SPECULAR],
+			    material[MAT_POOL_INDEX_SHININESS], color);
 
 		// Save resulting color
 		material[0] = color[0];
@@ -108,7 +112,8 @@ void drawTriangleThread(void* data, positive threadId, positive threadsCount)
 		// Back-face culling
 		if(isFaceOrientationZPositive(v1, v2, v3))
 			continue;
-		if((v1[2] < 0 && v2[2] < 0 && v3[2] < 0) || (v1[2] > 1 && v2[2] > 1 && v3[2] > 1))
+		if((v1[2] < 0 && v2[2] < 0 && v3[2] < 0)
+		    || (v1[2] > 1 && v2[2] > 1 && v3[2] > 1))
 			continue;
 
 		vec3 c1 = that->pool->materialPool + face[0] * VEC16_SCALARS_COUNT;

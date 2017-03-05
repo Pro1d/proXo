@@ -57,29 +57,41 @@ enum {
 	LOOKAT,
 	ZMAX,
 	/** Ray Tracing
-    REFRACTIVE_INDEX, REFRACTIVE_INDEX_R, REFRACTIVE_INDEX_G, REFRACTIVE_INDEX_B,
+    REFRACTIVE_INDEX, REFRACTIVE_INDEX_R, REFRACTIVE_INDEX_G,
+    REFRACTIVE_INDEX_B,
     REFLECT, REFLECT_R, REFLECT_G, REFLECT_B,
     // ABSORPTION, ABSORPTION_R, ABSORPTION_G, ABSORPTION_B, // <=> 1-COLOR
     */
 	KEY_COUNT
 };
 static const char* keyName[KEY_COUNT] = {
-	"materials", "objects", "body", "world", "skybox", "name", "data", "light", "sun", "point",
-	"spot", "dir", "pos", "cutoff", "falloff", "attenuation", "intensity", "color", "color255",
-	"ambient", "diffuse", "specular", "shininess", "emissive", "normal", "reflect",
-	"refractive_index", "absorption", "object", "container", "end", "t", "s", "r", "tx", "ty", "tz",
+	"materials", "objects", "body", "world", "skybox", "name", "data", "light",
+	"sun", "point", "spot", "dir", "pos", "cutoff", "falloff", "attenuation",
+	"intensity", "color", "color255", "ambient", "diffuse", "specular",
+	"shininess", "emissive", "normal", "reflect", "refractive_index",
+	"absorption", "object", "container", "end", "t", "s", "r", "tx", "ty", "tz",
 	"rx", "ry", "rz", "material", "camera", "fov", "lookat", "zmax",
 };
 char commmentCharacter = '#';
 
-enum { ST_MAIN, ST_MATERIALS, ST_OBJECTS, ST_WORLD, ST_BODY, ST_CAMERA, ST_SKYBOX, ST_ERROR };
+enum {
+	ST_MAIN,
+	ST_MATERIALS,
+	ST_OBJECTS,
+	ST_WORLD,
+	ST_BODY,
+	ST_CAMERA,
+	ST_SKYBOX,
+	ST_ERROR
+};
 
 SceneParser::SceneParser()
 {
 	// ctor
 }
 
-bool SceneParser::readScene(const char* directoryName, const char* filename, Scene& scene)
+bool SceneParser::readScene(
+    const char* directoryName, const char* filename, Scene& scene)
 {
 	char fullPath[256];
 	strcpy(fullPath, directoryName);
@@ -161,7 +173,8 @@ bool SceneParser::readScene(const char* directoryName, const char* filename, Sce
 void SceneParser::parseWorld(Scene& scene)
 {
 	int o, c, l;
-	if(scene.world != NULL || !nextInteger(o) || !nextInteger(c) || !nextInteger(l)) {
+	if(scene.world != NULL || !nextInteger(o) || !nextInteger(c)
+	    || !nextInteger(l)) {
 		state = ST_ERROR;
 		return;
 	}
@@ -173,7 +186,8 @@ void SceneParser::parseWorld(Scene& scene)
 void SceneParser::parseBody(Scene& scene)
 {
 	int o, c, l;
-	if(scene.body != NULL || !nextInteger(o) || !nextInteger(c) || !nextInteger(l)) {
+	if(scene.body != NULL || !nextInteger(o) || !nextInteger(c)
+	    || !nextInteger(l)) {
 		state = ST_ERROR;
 		return;
 	}
@@ -364,7 +378,8 @@ void SceneParser::parseStateObjects(Scene& scene)
 				char fullPath[256];
 				strcpy(fullPath, directory);
 				strcat(fullPath, word);
-				if(!objectParser.readObject(fullPath, *scene.objects[currentName])) {
+				if(!objectParser.readObject(
+				       fullPath, *scene.objects[currentName])) {
 					state = ST_ERROR;
 					printf("Error loading object \"%s\"\n", fullPath);
 				}
@@ -414,7 +429,8 @@ void SceneParser::parseStateObjects(Scene& scene)
 	}
 }
 
-void SceneParser::parseContainer(Container& container, mat4 matrix, Scene& scene)
+void SceneParser::parseContainer(
+    Container& container, mat4 matrix, Scene& scene)
 {
 	char word[128];
 	real x[4];

@@ -20,14 +20,16 @@ enum {
 
 class Pool {
 public:
-	Pool(positive maxVerticesCount, positive maxFacesCount, positive maxLightsCount);
+	Pool(positive maxVerticesCount, positive maxFacesCount,
+	    positive maxLightsCount);
 	virtual ~Pool();
 	void reset();
 
 	vec4 vertexPool;
 	vec4 normalPool;
-	vec16 materialPool; // r, g, b, ambient, diffuse, specular, shininess, emissive, reflect,
-	                    // refractiveIndex, depthAbsorption
+	vec16 materialPool; // r, g, b, ambient, diffuse, specular, shininess,
+	                    // emissive, reflect,
+	// refractiveIndex, depthAbsorption
 	vec2 mappingPool;
 	positive currentVerticesCount;
 	// positive * texturePool;

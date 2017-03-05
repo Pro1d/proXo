@@ -8,8 +8,8 @@ AmbientLight::AmbientLight() : Light(false)
 {
 }
 
-void AmbientLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient, real diffuse,
-    real specular, real shininess, vec4 colorOut)
+void AmbientLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient,
+    real diffuse, real specular, real shininess, vec4 colorOut)
 {
 	// Ambient
 	real A = ambient * intensity;
@@ -22,7 +22,8 @@ void AmbientLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient, r
 		real distToLight2 = squaredLength(L);
 
 		// light is too far, attenuation makes it invisible
-		if(transformedReductionFactor > 0 && distToLight2 > transformedDistanceMax)
+		if(transformedReductionFactor > 0
+		    && distToLight2 > transformedDistanceMax)
 			return;
 
 		// intensity reduction with distance

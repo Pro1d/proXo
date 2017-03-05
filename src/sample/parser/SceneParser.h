@@ -7,7 +7,8 @@
 class SceneParser {
 public:
 	SceneParser();
-	bool readScene(const char* directoryName, const char* filename, Scene& scene);
+	bool readScene(
+	    const char* directoryName, const char* filename, Scene& scene);
 
 protected:
 	void parseBody(Scene& scene);

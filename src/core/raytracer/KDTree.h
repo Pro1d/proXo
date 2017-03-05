@@ -7,12 +7,19 @@
 
 #define MINIMUM_FACES_TREE 10
 
-enum { BOUND_X_MIN, BOUND_Y_MIN, BOUND_Z_MIN, BOUND_X_MAX, BOUND_Y_MAX, BOUND_Z_MAX };
+enum {
+	BOUND_X_MIN,
+	BOUND_Y_MIN,
+	BOUND_Z_MIN,
+	BOUND_X_MAX,
+	BOUND_Y_MAX,
+	BOUND_Z_MAX
+};
 
 class KDTree {
 public:
-	KDTree(
-	    Pool& pool, positive* faces, positive faceBegin, positive faceEnd, KDTree* parent = NULL);
+	KDTree(Pool& pool, positive* faces, positive faceBegin, positive faceEnd,
+	    KDTree* parent = NULL);
 	~KDTree();
 	void build(Pool& pool);
 	void setBounds(Pool& pool);

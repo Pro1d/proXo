@@ -42,7 +42,8 @@ MultiThread::~MultiThread()
 }
 
 void MultiThread::execute(
-    void (*func)(void* data, positive threadId, positive threadsCount), void* data)
+    void (*func)(void* data, positive threadId, positive threadsCount),
+    void* data)
 {
 	for(positive i = 0; i < threadCount; i++) {
 		params[i].func_ptr = func;

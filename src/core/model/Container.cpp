@@ -5,12 +5,16 @@
 #include "core/math/type.h"
 #include <cstdio>
 
-Container::Container(int maxObjectsCount, int maxContainersCount, int maxLightsCount)
-    : objects(new Object*[maxObjectsCount]), objectMatrices(new mat4[maxObjectsCount]),
+Container::Container(
+    int maxObjectsCount, int maxContainersCount, int maxLightsCount)
+    : objects(new Object*[maxObjectsCount]),
+      objectMatrices(new mat4[maxObjectsCount]),
       objectMaterials(new Material*[maxObjectsCount]),
       containers(new Container*[maxContainersCount]),
-      containerMatrices(new mat4[maxContainersCount]), lights(new Light*[maxLightsCount]),
-      lightMatrices(new mat4[maxLightsCount]), objectsCount(0), containersCount(0), lightsCount(0)
+      containerMatrices(new mat4[maxContainersCount]),
+      lights(new Light*[maxLightsCount]),
+      lightMatrices(new mat4[maxLightsCount]), objectsCount(0),
+      containersCount(0), lightsCount(0)
 {
 }
 
@@ -65,8 +69,8 @@ void Container::print(positive depth)
 	for(positive i = 0; i < objectsCount; i++) {
 		for(positive a = 0; a < depth; a++)
 			printf("\t");
-		printf(
-		    "Object: %d vertices, %d faces\n", objects[i]->verticesCount, objects[i]->facesCount);
+		printf("Object: %d vertices, %d faces\n", objects[i]->verticesCount,
+		    objects[i]->facesCount);
 		printMatrix(objectMatrices[i], depth + 1);
 	}
 	for(positive i = 0; i < lightsCount; i++) {

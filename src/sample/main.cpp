@@ -25,10 +25,11 @@ int main(int argc, char** argv)
 	atexit(SDL_Quit);
 
 	// create a new window
-	SDL_Surface* screen = SDL_SetVideoMode(
-	    SCREEN_WIDTH, SCREEN_HEIGHT, 24, SDL_HWACCEL | SDL_HWSURFACE | SDL_DOUBLEBUF);
+	SDL_Surface* screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 24,
+	    SDL_HWACCEL | SDL_HWSURFACE | SDL_DOUBLEBUF);
 	if(!screen) {
-		printf("Unable to set %dx%d video: %s\n", SCREEN_WIDTH, SCREEN_HEIGHT, SDL_GetError());
+		printf("Unable to set %dx%d video: %s\n", SCREEN_WIDTH, SCREEN_HEIGHT,
+		    SDL_GetError());
 		return 4;
 	}
 
@@ -39,7 +40,8 @@ int main(int argc, char** argv)
 		return 2;
 	}
 	Buffer buf(SCREEN_WIDTH * SAMPLE_SIZE, SCREEN_HEIGHT * SAMPLE_SIZE);
-	scene.camera.setScreenSize(SCREEN_WIDTH * SAMPLE_SIZE, SCREEN_HEIGHT * SAMPLE_SIZE);
+	scene.camera.setScreenSize(
+	    SCREEN_WIDTH * SAMPLE_SIZE, SCREEN_HEIGHT * SAMPLE_SIZE);
 	scene.print();
 	Engine realTimeEngine(&buf, &scene);
 	realTimeEngine.createMatchingPool();
@@ -71,8 +73,8 @@ int main(int argc, char** argv)
 	controller.assignMouse(PITCH_UP, MOUSE_Y);
 	controller.assignMouse(YAW_LEFT, MOUSE_X);
 
-	SDL_Surface* buffer =
-	    SDL_CreateRGBSurface(SDL_HWSURFACE, SCREEN_WIDTH, SCREEN_HEIGHT, 24, 0, 0, 0, 0);
+	SDL_Surface* buffer = SDL_CreateRGBSurface(
+	    SDL_HWSURFACE, SCREEN_WIDTH, SCREEN_HEIGHT, 24, 0, 0, 0, 0);
 	Uint32 time               = SDL_GetTicks();
 	bool rayTracingRenderView = false;
 

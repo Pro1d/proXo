@@ -7,7 +7,8 @@
 #include <SDL/SDL.h>
 
 void bufferToBitmap24bpp(Buffer& buffer, SDL_Surface* bmp, positive sampleSize);
-void bufferToBitmap24bppOpt(Buffer& buffer, SDL_Surface* bmp, positive sampleSize);
+void bufferToBitmap24bppOpt(
+    Buffer& buffer, SDL_Surface* bmp, positive sampleSize);
 
 class BufferToBitmap {
 public:
@@ -15,7 +16,8 @@ public:
 	void convert();
 
 private:
-	static void bufferToBitmap24bppThread(void* data, positive threadId, positive threadsCount);
+	static void bufferToBitmap24bppThread(
+	    void* data, positive threadId, positive threadsCount);
 
 	MultiThread multithread;
 	Buffer* buffer;

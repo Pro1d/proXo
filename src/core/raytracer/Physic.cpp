@@ -4,8 +4,9 @@
 
 real refractRay(vec3 incident, vec3 normal, real n1, real n2, vec3 refractOut)
 {
-	real e     = n1 / n2;
-	real dotI  = -(incident[0] * normal[0] + incident[1] * normal[1] + incident[2] * normal[2]);
+	real e    = n1 / n2;
+	real dotI = -(incident[0] * normal[0] + incident[1] * normal[1]
+	    + incident[2] * normal[2]);
 	real dotT2 = 1 - e * e * (1 - dotI * dotI);
 	if(dotT2 <= 0)
 		return 0.0f;
@@ -17,8 +18,8 @@ real refractRay(vec3 incident, vec3 normal, real n1, real n2, vec3 refractOut)
 	refractOut[2] = e * incident[2] + (e * dotI - dotT) * normal[2];
 
 	/// Fresnel equation for transmitance ratio
-	real cosR =
-	    -(refractOut[0] * normal[0] + refractOut[1] * normal[1] + refractOut[2] * normal[2]);
+	real cosR = -(refractOut[0] * normal[0] + refractOut[1] * normal[1]
+	    + refractOut[2] * normal[2]);
 	real cosI = dotI;
 
 	real Rn = (n1 * cosI - n2 * cosR) / (n1 * cosI + n2 * cosR);

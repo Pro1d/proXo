@@ -5,9 +5,11 @@
 #include <cstdio>
 #include <cstring>
 
-KDTree::KDTree(Pool& pool, positive* faces, positive faceBegin, positive faceEnd, KDTree* parent)
-    : middleSubTree(NULL), firstSubTree(NULL), secondSubTree(NULL), isLeaf(false),
-      facesCount(faceEnd - faceBegin), faces(faces + faceBegin * 4)
+KDTree::KDTree(Pool& pool, positive* faces, positive faceBegin,
+    positive faceEnd, KDTree* parent)
+    : middleSubTree(NULL), firstSubTree(NULL), secondSubTree(NULL),
+      isLeaf(false), facesCount(faceEnd - faceBegin),
+      faces(faces + faceBegin * 4)
 {
 	if(parent == NULL) {
 		isLocked[0] = false;
@@ -42,13 +44,19 @@ void KDTree::setBounds(Pool& pool)
 
 	for(positive i = 0; i < facesCount; i++) {
 		for(positive j = 0; j < 3; j++) {
-			positive idx        = faces[i * 4 + j] * VEC4_SCALARS_COUNT;
-			bounds[BOUND_X_MIN] = std::min(bounds[BOUND_X_MIN], pool.vertexPool[idx + 0]);
-			bounds[BOUND_Y_MIN] = std::min(bounds[BOUND_Y_MIN], pool.vertexPool[idx + 1]);
-			bounds[BOUND_Z_MIN] = std::min(bounds[BOUND_Z_MIN], pool.vertexPool[idx + 2]);
-			bounds[BOUND_X_MAX] = std::max(bounds[BOUND_X_MAX], pool.vertexPool[idx + 0]);
-			bounds[BOUND_Y_MAX] = std::max(bounds[BOUND_Y_MAX], pool.vertexPool[idx + 1]);
-			bounds[BOUND_Z_MAX] = std::max(bounds[BOUND_Z_MAX], pool.vertexPool[idx + 2]);
+			positive idx = faces[i * 4 + j] * VEC4_SCALARS_COUNT;
+			bounds[BOUND_X_MIN] =
+			    std::min(bounds[BOUND_X_MIN], pool.vertexPool[idx + 0]);
+			bounds[BOUND_Y_MIN] =
+			    std::min(bounds[BOUND_Y_MIN], pool.vertexPool[idx + 1]);
+			bounds[BOUND_Z_MIN] =
+			    std::min(bounds[BOUND_Z_MIN], pool.vertexPool[idx + 2]);
+			bounds[BOUND_X_MAX] =
+			    std::max(bounds[BOUND_X_MAX], pool.vertexPool[idx + 0]);
+			bounds[BOUND_Y_MAX] =
+			    std::max(bounds[BOUND_Y_MAX], pool.vertexPool[idx + 1]);
+			bounds[BOUND_Z_MAX] =
+			    std::max(bounds[BOUND_Z_MAX], pool.vertexPool[idx + 2]);
 		}
 	}
 }
@@ -57,9 +65,11 @@ void KDTree::build(Pool& pool)
 {
 	setBounds(pool);
 	real size[3] = { bounds[BOUND_X_MAX] - bounds[BOUND_X_MIN],
-		bounds[BOUND_Y_MAX] - bounds[BOUND_Y_MIN], bounds[BOUND_Z_MAX] - bounds[BOUND_Z_MIN] };
+		bounds[BOUND_Y_MAX] - bounds[BOUND_Y_MIN],
+		bounds[BOUND_Z_MAX] - bounds[BOUND_Z_MIN] };
 
-	if(facesCount < MINIMUM_FACES_TREE || (isLocked[0] && isLocked[1] && isLocked[2])) {
+	if(facesCount < MINIMUM_FACES_TREE
+	    || (isLocked[0] && isLocked[1] && isLocked[2])) {
 		isLeaf = true;
 		return;
 	}
@@ -81,9 +91,12 @@ void KDTree::build(Pool& pool)
 	for(positive i = 0; i < secondBegin; i++) {
 		positive idx = i * 4;
 		// if the face is in second side
-		if(pool.vertexPool[faces[idx + 0] * VEC4_SCALARS_COUNT + cutAxis] >= cutValue
-		    && pool.vertexPool[faces[idx + 1] * VEC4_SCALARS_COUNT + cutAxis] >= cutValue
-		    && pool.vertexPool[faces[idx + 2] * VEC4_SCALARS_COUNT + cutAxis] >= cutValue) {
+		if(pool.vertexPool[faces[idx + 0] * VEC4_SCALARS_COUNT + cutAxis]
+		        >= cutValue
+		    && pool.vertexPool[faces[idx + 1] * VEC4_SCALARS_COUNT + cutAxis]
+		        >= cutValue
+		    && pool.vertexPool[faces[idx + 2] * VEC4_SCALARS_COUNT + cutAxis]
+		        >= cutValue) {
 			// swap face[i] and face[secondBegin-1]
 			secondBegin--;
 			positive face[4];
@@ -100,9 +113,12 @@ void KDTree::build(Pool& pool)
 	for(positive i = 0; i < middleBegin; i++) {
 		positive idx = i * 4;
 		// if the face is in middle side
-		if(pool.vertexPool[faces[idx + 0] * VEC4_SCALARS_COUNT + cutAxis] > cutValue
-		    || pool.vertexPool[faces[idx + 1] * VEC4_SCALARS_COUNT + cutAxis] > cutValue
-		    || pool.vertexPool[faces[idx + 2] * VEC4_SCALARS_COUNT + cutAxis] > cutValue) {
+		if(pool.vertexPool[faces[idx + 0] * VEC4_SCALARS_COUNT + cutAxis]
+		        > cutValue
+		    || pool.vertexPool[faces[idx + 1] * VEC4_SCALARS_COUNT + cutAxis]
+		        > cutValue
+		    || pool.vertexPool[faces[idx + 2] * VEC4_SCALARS_COUNT + cutAxis]
+		        > cutValue) {
 			// swap face[i] and face[middleBegin-1]
 			middleBegin--;
 			positive face[4];
@@ -118,7 +134,8 @@ void KDTree::build(Pool& pool)
 	bool isWiselySplitted = firstBegin < firstEnd && secondBegin < secondEnd;
 	if(isWiselySplitted) {
 		if(middleBegin < middleEnd) {
-			middleSubTree = new KDTree(pool, faces, middleBegin, middleEnd, this);
+			middleSubTree =
+			    new KDTree(pool, faces, middleBegin, middleEnd, this);
 			middleSubTree->isLocked[cutAxis] = true;
 			middleSubTree->build(pool);
 		}
@@ -127,7 +144,8 @@ void KDTree::build(Pool& pool)
 			firstSubTree->build(pool);
 		}
 		if(secondBegin < secondEnd) {
-			secondSubTree = new KDTree(pool, faces, secondBegin, secondEnd, this);
+			secondSubTree =
+			    new KDTree(pool, faces, secondBegin, secondEnd, this);
 			secondSubTree->build(pool);
 		}
 	}
@@ -140,8 +158,9 @@ void KDTree::print(positive depth)
 {
 	for(positive i = 0; i < depth; i++)
 		printf("\t");
-	printf("%f %f %f %f %f %f | %d | %d %d %d\n", bounds[0], bounds[1], bounds[2], bounds[3],
-	    bounds[4], bounds[5], facesCount, isLocked[0], isLocked[1], isLocked[2]);
+	printf("%f %f %f %f %f %f | %d | %d %d %d\n", bounds[0], bounds[1],
+	    bounds[2], bounds[3], bounds[4], bounds[5], facesCount, isLocked[0],
+	    isLocked[1], isLocked[2]);
 
 	if(firstSubTree != NULL) {
 		for(positive i = 0; i <= depth; i++)

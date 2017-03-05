@@ -6,7 +6,8 @@
 #include <cmath>
 
 Camera::Camera()
-    : fieldOfView(70 * PI / 180), zNear(0.5), zFar(100), screenWidth(512), screenHeight(512)
+    : fieldOfView(70 * PI / 180), zNear(0.5), zFar(100), screenWidth(512),
+      screenHeight(512)
 {
 	identity(position);
 	identity(projection);
@@ -122,7 +123,8 @@ void Camera::setDepthMax(real zFar)
 void Camera::lookAt(vec3 target)
 {
 	// cartesian to polar coordiantes
-	real d[3] = { position[3] + target[0], position[7] + target[1], position[11] + target[2] };
+	real d[3] = { position[3] + target[0], position[7] + target[1],
+		position[11] + target[2] };
 	setDirection(d);
 }
 
@@ -166,8 +168,9 @@ void Camera::setDirection(vec3 dir)
 bool Camera::isShpereVisible(vec3 center, real radius)
 {
 	if(fieldOfView == 0) {
-		return center[0] + radius > xmin || center[0] - radius < xmax || center[1] + radius > ymin
-		    || center[1] - radius < ymax || center[2] + radius > zNear || center[2] - radius < zFar;
+		return center[0] + radius > xmin || center[0] - radius < xmax
+		    || center[1] + radius > ymin || center[1] - radius < ymax
+		    || center[2] + radius > zNear || center[2] - radius < zFar;
 	}
 	else {
 		if(-center[2] + radius < zNear || -center[2] - radius > zFar)

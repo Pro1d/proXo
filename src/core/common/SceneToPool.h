@@ -17,10 +17,11 @@ class SceneToPool {
 public:
 	SceneToPool(MultiThread& mt);
 	void run(Scene& scene, Pool& pool, bool skipNotVisibleObject);
-	void objectToPool(
-	    Object& object, Material& material, Pool& pool, Camera& camera, bool skipNotVisibleObject);
+	void objectToPool(Object& object, Material& material, Pool& pool,
+	    Camera& camera, bool skipNotVisibleObject);
 	void lightToPool(Light& light, Pool& pool);
-	static void objectToPoolThread(void* data, positive threadId, positive threadsCount);
+	static void objectToPoolThread(
+	    void* data, positive threadId, positive threadsCount);
 
 private:
 	TransformationStack transformation;

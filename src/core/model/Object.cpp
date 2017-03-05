@@ -5,8 +5,8 @@
 #include <cstdlib>
 
 Object::Object(/*const char * filename, positive texture_id*/)
-    : vertices(NULL), normals(NULL), colors(NULL), texture_mapping(NULL), faces(NULL),
-      texture_id(0), verticesCount(0), facesCount(0)
+    : vertices(NULL), normals(NULL), colors(NULL), texture_mapping(NULL),
+      faces(NULL), texture_id(0), verticesCount(0), facesCount(0)
 {
 }
 
@@ -94,12 +94,17 @@ void Object::updateBoundingSphere()
 	boundingSphereRadius = radiusSquaredMax * sqrt_inv(radiusSquaredMax);
 
 	/** Other possible method: Ritter's bounding sphere algorithm
-	    1. Pick a point x from P, search a point y in P, which has the largest distance from x;
-	    2. Search a point z in P, which has the largest distance from y. set up an initial ball B,
-	    with its centre as the midpoint of y and z, the radius as half of the distance between y and
+	    1. Pick a point x from P, search a point y in P, which has the largest
+	   distance from x;
+	    2. Search a point z in P, which has the largest distance from y. set up
+	   an initial ball B,
+	    with its centre as the midpoint of y and z, the radius as half of the
+	   distance between y and
 	   z;
-	    3. If all points in P are within ball B, then we get a bounding sphere. Otherwise,
-	    let p be a point outside the ball, construct a new ball covering both point p and previous
+	    3. If all points in P are within ball B, then we get a bounding sphere.
+	   Otherwise,
+	    let p be a point outside the ball, construct a new ball covering both
+	   point p and previous
 	   ball.
 	    Repeat this step until all points are covered.
 	*/

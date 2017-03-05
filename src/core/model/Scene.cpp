@@ -14,10 +14,11 @@ Scene::~Scene()
 {
 	if(skybox != NULL)
 		delete[] skybox;
-	for(std::map<std::string, Material*>::iterator it = materials.begin(); it != materials.end();
-	    ++it)
+	for(std::map<std::string, Material*>::iterator it = materials.begin();
+	    it != materials.end(); ++it)
 		delete it->second;
-	for(std::map<std::string, Object*>::iterator it = objects.begin(); it != objects.end(); ++it)
+	for(std::map<std::string, Object*>::iterator it = objects.begin();
+	    it != objects.end(); ++it)
 		delete it->second;
 	if(world != NULL)
 		delete world;

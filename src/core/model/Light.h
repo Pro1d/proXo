@@ -9,8 +9,8 @@ public:
 	virtual ~Light();
 	void initialize();
 	void transform(mat4 matrix);
-	virtual void lighting(vec4 color, vec4 normal, vec4 point, real ambient, real diffuse,
-	    real specular, real shininess, vec4 colorOut) = 0;
+	virtual void lighting(vec4 color, vec4 normal, vec4 point, real ambient,
+	    real diffuse, real specular, real shininess, vec4 colorOut) = 0;
 	virtual real getDirectionToSource(vec4 point, vec4 directionOut) = 0;
 	void setDirection(vec3 dir);
 	void setPosition(vec3 pos);

@@ -9,7 +9,6 @@ AlignConsecutiveAssignments: true
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: Stroustrup
 ColumnLimit: 80
-NamespaceIndentation: All
 ReflowComments: true
 SortIncludes: true
 SpaceAfterCStyleCast: true

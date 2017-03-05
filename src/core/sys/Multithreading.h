@@ -48,7 +48,9 @@ class MultiThread {
 public:
 	MultiThread(positive threadCount);
 	virtual ~MultiThread();
-	void execute(void (*func)(void* data, positive threadId, positive threadsCount), void* data);
+	void execute(
+	    void (*func)(void* data, positive threadId, positive threadsCount),
+	    void* data);
 
 private:
 	positive threadCount;

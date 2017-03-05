@@ -10,7 +10,9 @@ public:
 
 	inline vec4 getValue(integer u, integer v)
 	{
-		return data_ + ((u & sizeMask_) | ((v & sizeMask_) << log2size_)) * VEC4_SCALARS_COUNT;
+		return data_
+		    + ((u & sizeMask_) | ((v & sizeMask_) << log2size_))
+		    * VEC4_SCALARS_COUNT;
 	}
 	inline vec4 getValue(real u, real v)
 	{

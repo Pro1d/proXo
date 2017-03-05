@@ -7,8 +7,8 @@ PointLight::PointLight() : Light(true)
 {
 }
 
-void PointLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient, real diffuse,
-    real specular, real shininess, vec4 colorOut)
+void PointLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient,
+    real diffuse, real specular, real shininess, vec4 colorOut)
 {
 	real L[4], R[4], V[4];
 
