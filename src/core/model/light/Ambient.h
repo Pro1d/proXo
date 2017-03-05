@@ -4,6 +4,8 @@
 #include "core/math/type.h"
 #include "core/model/Light.h"
 
+namespace proxo {
+
 class AmbientLight : public Light {
 public:
 	AmbientLight();
@@ -11,5 +13,7 @@ public:
 	    real diffuse, real specular, real shininess, vec4 colorOut);
 	real getDirectionToSource(vec4 point, vec4 directionOut);
 };
+
+} // namespace proxo
 
 #endif // __AMBIENT_H__

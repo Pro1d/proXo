@@ -3,6 +3,9 @@
 
 #include "basics.h"
 #include "type.h"
+
+namespace proxo {
+
 real dot(vec4 a, vec4 b);
 real cross(vec4 a, vec4 b);
 void normalize(vec4 in, vec4 out);
@@ -78,5 +81,7 @@ inline bool isFaceOrientationZPositive(vec4 A, vec4 B, vec4 C)
 {
 	return (B[0] - A[0]) * (C[1] - A[1]) - (C[0] - A[0]) * (B[1] - A[1]) > 0;
 }
+
+} // namespace proxo
 
 #endif // __VECTOR_H__

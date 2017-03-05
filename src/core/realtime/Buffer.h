@@ -3,10 +3,14 @@
 
 #include "core/math/type.h"
 
-#define BUF_Z_OFFSET 0
-#define BUF_R_OFFSET 1
-#define BUF_G_OFFSET 2
-#define BUF_B_OFFSET 3
+namespace proxo {
+
+enum {
+BUF_Z_OFFSET=0,
+BUF_R_OFFSET=1,
+BUF_G_OFFSET=2,
+BUF_B_OFFSET=3
+};
 
 class Buffer {
 public:
@@ -27,5 +31,7 @@ inline vec4 Buffer::getPtr(positive x, positive y)
 {
 	return data + (x + y * width) * VEC4_SCALARS_COUNT;
 }
+
+} // namespace proxo
 
 #endif

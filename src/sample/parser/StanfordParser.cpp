@@ -4,6 +4,8 @@
 #include <cstring>
 #include <vector>
 
+using namespace proxo;
+
 #define SUPPORTED_FORMAT_VERSION "1.0"
 
 enum { HEADER, HEADER_VERTEX, HEADER_FACE, VERTEX_LIST, FACE_LIST, END, ERROR };

@@ -10,6 +10,8 @@
 #include <cstdio>
 #include <cstring>
 
+using namespace proxo;
+
 enum {
 	MATERIALS,
 	OBJECTS,

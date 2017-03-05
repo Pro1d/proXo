@@ -5,6 +5,8 @@
 #include "core/math/type.h"
 #include <cstring>
 
+namespace proxo {
+
 class TransformationStack {
 public:
 	TransformationStack(positive stack_size);
@@ -74,5 +76,7 @@ inline void TransformationStack::pushMult(mat4 M, mat4 N)
 	stack_top += MAT4_SCALARS_COUNT;
 	multiplyMM(M, N, stack_top);
 }
+
+} // namespace proxo
 
 #endif

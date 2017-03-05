@@ -2,6 +2,8 @@
 #include "core/math/type.h"
 #include <thread>
 
+namespace proxo {
+
 void threadHost(ThreadParams* p)
 {
 	while(!p->end) {
@@ -54,3 +56,5 @@ void MultiThread::execute(
 	for(positive i = 0; i < threadCount; i++)
 		params[i].syncEnd.wait();
 }
+
+} // namespace proxo

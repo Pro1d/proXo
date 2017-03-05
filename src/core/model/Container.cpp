@@ -5,6 +5,8 @@
 #include "core/math/type.h"
 #include <cstdio>
 
+namespace proxo {
+
 Container::Container(
     int maxObjectsCount, int maxContainersCount, int maxLightsCount)
     : objects(new Object*[maxObjectsCount]),
@@ -106,3 +108,5 @@ void Container::getCounts(positive& vertices, positive& faces, positive& lights)
 		lights += l;
 	}
 }
+
+} // namespace proxo

@@ -3,6 +3,8 @@
 
 #include "core/math/type.h"
 
+namespace proxo {
+
 class Material {
 public:
 	Material();
@@ -19,5 +21,7 @@ public:
 protected:
 private:
 };
+
+} // namespace proxo
 
 #endif // MATERIAL_H

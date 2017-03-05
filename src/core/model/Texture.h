@@ -3,6 +3,8 @@
 
 #include "core/math/type.h"
 
+namespace proxo {
+
 class Texture {
 public:
 	// the size must be a power of 2 (see Texture::isSizeValid)
@@ -27,5 +29,7 @@ private:
 	positive log2size_;
 	positive sizeMask_;
 };
+
+} // namespace proxo
 
 #endif

@@ -4,6 +4,8 @@
 #include "core/math/Vector.h"
 #include "core/math/type.h"
 
+namespace proxo {
+
 #define EPSILON ((real) 1 / 255)
 
 RayTracer::RayTracer(Buffer* imageBuffer, Scene* scene)
@@ -255,3 +257,5 @@ void RayTracer::render()
 
 	multithread.execute(threadRenderTask, this);
 }
+
+} // namespace proxo

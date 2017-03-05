@@ -4,6 +4,8 @@
 #include "core/model/Light.h"
 #include <limits>
 
+namespace proxo {
+
 AmbientLight::AmbientLight() : Light(false)
 {
 }
@@ -43,3 +45,5 @@ real AmbientLight::getDirectionToSource(vec4 point, vec4 directionOut)
 {
 	return std::numeric_limits<real>::infinity();
 }
+
+} // namespace proxo

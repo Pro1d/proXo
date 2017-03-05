@@ -1,14 +1,14 @@
-
 #ifndef __FUNC_H__
 #define __FUNC_H__
 
+#include <cmath>
+#include <cstdint>
 #include "core/config/global.h"
+
+namespace proxo {
 
 double sqrt_inv(double x);
 float sqrt_inv(float x);
-
-#include <cmath>
-#include <cstdint>
 
 #if INV_SQRT_METHOD == DEFAULT_MATH_INV_SQRT
 
@@ -100,5 +100,7 @@ inline float sqrt_inv(float x)
 }
 
 #endif
+
+} // namespace proxo
 
 #endif

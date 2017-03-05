@@ -8,6 +8,8 @@
 #include "core/realtime/Buffer.h"
 #include "core/sys/Multithreading.h"
 
+namespace proxo {
+
 class RayTracer {
 public:
 	RayTracer(Buffer* imageBuffer, Scene* scene);
@@ -26,5 +28,7 @@ public:
 	MultiThread multithread;
 	SceneToPool sceneToPool;
 };
+
+} // namespace proxo
 
 #endif // __ENGINE_H__

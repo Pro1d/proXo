@@ -6,6 +6,8 @@
 #include <cstdlib>
 #include <cstring>
 
+namespace proxo {
+
 SceneToPool::SceneToPool(MultiThread& mt) : transformation(50), multithread(mt)
 {
 }
@@ -171,3 +173,5 @@ void SceneToPool::lightToPool(Light& light, Pool& pool)
 	pool.lightPool[pool.currentLightsCount] = &light;
 	pool.currentLightsCount++;
 }
+
+} // namespace proxo

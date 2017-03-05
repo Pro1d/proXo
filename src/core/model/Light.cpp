@@ -4,6 +4,8 @@
 #include "core/math/type.h"
 #include <algorithm>
 
+namespace proxo {
+
 Light::Light(bool castShadow) : castShadow(castShadow)
 {
 	initialize();
@@ -98,3 +100,5 @@ real Light::specularIntensity(real RdotV, real shininess)
 	else
 	    return 0;*/
 }
+
+} // namespace proxo

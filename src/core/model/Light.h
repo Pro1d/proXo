@@ -3,6 +3,8 @@
 
 #include "core/math/type.h"
 
+namespace proxo {
+
 class Light {
 public:
 	Light(bool castShadow);
@@ -39,5 +41,7 @@ public:
 	real position[VEC4_SCALARS_COUNT];
 	bool castShadow;
 };
+
+} // namespace proxo
 
 #endif // __LIGHT_H__

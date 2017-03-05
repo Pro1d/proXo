@@ -3,6 +3,8 @@
 #include "core/math/basics.h"
 #include <algorithm>
 
+namespace proxo {
+
 PointLight::PointLight() : Light(true)
 {
 }
@@ -62,3 +64,5 @@ real PointLight::getDirectionToSource(vec4 point, vec4 directionOut)
 	multiply(directionOut, norm_inv);
 	return norm_inv * norm2;
 }
+
+} // namespace proxo

@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <limits>
 
+namespace proxo {
+
 SunLight::SunLight() : Light(true)
 {
 }
@@ -63,3 +65,5 @@ real SunLight::getDirectionToSource(vec4 point, vec4 directionOut)
 	directionOut[3] = 1;
 	return std::numeric_limits<real>::infinity();
 }
+
+} // namespace proxo

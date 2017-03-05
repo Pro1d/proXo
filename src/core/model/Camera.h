@@ -3,6 +3,8 @@
 
 #include "core/math/type.h"
 
+namespace proxo {
+
 class Camera {
 public:
 	Camera();
@@ -30,5 +32,7 @@ public:
 	real ymin, ymax;
 	real screenWidth, screenHeight;
 };
+
+} // namespace proxo
 
 #endif

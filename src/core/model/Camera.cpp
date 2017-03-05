@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <cmath>
 
+namespace proxo {
+
 Camera::Camera()
     : fieldOfView(70 * PI / 180), zNear(0.5), zFar(100), screenWidth(512),
       screenHeight(512)
@@ -202,3 +204,5 @@ bool Camera::isShpereVisible(vec3 center, real radius)
 		return true;
 	}
 }
+
+} // namespace proxo

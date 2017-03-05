@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <cstdlib>
 
+namespace proxo {
+
 Object::Object(/*const char * filename, positive texture_id*/)
     : vertices(NULL), normals(NULL), colors(NULL), texture_mapping(NULL),
       faces(NULL), texture_id(0), verticesCount(0), facesCount(0)
@@ -109,3 +111,5 @@ void Object::updateBoundingSphere()
 	    Repeat this step until all points are covered.
 	*/
 }
+
+} // namespace proxo

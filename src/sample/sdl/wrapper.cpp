@@ -4,6 +4,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace proxo;
 
 void bufferToBitmap24bpp(Buffer& buffer, SDL_Surface* bmp, positive sampleSize)
 {

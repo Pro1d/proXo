@@ -7,6 +7,8 @@
 #include "core/model/Scene.h"
 #include "core/sys/Multithreading.h"
 
+namespace proxo {
+
 class Engine {
 public:
 	Engine(Buffer* imageBuffer, Scene* scene);
@@ -23,5 +25,7 @@ public:
 	MultiThread multithread;
 	SceneToPool sceneToPool;
 };
+
+} // namespace proxo
 
 #endif // ENGINE_H

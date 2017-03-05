@@ -4,6 +4,8 @@
 #include "core/math/type.h"
 #include "core/model/Light.h"
 
+namespace proxo {
+
 enum {
 	MAT_POOL_INDEX_RED,
 	MAT_POOL_INDEX_GREEN,
@@ -28,7 +30,7 @@ public:
 	vec4 vertexPool;
 	vec4 normalPool;
 	vec16 materialPool; // r, g, b, ambient, diffuse, specular, shininess,
-	                    // emissive, reflect,
+	// emissive, reflect,
 	// refractiveIndex, depthAbsorption
 	vec2 mappingPool;
 	positive currentVerticesCount;
@@ -38,5 +40,7 @@ public:
 	Light** lightPool;
 	positive currentLightsCount;
 };
+
+} // namespace proxo
 
 #endif // POOL_H

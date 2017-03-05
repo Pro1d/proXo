@@ -35,44 +35,44 @@ class CameraController {
 public:
 	CameraController();
 	virtual ~CameraController();
-	void setCamera(Camera* camera);
+	void setCamera(proxo::Camera* camera);
 	void assignKey(int action, int key);
 	void assignMouse(int action, int button);
 	void setModifiersForStepByStep(int keys);
 	void setModifiersHighSpeed(int keys);
 	bool handleEvent(SDL_Event& event);
-	void setTranslateSpeed(real speed);
-	void setRotateSpeed(real speed);
-	void updateCamera(real dt);
+	void setTranslateSpeed(proxo::real speed);
+	void setRotateSpeed(proxo::real speed);
+	void updateCamera(proxo::real dt);
 	void grabMouse(bool grab);
 
 protected:
-	void actionToMatrix(real dt);
-	real getSpeed(int action, real dt);
+	void actionToMatrix(proxo::real dt);
+	proxo::real getSpeed(int action, proxo::real dt);
 
 private:
 	std::map<int, int> mouseMapping;
 	std::map<int, int> keyMapping;
 	int stepByStepModifers;
 	int highSpeedModifers;
-	Camera* camera;
+	proxo::Camera* camera;
 	bool isActionActive[ACTIONS_COUNT];
 	bool isActionNew[ACTIONS_COUNT];
 	bool isStepByStepEnabled;
 	bool isHighSpeedEnabled;
 	bool isMouseGrabbed;
 
-	real highSpeedFactor;
-	real rotationStep;
-	real translateStep;
-	positive stepDelay;
-	positive timeLastStep;
-	real rotationSpeed;
-	real translateSpeed;
-	real mouseSensivity;
-	real rotateMouse[3];
+	proxo::real highSpeedFactor;
+	proxo::real rotationStep;
+	proxo::real translateStep;
+	proxo::positive stepDelay;
+	proxo::positive timeLastStep;
+	proxo::real rotationSpeed;
+	proxo::real translateSpeed;
+	proxo::real mouseSensivity;
+	proxo::real rotateMouse[3];
 
-	real motionMatrix[MAT4_SCALARS_COUNT];
+	proxo::real motionMatrix[MAT4_SCALARS_COUNT];
 };
 
 #endif // CAMERACONTROLLER_H

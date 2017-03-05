@@ -1,5 +1,7 @@
 #include "Pool.h"
 
+namespace proxo {
+
 Pool::Pool(
     positive maxVerticesCount, positive maxFacesCount, positive maxLightsCount)
     : vertexPool(new real[maxVerticesCount * VEC4_SCALARS_COUNT]),
@@ -30,3 +32,5 @@ void Pool::reset()
 	currentFacesCount    = 0;
 	currentLightsCount   = 0;
 }
+
+} // namespace proxo

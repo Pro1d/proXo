@@ -6,6 +6,8 @@
 #include <mutex>
 #include <thread>
 
+namespace proxo {
+
 class ThreadSync {
 public:
 	ThreadSync() : sync(false) {}
@@ -57,5 +59,7 @@ private:
 	std::thread** threads;
 	ThreadParams* params;
 };
+
+} // namespace proxo
 
 #endif

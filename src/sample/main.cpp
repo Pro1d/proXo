@@ -14,6 +14,8 @@
 #define SCREEN_HEIGHT 768
 #define SAMPLE_SIZE 2
 
+using namespace proxo;
+
 int main(int argc, char** argv)
 {
 	// initialize SDL video

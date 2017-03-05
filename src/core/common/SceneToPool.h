@@ -6,6 +6,8 @@
 #include "core/model/TransformationStack.h"
 #include "core/sys/Multithreading.h"
 
+namespace proxo {
+
 typedef struct {
 	mat4 transformationMatrix;
 	Object* object;
@@ -28,5 +30,7 @@ private:
 	Container* containerStack[50];
 	MultiThread& multithread;
 };
+
+} // namespace proxo
 
 #endif // SCENETOPOOL_H

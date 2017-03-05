@@ -4,6 +4,8 @@
 #include <SDL/SDL.h>
 #include <cmath>
 
+using namespace proxo;
+
 CameraController::CameraController()
     : isStepByStepEnabled(false), isHighSpeedEnabled(false),
       isMouseGrabbed(false), highSpeedFactor(3), rotationStep(10),

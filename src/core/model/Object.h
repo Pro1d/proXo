@@ -3,6 +3,8 @@
 
 #include "core/math/type.h"
 
+namespace proxo {
+
 class Object {
 public:
 	Object();
@@ -27,5 +29,7 @@ public:
 	real boundingSphereCenter[VEC4_SCALARS_COUNT];
 	real boundingSphereRadius;
 };
+
+} // namespace proxo
 
 #endif

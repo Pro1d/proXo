@@ -4,6 +4,8 @@
 #include "core/model/Light.h"
 #include <algorithm>
 
+namespace proxo {
+
 SpotLight::SpotLight() : Light(true)
 {
 }
@@ -81,3 +83,5 @@ real SpotLight::getDirectionToSource(vec4 point, vec4 directionOut)
 	multiply(directionOut, norm_inv);
 	return norm_inv * norm2;
 }
+
+} // namespace proxo

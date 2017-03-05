@@ -8,6 +8,8 @@
 #include <map>
 #include <string>
 
+namespace proxo {
+
 class Scene {
 public:
 	Scene();
@@ -23,5 +25,7 @@ public:
 	std::map<std::string, Material*> materials;
 	std::map<std::string, Object*> objects;
 };
+
+} // namespace proxo
 
 #endif

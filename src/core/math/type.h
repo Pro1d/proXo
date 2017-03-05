@@ -3,6 +3,8 @@
 
 #include "core/config/global.h"
 
+namespace proxo {
+
 #ifdef USE_DOUBLE_PRECISION_FLOATING_VALUE
 typedef double real;
 #else
@@ -35,5 +37,7 @@ typedef real* mat4; // real[4*4]
 #define VEC16_SIZE (sizeof(real) * VEC16_SCALARS_COUNT)
 #define MAT4_SCALARS_COUNT 16
 #define MAT4_SIZE (sizeof(real) * MAT4_SCALARS_COUNT)
+
+} // namespace proxo
 
 #endif

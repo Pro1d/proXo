@@ -7,6 +7,8 @@
 #include "Object.h"
 #include "core/math/type.h"
 
+namespace proxo {
+
 class Container {
 public:
 	Container(int maxObjectsCount, int maxContainersCount, int maxLightsCount);
@@ -32,5 +34,7 @@ public:
 	positive containersCount;
 	positive lightsCount;
 };
+
+} // namespace proxo
 
 #endif

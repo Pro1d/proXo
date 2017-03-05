@@ -6,6 +6,8 @@
 using std::min;
 using std::max;
 
+namespace proxo {
+
 /** A : UP, B : LEFT, C : RIGHT, By=Cy
  *	remplit les pixels dont le centre est contenu dans le triangle
  **/
@@ -346,3 +348,5 @@ void triangle(Buffer& buffer, const vec3 A, const vec3 B, const vec3 C,
 		}
 	}
 }
+
+} // namespace proxo

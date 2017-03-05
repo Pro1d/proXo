@@ -6,12 +6,12 @@
 
 class StanfordParser {
 public:
-	bool readObject(const char* filename, Object& object);
+	bool readObject(const char* filename, proxo::Object& object);
 
 private:
 	bool nextWord(char* w);
 	int nextInteger();
-	real nextReal();
+	proxo::real nextReal();
 	void skipLine();
 	bool equals(const char* a, const char* b);
 	int wordToKey(char* w);

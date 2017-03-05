@@ -4,6 +4,8 @@
 #include "KDTree.h"
 #include "core/math/type.h"
 
+namespace proxo {
+
 class IntersectionData {
 public:
 	positive* face;
@@ -22,5 +24,7 @@ void intersectSetOfTriangles(vec3 orig, vec3 dir, positive* faces,
     IntersectionData& out);
 void intersectTree(vec3 orig, vec3 dir, KDTree* tree, TreeStack& stack,
     vec4 vertices, positive* faceToIgnore, IntersectionData& out);
+
+} // namespace proxo
 
 #endif // __INTERSECTION_H__

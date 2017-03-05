@@ -1,6 +1,8 @@
 #include "Buffer.h"
 #include <cstring>
 
+namespace proxo {
+
 Buffer::Buffer(positive w, positive h)
     : data(new real[w * h * VEC4_SCALARS_COUNT]), width(w), height(h)
 {
@@ -48,3 +50,5 @@ void Buffer::merge(Buffer& buffer)
 		cursor += VEC4_SCALARS_COUNT;
 	}
 }
+
+} // namespace proxo

@@ -8,6 +8,8 @@
 #include <cmath>
 #include <cstdlib>
 
+namespace proxo {
+
 mat4 newMatrix();
 void identity(mat4 mOut);
 
@@ -32,5 +34,7 @@ real getMatrixScale(mat4 m);
 real getMatrixSquaredScale(mat4 m);
 
 void printMatrix(mat4 m, positive tabCount);
+
+} // namespace proxo
 
 #endif

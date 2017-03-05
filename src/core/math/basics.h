@@ -6,6 +6,8 @@
 #include "inv_sqrt.h"
 #define PI 3.1415926535897932384626433832795
 
+namespace proxo {
+
 real clamp01(real x);
 real clamp(real x, real low, real high);
 // real triangleArea(vec2 a, vec2 b, vec2 c);
@@ -49,5 +51,7 @@ inline real clamp(real x, real low, real high)
 }*/
 
 inline void faceNormal(vec3 a, vec3 b, vec3 c, vec3 normalOut);
+
+} // namespace proxo
 
 #endif

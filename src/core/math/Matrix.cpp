@@ -6,6 +6,8 @@
 #include <cstdlib>
 #include <cstring>
 
+namespace proxo {
+
 real _tmpMatrix1[MAT4_SCALARS_COUNT];
 real _tmpMatrix2[MAT4_SCALARS_COUNT];
 
@@ -261,3 +263,5 @@ void printMatrix(mat4 m, positive tabCount)
 		printf("\n");
 	}
 }
+
+} // namespace proxo

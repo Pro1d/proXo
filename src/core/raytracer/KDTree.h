@@ -5,6 +5,8 @@
 #include "core/math/type.h"
 #include <cstdlib>
 
+namespace proxo {
+
 #define MINIMUM_FACES_TREE 10
 
 enum {
@@ -66,5 +68,7 @@ inline void TreeStack::pop(KDTree*& t, real& d)
 	t = *--treeStackTop;
 	d = *--distanceStackTop;
 }
+
+} // namespace proxo
 
 #endif // __KDTREE_H__

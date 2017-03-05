@@ -2,6 +2,8 @@
 #include "type.h"
 #include <cstdlib>
 
+namespace proxo {
+
 void fitWithScreenCoordinates(real screenWidth, real screenHeight, mat4 mOut)
 {
 	real half_w = screenWidth / 2;
@@ -23,8 +25,8 @@ void fitWithScreenCoordinates(real screenWidth, real screenHeight, mat4 mOut)
 	mOut[14]    = 0;
 	mOut[15]    = 1;
 }
-/*
-*/
+
+} // namespace proxo
 
 /*
 void Camera::setOrthographic(real zNear, real zFar, real width, real height) {

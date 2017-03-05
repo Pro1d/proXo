@@ -9,6 +9,8 @@
 #include "core/model/Scene.h"
 #include "core/sys/Multithreading.h"
 
+namespace proxo {
+
 Engine::Engine(Buffer* imageBuffer, Scene* scene)
     : pool(NULL), scene(scene), imageBuffer(imageBuffer),
       multithread(THREADS_COUNT), sceneToPool(multithread)
@@ -162,3 +164,5 @@ void Engine::drawTriangles()
 {
 	multithread.execute(drawTriangleThread, (void*) this);
 }
+
+} // namespace proxo

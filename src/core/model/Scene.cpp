@@ -5,6 +5,8 @@
 #include <map>
 #include <string>
 
+namespace proxo {
+
 Scene::Scene() : world(NULL), body(NULL), skybox(NULL)
 {
 	materials["default"] = new Material;
@@ -59,3 +61,5 @@ void Scene::getCounts(positive& vertices, positive& faces, positive& lights)
 	faces += f;
 	lights += l;
 }
+
+} // namespace proxo

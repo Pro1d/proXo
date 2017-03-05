@@ -2,6 +2,8 @@
 #include "core/math/Vector.h"
 #include "core/math/type.h"
 
+namespace proxo {
+
 real refractRay(vec3 incident, vec3 normal, real n1, real n2, vec3 refractOut)
 {
 	real e    = n1 / n2;
@@ -27,3 +29,5 @@ real refractRay(vec3 incident, vec3 normal, real n1, real n2, vec3 refractOut)
 
 	return clamp01(1 - (Rn * Rn + Rt * Rt) / 2);
 }
+
+} // namespace proxo

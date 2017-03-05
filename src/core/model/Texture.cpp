@@ -3,6 +3,8 @@
 
 using namespace std;
 
+namespace proxo {
+
 Texture::Texture(vec4 data, positive size)
     : data_(data), size_(size), log2size_(0), sizeMask_(size - 1)
 {
@@ -16,3 +18,5 @@ bool Texture::isSizeValid(positive size)
 	// Here is a cute hack to verify it
 	return size > 0 && (size & (~size + 1)) == size;
 }
+
+} // namespace proxo

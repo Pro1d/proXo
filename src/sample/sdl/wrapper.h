@@ -6,25 +6,25 @@
 #include "core/sys/Multithreading.h"
 #include <SDL/SDL.h>
 
-void bufferToBitmap24bpp(Buffer& buffer, SDL_Surface* bmp, positive sampleSize);
+void bufferToBitmap24bpp(proxo::Buffer& buffer, SDL_Surface* bmp, proxo::positive sampleSize);
 void bufferToBitmap24bppOpt(
-    Buffer& buffer, SDL_Surface* bmp, positive sampleSize);
+    proxo::Buffer& buffer, SDL_Surface* bmp, proxo::positive sampleSize);
 
 class BufferToBitmap {
 public:
-	BufferToBitmap(Buffer& buffer, SDL_Surface* bmp, positive sampleSize);
+	BufferToBitmap(proxo::Buffer& buffer, SDL_Surface* bmp, proxo::positive sampleSize);
 	void convert();
 
 private:
 	static void bufferToBitmap24bppThread(
-	    void* data, positive threadId, positive threadsCount);
+	    void* data, proxo::positive threadId, proxo::positive threadsCount);
 
-	MultiThread multithread;
-	Buffer* buffer;
+	proxo::MultiThread multithread;
+	proxo::Buffer* buffer;
 	SDL_Surface* bitmap;
-	positive sampleSize;
-	positive sampleSize_log2;
-	positive samplePixelsCount_log2;
+	proxo::positive sampleSize;
+	proxo::positive sampleSize_log2;
+	proxo::positive samplePixelsCount_log2;
 };
 
 #endif // __SDL_WRAPPER_H__

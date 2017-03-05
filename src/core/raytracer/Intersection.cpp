@@ -6,6 +6,8 @@
 
 #define EPSILON ((real) 0.000000001)
 
+namespace proxo {
+
 integer intersectTriangle(vec3 orig, vec3 dir, vec3 vert0, vec3 vert1,
     vec3 vert2, real* t, real* u, real* v)
 {
@@ -217,3 +219,5 @@ void intersectTree(vec3 orig, vec3 dir, KDTree* root, TreeStack& stack,
 		}
 	}
 }
+
+} // namespace proxo

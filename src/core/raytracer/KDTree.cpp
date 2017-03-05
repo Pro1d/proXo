@@ -5,6 +5,8 @@
 #include <cstdio>
 #include <cstring>
 
+namespace proxo {
+
 KDTree::KDTree(Pool& pool, positive* faces, positive faceBegin,
     positive faceEnd, KDTree* parent)
     : middleSubTree(NULL), firstSubTree(NULL), secondSubTree(NULL),
@@ -181,3 +183,5 @@ void KDTree::print(positive depth)
 		middleSubTree->print(depth + 1);
 	}
 }
+
+} // namespace proxo
