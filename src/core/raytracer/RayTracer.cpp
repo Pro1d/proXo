@@ -155,7 +155,7 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 		normalize(normal);
 		multiply(normal, intersect.intersectionSide);
 		/// Add texture
-		positive texture = intersect.face[3];
+		//positive texture = intersect.face[3];
 
 		colorOut[0] = color[0] * mat.emissive;
 		colorOut[1] = color[1] * mat.emissive;
@@ -166,7 +166,7 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 
 		if(mat.depthAbsorbtion > 1 - EPSILON)
 			for(positive i = 0; i < pool->currentLightsCount; i++) {
-				real directIntensity = (1 - mat.reflect);
+				//real directIntensity = (1 - mat.reflect);
 
 				bool shadow = false;
 				if(pool->lightPool[i]->castShadow) {
@@ -201,7 +201,7 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 			real refractIntensity = (1 - mat.reflect) * refractRatio;
 			if(refractIntensity > EPSILON) {
 				real refractColor[VEC3_SCALARS_COUNT];
-				real refractDepth;
+				real refractDepth = 1.0;
 				real absorption = mat.depthAbsorbtion == 0 ?
 				    0 :
 				    pow(mat.depthAbsorbtion,

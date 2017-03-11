@@ -5,29 +5,67 @@
 
 namespace proxo {
 
+/**
+ * Access data:
+ * if(hasField(DIFFUSE_RGB))
+ * 	color = (vec3) getData(u, v) + getFieldOffset(DIFFUSE_RGB);
+ */
 class Texture {
 public:
-	// the size must be a power of 2 (see Texture::isSizeValid)
-	Texture(vec4 data, positive size);
+	enum Field {
+		DIFFUSE_RGB,
+		AMBIENT_RGB,
+		SPECULAR_RGB,
+		EMISSIVE_RGB,
+		NORMAL_XYZ,
+		SHININESS_I,
+		FIELDS_COUNT
+	};
+	enum FlagField {
+		FLAG_DIFFUSE_RGB  = 1 << DIFFUSE_RGB,
+		FLAG_AMBIENT_RGB  = 1 << AMBIENT_RGB,
+		FLAG_SPECULAR_RGB = 1 << SPECULAR_RGB,
+		FLAG_EMISSIVE_RGB = 1 << EMISSIVE_RGB,
+		FLAG_NORMAL_XYZ   = 1 << NORMAL_XYZ,
+		FLAG_SHININESS_I  = 1 << SHININESS_I,
+		MASK_FIELDS       = (1 << FIELDS_COUNT) - 1
+	};
+	static const positive FieldSize[FIELDS_COUNT];
 
-	inline vec4 getValue(integer u, integer v)
+	// the size must be a power of 2 (see Texture::isSizeValid)
+	Texture(positive size, FlagField flagFields = FLAG_DIFFUSE_RGB);
+	~Texture();
+
+	inline real* getData(integer u, integer v)
 	{
-		return data_
-		    + ((u & sizeMask_) | ((v & sizeMask_) << log2size_))
-		    * VEC4_SCALARS_COUNT;
+		return data_ + (((u & sizeMask_) | ((v & sizeMask_) << log2size_))
+		                   << log2depth_);
 	}
-	inline vec4 getValue(real u, real v)
+
+	inline real* getData(real u, real v)
 	{
-		return getValue((integer)(u * size_), (integer)(v * size_));
+		return getData((integer)(u * sizeReal_), (integer)(v * sizeReal_));
 	}
+
+	inline bool hasField(FlagField field) { return (flagFields_ & field) != 0; }
+
+	inline bool hasField(Field field) { return hasField((FlagField) (1 << field)); }
+
+	inline positive getFieldOffset(Field field) { return offsets_[field]; }
+
+	inline positive getSize() { return size_; }
 
 	static bool isSizeValid(positive size);
 
 private:
-	vec4 data_;
+	real* data_;
 	positive size_;
+	real sizeReal_;
 	positive log2size_;
 	positive sizeMask_;
+	positive log2depth_;
+	FlagField flagFields_;
+	positive offsets_[FIELDS_COUNT];
 };
 
 } // namespace proxo
