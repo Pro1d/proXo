@@ -71,6 +71,7 @@ void SceneToPool::objectToPoolThread(
 	Pool& pool            = *inputs->pool;
 	mat4 matrix           = inputs->transformationMatrix;
 	positive vertexOffset = pool.currentVerticesCount;
+	positive texture_id   = inputs->texture_id;
 
 	// Select range of data to process
 	positive vertexIndexStart = threadId * object.verticesCount / threadsCount;
@@ -109,14 +110,14 @@ void SceneToPool::objectToPoolThread(
 			materials[1] = 1;
 			materials[2] = 1;
 		}
-		materials[MAT_POOL_INDEX_AMBIENT]    = material.ambient;
-		materials[MAT_POOL_INDEX_DIFFUSE]    = material.diffuse;
-		materials[MAT_POOL_INDEX_SPECULAR]   = material.specular;
-		materials[MAT_POOL_INDEX_SHININESS]  = material.shininess;
-		materials[MAT_POOL_INDEX_EMISSIVE]   = material.emissive;
-		materials[MAT_POOL_INDEX_REFLECT]    = material.reflect;
-		materials[MAT_POOL_INDEX_REFRACTIVE] = material.refractiveIndex;
-		materials[MAT_POOL_INDEX_ABSORPTION] = material.depthAbsorbtion;
+		materials[Pool::MAT_INDEX_AMBIENT]    = material.ambient;
+		materials[Pool::MAT_INDEX_DIFFUSE]    = material.diffuse;
+		materials[Pool::MAT_INDEX_SPECULAR]   = material.specular;
+		materials[Pool::MAT_INDEX_SHININESS]  = material.shininess;
+		materials[Pool::MAT_INDEX_EMISSIVE]   = material.emissive;
+		materials[Pool::MAT_INDEX_REFLECT]    = material.reflect;
+		materials[Pool::MAT_INDEX_REFRACTIVE] = material.refractiveIndex;
+		materials[Pool::MAT_INDEX_ABSORPTION] = material.depthAbsorbtion;
 		materials += VEC16_SCALARS_COUNT;
 
 		// copy colors, mappings and textures
@@ -137,7 +138,7 @@ void SceneToPool::objectToPoolThread(
 		faces[0] = f[0] + vertexOffset;
 		faces[1] = f[1] + vertexOffset;
 		faces[2] = f[2] + vertexOffset;
-		faces[3] = object.texture_id;
+		faces[3] = texture_id;
 	}
 }
 
@@ -155,9 +156,14 @@ void SceneToPool::objectToPool(Object& object, Material& material, Pool& pool,
 		if(!camera.isShpereVisible(center, radius))
 			return;
 	}
+	
+	// Add Texture to pool
+	positive texture_id = pool.currentTexturesCount;
+	pool.texturePool[texture_id] = object.texture;
+	pool.currentTexturesCount++;
 
 	// inputs for objectToPoolThread
-	ObjectToPoolInputs inputs = { matrix, &object, &material, &pool };
+	ObjectToPoolInputs inputs = { matrix, &object, &material, &pool, texture_id };
 
 	// Run object to pool
 	multithread.execute(SceneToPool::objectToPoolThread, (void*) &inputs);

@@ -13,6 +13,7 @@ typedef struct {
 	Object* object;
 	Material* material;
 	Pool* pool;
+	positive texture_id;
 } ObjectToPoolInputs;
 
 class SceneToPool {

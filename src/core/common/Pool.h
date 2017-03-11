@@ -3,27 +3,28 @@
 
 #include "core/math/type.h"
 #include "core/model/Light.h"
+#include "core/model/Texture.h"
 
 namespace proxo {
 
-enum {
-	MAT_POOL_INDEX_RED,
-	MAT_POOL_INDEX_GREEN,
-	MAT_POOL_INDEX_BLUE,
-	MAT_POOL_INDEX_AMBIENT,
-	MAT_POOL_INDEX_DIFFUSE,
-	MAT_POOL_INDEX_SPECULAR,
-	MAT_POOL_INDEX_SHININESS,
-	MAT_POOL_INDEX_EMISSIVE,
-	MAT_POOL_INDEX_REFLECT,
-	MAT_POOL_INDEX_REFRACTIVE,
-	MAT_POOL_INDEX_ABSORPTION
-};
-
 class Pool {
 public:
+	enum {
+		MAT_INDEX_RED,
+		MAT_INDEX_GREEN,
+		MAT_INDEX_BLUE,
+		MAT_INDEX_AMBIENT,
+		MAT_INDEX_DIFFUSE,
+		MAT_INDEX_SPECULAR,
+		MAT_INDEX_SHININESS,
+		MAT_INDEX_EMISSIVE,
+		MAT_INDEX_REFLECT,
+		MAT_INDEX_REFRACTIVE,
+		MAT_INDEX_ABSORPTION
+	};
+
 	Pool(positive maxVerticesCount, positive maxFacesCount,
-	    positive maxLightsCount);
+	    positive maxLightsCount, positive maxTexturesCount);
 	virtual ~Pool();
 	void reset();
 
@@ -34,7 +35,8 @@ public:
 	// refractiveIndex, depthAbsorption
 	vec2 mappingPool;
 	positive currentVerticesCount;
-	// positive * texturePool;
+	Texture** texturePool;
+	positive currentTexturesCount;
 	positive* facePool; // vertex1, vertex2, vertex3, texture_id
 	positive currentFacesCount;
 	Light** lightPool;

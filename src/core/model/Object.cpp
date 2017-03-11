@@ -8,7 +8,7 @@ namespace proxo {
 
 Object::Object(/*const char * filename, positive texture_id*/)
     : vertices(NULL), normals(NULL), colors(NULL), texture_mapping(NULL),
-      faces(NULL), texture_id(0), verticesCount(0), facesCount(0)
+      faces(NULL), texture(NULL), verticesCount(0), facesCount(0)
 {
 }
 
@@ -19,7 +19,7 @@ void Object::initialize()
 	colors          = (NULL);
 	texture_mapping = (NULL);
 	faces           = (NULL);
-	texture_id      = (0);
+	texture         = (NULL);
 	verticesCount   = (0);
 	facesCount      = (0);
 }
@@ -36,6 +36,8 @@ Object::~Object()
 		delete[] texture_mapping;
 	if(faces != NULL)
 		delete[] faces;
+	if(texture != NULL)
+		delete texture;
 }
 
 void Object::allocateVertices()

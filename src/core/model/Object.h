@@ -2,6 +2,7 @@
 #define __OBJECT_H__
 
 #include "core/math/type.h"
+#include "core/model/Texture.h"
 
 namespace proxo {
 
@@ -23,7 +24,7 @@ public:
 	vec2 texture_mapping;
 	positive* faces;
 	vec4 faceNormals;
-	positive texture_id;
+	Texture * texture;
 	positive verticesCount;
 	positive facesCount;
 	real boundingSphereCenter[VEC4_SCALARS_COUNT];

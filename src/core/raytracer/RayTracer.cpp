@@ -33,7 +33,7 @@ void RayTracer::createMatchingPool()
 		delete pool;
 	positive vertices, faces, lights;
 	scene->getCounts(vertices, faces, lights);
-	pool = new Pool(vertices, faces, lights);
+	pool = new Pool(vertices, faces, lights, scene->objects.size());
 }
 
 void threadRenderTask(void* data, positive threadId, positive threadsCount)
@@ -110,36 +110,39 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 
 		/// Get material
 		Material mat; // ambient=occlusion ambient, diffuse=light,
-		              // specular/shininess=light_reflect,
-		// reflect=%, refractiveIndex=, aepthAbsortion=exp(dist*.)
+		// specular/shininess=light_reflect,
+		// reflect=%, refractiveIndex=, depthAbsortion=exp(dist*.)
 
-		real color[VEC3_SCALARS_COUNT] = { Ka * Ma[MAT_POOL_INDEX_RED]
-			    + Kb * Mb[MAT_POOL_INDEX_RED] + Kc * Mc[MAT_POOL_INDEX_RED],
-			Ka * Ma[MAT_POOL_INDEX_GREEN] + Kb * Mb[MAT_POOL_INDEX_GREEN]
-			    + Kc * Mc[MAT_POOL_INDEX_GREEN],
-			Ka * Ma[MAT_POOL_INDEX_BLUE] + Kb * Mb[MAT_POOL_INDEX_BLUE]
-			    + Kc * Mc[MAT_POOL_INDEX_BLUE] };
-		mat.ambient = Ka * Ma[MAT_POOL_INDEX_AMBIENT]
-		    + Kb * Mb[MAT_POOL_INDEX_AMBIENT] + Kc * Mc[MAT_POOL_INDEX_AMBIENT];
-		mat.diffuse = Ka * Ma[MAT_POOL_INDEX_DIFFUSE]
-		    + Kb * Mb[MAT_POOL_INDEX_DIFFUSE] + Kc * Mc[MAT_POOL_INDEX_DIFFUSE];
-		mat.specular = Ka * Ma[MAT_POOL_INDEX_SPECULAR]
-		    + Kb * Mb[MAT_POOL_INDEX_SPECULAR]
-		    + Kc * Mc[MAT_POOL_INDEX_SPECULAR];
-		mat.shininess = Ka * Ma[MAT_POOL_INDEX_SHININESS]
-		    + Kb * Mb[MAT_POOL_INDEX_SHININESS]
-		    + Kc * Mc[MAT_POOL_INDEX_SHININESS];
-		mat.emissive = Ka * Ma[MAT_POOL_INDEX_EMISSIVE]
-		    + Kb * Mb[MAT_POOL_INDEX_EMISSIVE]
-		    + Kc * Mc[MAT_POOL_INDEX_EMISSIVE];
-		mat.reflect = Ka * Ma[MAT_POOL_INDEX_REFLECT]
-		    + Kb * Mb[MAT_POOL_INDEX_REFLECT] + Kc * Mc[MAT_POOL_INDEX_REFLECT];
-		mat.refractiveIndex = Ka * Ma[MAT_POOL_INDEX_REFRACTIVE]
-		    + Kb * Mb[MAT_POOL_INDEX_REFRACTIVE]
-		    + Kc * Mc[MAT_POOL_INDEX_REFRACTIVE];
-		mat.depthAbsorbtion = Ka * Ma[MAT_POOL_INDEX_ABSORPTION]
-		    + Kb * Mb[MAT_POOL_INDEX_ABSORPTION]
-		    + Kc * Mc[MAT_POOL_INDEX_ABSORPTION];
+		real color[VEC3_SCALARS_COUNT] = { Ka * Ma[Pool::MAT_INDEX_RED]
+			    + Kb * Mb[Pool::MAT_INDEX_RED] + Kc * Mc[Pool::MAT_INDEX_RED],
+			Ka * Ma[Pool::MAT_INDEX_GREEN] + Kb * Mb[Pool::MAT_INDEX_GREEN]
+			    + Kc * Mc[Pool::MAT_INDEX_GREEN],
+			Ka * Ma[Pool::MAT_INDEX_BLUE] + Kb * Mb[Pool::MAT_INDEX_BLUE]
+			    + Kc * Mc[Pool::MAT_INDEX_BLUE] };
+		mat.ambient = Ka * Ma[Pool::MAT_INDEX_AMBIENT]
+		    + Kb * Mb[Pool::MAT_INDEX_AMBIENT]
+		    + Kc * Mc[Pool::MAT_INDEX_AMBIENT];
+		mat.diffuse = Ka * Ma[Pool::MAT_INDEX_DIFFUSE]
+		    + Kb * Mb[Pool::MAT_INDEX_DIFFUSE]
+		    + Kc * Mc[Pool::MAT_INDEX_DIFFUSE];
+		mat.specular = Ka * Ma[Pool::MAT_INDEX_SPECULAR]
+		    + Kb * Mb[Pool::MAT_INDEX_SPECULAR]
+		    + Kc * Mc[Pool::MAT_INDEX_SPECULAR];
+		mat.shininess = Ka * Ma[Pool::MAT_INDEX_SHININESS]
+		    + Kb * Mb[Pool::MAT_INDEX_SHININESS]
+		    + Kc * Mc[Pool::MAT_INDEX_SHININESS];
+		mat.emissive = Ka * Ma[Pool::MAT_INDEX_EMISSIVE]
+		    + Kb * Mb[Pool::MAT_INDEX_EMISSIVE]
+		    + Kc * Mc[Pool::MAT_INDEX_EMISSIVE];
+		mat.reflect = Ka * Ma[Pool::MAT_INDEX_REFLECT]
+		    + Kb * Mb[Pool::MAT_INDEX_REFLECT]
+		    + Kc * Mc[Pool::MAT_INDEX_REFLECT];
+		mat.refractiveIndex = Ka * Ma[Pool::MAT_INDEX_REFRACTIVE]
+		    + Kb * Mb[Pool::MAT_INDEX_REFRACTIVE]
+		    + Kc * Mc[Pool::MAT_INDEX_REFRACTIVE];
+		mat.depthAbsorbtion = Ka * Ma[Pool::MAT_INDEX_ABSORPTION]
+		    + Kb * Mb[Pool::MAT_INDEX_ABSORPTION]
+		    + Kc * Mc[Pool::MAT_INDEX_ABSORPTION];
 		/// Normal
 		real normal[VEC4_SCALARS_COUNT] = { Ka
 			        * pool->normalPool[Ia * VEC4_SCALARS_COUNT + 0]
@@ -155,7 +158,35 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 		normalize(normal);
 		multiply(normal, intersect.intersectionSide);
 		/// Add texture
-		//positive texture = intersect.face[3];
+		Texture * texture = pool->texturePool[intersect.face[3]];
+		if(texture != NULL) {
+			real u = Ka * pool->mappingPool[Ia * VEC2_SCALARS_COUNT + 0]
+			    + Kb * pool->mappingPool[Ib * VEC2_SCALARS_COUNT + 0]
+			    + Kc * pool->mappingPool[Ic * VEC2_SCALARS_COUNT + 0];
+			real v = Ka * pool->mappingPool[Ia * VEC2_SCALARS_COUNT + 1]
+			    + Kb * pool->mappingPool[Ib * VEC2_SCALARS_COUNT + 1]
+			    + Kc * pool->mappingPool[Ic * VEC2_SCALARS_COUNT + 1];
+			real * texel = texture->getData(u, v);
+			if(texture->hasField(Texture::FLAG_DIFFUSE_RGB)) {
+				vec3 diffuse = texel + texture->getFieldOffset(Texture::DIFFUSE_RGB);
+			}
+			if(texture->hasField(Texture::FLAG_AMBIENT_RGB)) {
+				vec3 ambient = texel + texture->getFieldOffset(Texture::AMBIENT_RGB);
+			}
+			if(texture->hasField(Texture::FLAG_SPECULAR_RGB)) {
+				vec3 specular = texel + texture->getFieldOffset(Texture::SPECULAR_RGB);
+			}
+			if(texture->hasField(Texture::FLAG_EMISSIVE_RGB)) {
+				vec3 emissive = texel + texture->getFieldOffset(Texture::EMISSIVE_RGB);
+			}
+			if(texture->hasField(Texture::FLAG_SHININESS_I)) {
+				real shininess = texel[texture->getFieldOffset(Texture::SHININESS_I)];
+			}
+			if(texture->hasField(Texture::FLAG_NORMAL_XYZ)) {
+				vec3 normal = texel + texture->getFieldOffset(Texture::NORMAL_XYZ);
+				// TODO transform normal from face space to world space
+			}
+		}
 
 		colorOut[0] = color[0] * mat.emissive;
 		colorOut[1] = color[1] * mat.emissive;
@@ -166,7 +197,7 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 
 		if(mat.depthAbsorbtion > 1 - EPSILON)
 			for(positive i = 0; i < pool->currentLightsCount; i++) {
-				//real directIntensity = (1 - mat.reflect);
+				// real directIntensity = (1 - mat.reflect);
 
 				bool shadow = false;
 				if(pool->lightPool[i]->castShadow) {
@@ -177,7 +208,7 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 					intersectTree(point, lightDir, tree, stack,
 					    pool->vertexPool, intersect.face,
 					    intersectLight); // TODO find one face (no ordering
-					                     // needed)
+					// needed)
 					shadow = intersectLight.intersectionSide != 0
 					    && intersectLight.depth < dist;
 				}
@@ -202,7 +233,7 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 			if(refractIntensity > EPSILON) {
 				real refractColor[VEC3_SCALARS_COUNT];
 				real refractDepth = 1.0;
-				real absorption = mat.depthAbsorbtion == 0 ?
+				real absorption   = mat.depthAbsorbtion == 0 ?
 				    0 :
 				    pow(mat.depthAbsorbtion,
 				        refractDepth); // with material color

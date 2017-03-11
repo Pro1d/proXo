@@ -1,4 +1,5 @@
 #include "SceneParser.h"
+#include "../sdl/TextureLoader.h"
 #include "StanfordParser.h"
 #include "core/math/Matrix.h"
 #include "core/math/Vector.h"
@@ -360,6 +361,8 @@ void SceneParser::parseStateObjects(Scene& scene)
 	char word[128];
 	std::string currentName;
 	StanfordParser objectParser;
+	TextureLoader textureLoader;
+
 	while(state == ST_OBJECTS && nextWord(word)) {
 		int key = wordToKey(word);
 		switch(key) {
@@ -368,9 +371,20 @@ void SceneParser::parseStateObjects(Scene& scene)
 					state = ST_ERROR;
 					break;
 				}
+				// Finish the previous object
+				if(!currentName.empty()) {
+					scene.objects[currentName]->texture =
+					    textureLoader.createTexture();
+				}
 				currentName = word;
-				if(scene.objects.count(currentName) == 0)
+				if(scene.objects.count(currentName) == 0) {
 					scene.objects[currentName] = new Object;
+				}
+				else {
+					printf("Error: The object %s has already been created.",
+					    currentName.c_str());
+					state = ST_ERROR;
+				}
 				break;
 			case DATA: {
 				if(!nextWord(word) || currentName.empty()) {
@@ -386,42 +400,52 @@ void SceneParser::parseStateObjects(Scene& scene)
 					printf("Error loading object \"%s\"\n", fullPath);
 				}
 			} break;
-			case COLOR:
-				if(!nextWord(word) || currentName.empty()) {
-					state = ST_ERROR;
-					break;
-				}
-				// TODO Load Texture
-				break;
 			case NORMAL:
 				if(!nextWord(word) || currentName.empty()) {
 					state = ST_ERROR;
 					break;
 				}
-				// TODO Load Texture
+				textureLoader.addImageFile(
+				    std::string(word), Texture::NORMAL_XYZ);
 				break;
 			case AMBIENT:
 				if(!nextWord(word) || currentName.empty()) {
 					state = ST_ERROR;
 					break;
 				}
-				// TODO Load Texture
+				textureLoader.addImageFile(
+				    std::string(word), Texture::AMBIENT_RGB);
 				break;
 			case DIFFUSE:
 				if(!nextWord(word) || currentName.empty()) {
 					state = ST_ERROR;
 					break;
 				}
-				// TODO Load Texture
+				textureLoader.addImageFile(
+				    std::string(word), Texture::DIFFUSE_RGB);
 				break;
 			case SPECULAR:
 				if(!nextWord(word) || currentName.empty()) {
 					state = ST_ERROR;
 					break;
 				}
-				// TODO Load Texture
+				textureLoader.addImageFile(
+				    std::string(word), Texture::SPECULAR_RGB);
+				break;
+			case SHININESS:
+				if(!nextWord(word) || currentName.empty()) {
+					state = ST_ERROR;
+					break;
+				}
+				textureLoader.addImageFile(
+				    std::string(word), Texture::SHININESS_I);
 				break;
 			case END:
+				// Finish the previous object
+				if(!currentName.empty()) {
+					scene.objects[currentName]->texture =
+					    textureLoader.createTexture();
+				}
 				state = ST_MAIN;
 				break;
 			default:

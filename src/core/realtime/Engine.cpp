@@ -35,7 +35,7 @@ void Engine::createMatchingPool()
 		delete pool;
 	positive vertices, faces, lights;
 	scene->getCounts(vertices, faces, lights);
-	pool = new Pool(vertices, faces, lights);
+	pool = new Pool(vertices, faces, lights, scene->objects.size());
 }
 
 void clearBufferThread(void* data, positive threadId, positive threadsCount)
@@ -70,7 +70,7 @@ void vertexLigthingThread(void* data, positive threadId, positive threadsCount)
 	    i += threadsCount) {
 
 		// Emissive light
-		real emissive                  = material[MAT_POOL_INDEX_EMISSIVE];
+		real emissive                  = material[Pool::MAT_INDEX_EMISSIVE];
 		real color[VEC3_SCALARS_COUNT] = { material[0] * emissive,
 			material[1] * emissive, material[2] * emissive };
 
@@ -78,10 +78,10 @@ void vertexLigthingThread(void* data, positive threadId, positive threadsCount)
 		for(positive j = 0; j < that->pool->currentLightsCount; j++)
 			that->pool->lightPool[j]->lighting(material,
 			    that->pool->normalPool + i * VEC4_SCALARS_COUNT, vertex,
-			    material[MAT_POOL_INDEX_AMBIENT],
-			    material[MAT_POOL_INDEX_DIFFUSE],
-			    material[MAT_POOL_INDEX_SPECULAR],
-			    material[MAT_POOL_INDEX_SHININESS], color);
+			    material[Pool::MAT_INDEX_AMBIENT],
+			    material[Pool::MAT_INDEX_DIFFUSE],
+			    material[Pool::MAT_INDEX_SPECULAR],
+			    material[Pool::MAT_INDEX_SHININESS], color);
 
 		// Save resulting color
 		material[0] = color[0];
