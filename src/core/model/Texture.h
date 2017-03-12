@@ -60,6 +60,8 @@ public:
 
 	static bool isSizeValid(positive size);
 
+	static void normalMapToWorldCoord(vec3 pA, vec3 pB, vec3 pC, vec2 tA, vec2 tB, vec2 tC, vec3 normalIn, vec3 normalOut);
+
 private:
 	real* data_;
 	positive size_;
