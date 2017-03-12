@@ -125,9 +125,7 @@ Texture* TextureLoader::createTexture()
 			Texture::Field field = (Texture::Field) i;
 			switch(field) {
 				case Texture::DIFFUSE_RGB:
-				case Texture::AMBIENT_RGB:
 				case Texture::EMISSIVE_RGB:
-				case Texture::SPECULAR_RGB:
 					colorBitmapToTexture(
 					    bitmaps_[i], *texture, texture->getFieldOffset(field));
 					break;
@@ -135,6 +133,8 @@ Texture* TextureLoader::createTexture()
 					normalBitmapToTexture(
 					    bitmaps_[i], *texture, texture->getFieldOffset(field));
 					break;
+				case Texture::AMBIENT_I:
+				case Texture::SPECULAR_I:
 				case Texture::SHININESS_I:
 					intensityBitmapToTexture(
 					    bitmaps_[i], *texture, texture->getFieldOffset(field));

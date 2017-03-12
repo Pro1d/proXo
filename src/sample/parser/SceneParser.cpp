@@ -414,7 +414,7 @@ void SceneParser::parseStateObjects(Scene& scene)
 					break;
 				}
 				textureLoader.addImageFile(
-				    std::string(word), Texture::AMBIENT_RGB);
+				    std::string(word), Texture::AMBIENT_I);
 				break;
 			case DIFFUSE:
 				if(!nextWord(word) || currentName.empty()) {
@@ -430,7 +430,7 @@ void SceneParser::parseStateObjects(Scene& scene)
 					break;
 				}
 				textureLoader.addImageFile(
-				    std::string(word), Texture::SPECULAR_RGB);
+				    std::string(word), Texture::SPECULAR_I);
 				break;
 			case SHININESS:
 				if(!nextWord(word) || currentName.empty()) {

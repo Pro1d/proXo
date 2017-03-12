@@ -170,11 +170,11 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 			if(texture->hasField(Texture::FLAG_DIFFUSE_RGB)) {
 				vec3 diffuse = texel + texture->getFieldOffset(Texture::DIFFUSE_RGB);
 			}
-			if(texture->hasField(Texture::FLAG_AMBIENT_RGB)) {
-				vec3 ambient = texel + texture->getFieldOffset(Texture::AMBIENT_RGB);
+			if(texture->hasField(Texture::FLAG_AMBIENT_I)) {
+				real ambient = texel[texture->getFieldOffset(Texture::AMBIENT_I)];
 			}
-			if(texture->hasField(Texture::FLAG_SPECULAR_RGB)) {
-				vec3 specular = texel + texture->getFieldOffset(Texture::SPECULAR_RGB);
+			if(texture->hasField(Texture::FLAG_SPECULAR_I)) {
+				real specular = texel[texture->getFieldOffset(Texture::SPECULAR_I)];
 			}
 			if(texture->hasField(Texture::FLAG_EMISSIVE_RGB)) {
 				vec3 emissive = texel + texture->getFieldOffset(Texture::EMISSIVE_RGB);
@@ -217,7 +217,6 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 					pool->lightPool[i]->lighting(color, normal, point,
 					    mat.ambient, mat.diffuse, mat.specular, mat.shininess,
 					    colorOut);
-					// todo ambient light has no shadow!
 				}
 			}
 

@@ -5,7 +5,7 @@ using namespace std;
 
 namespace proxo {
 
-const positive Texture::FieldSize[FIELDS_COUNT] = { 3, 3, 3, 3, 3, 1 };
+const positive Texture::FieldSize[FIELDS_COUNT] = { 3, 1, 1, 3, 3, 1 };
 
 Texture::Texture(positive size, FlagField fields)
     : data_(NULL), size_(size), sizeReal_((real) size), log2size_(0),
