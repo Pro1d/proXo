@@ -9,7 +9,7 @@ It reads `.scene` files (*TODO: how to write a scene description file*).
 It loads `.ply` files ([Stanford PLY - Wikipedia](https://en.wikipedia.org/wiki/PLY_(file_format))) exported from [Blender](https://www.blender.org/).
 
 ## Requirement
-* For the sample, the only external library needed is [SDL 1.2](https://www.libsdl.org/index.php). It can be installed on Ubuntu with: `sudo apt-get install libsdl1.2-dev`
+* For the sample, the only external libraries needed are [SDL 1.2](https://www.libsdl.org/index.php) and [SDL\_Image](https://www.libsdl.org/projects/SDL_image/). They can be installed on Ubuntu with: `sudo apt-get install libsdl1.2-dev libsdl-image1.2-dev`
 
 ## Coming soon
  * *Textures (diffuse, specular, normal, ...) for the ray tracer*

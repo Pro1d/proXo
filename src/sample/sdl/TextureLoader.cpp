@@ -3,6 +3,7 @@
 #include "core/math/type.h"
 #include "core/model/Texture.h"
 #include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
 #include <iostream>
 #include <string>
 
@@ -88,7 +89,7 @@ void TextureLoader::addImageFile(const string& filename, Texture::Field field)
 
 SDL_Surface* TextureLoader::loadBitmap(const string& filename)
 {
-	SDL_Surface* bmp = SDL_LoadBMP(filename.c_str());
+	SDL_Surface* bmp = IMG_Load(filename.c_str());
 
 	if(bmp == NULL) {
 		cout << "Error: Cannot open " << filename << endl;

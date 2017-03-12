@@ -4,7 +4,7 @@ SOURCE_DIR:=./src
 OBJECT_DIR:=./obj
 
 # Linker flags
-LDFLAGS =-lSDL -lSDLmain -lm -lpthread
+LDFLAGS =-lSDL -lSDLmain -lSDL_image -lm -lpthread
 # Compiler flags
 CXXFLAGS +=-Wall -Wno-strict-aliasing -std=c++11 -I$(SOURCE_DIR)
 
