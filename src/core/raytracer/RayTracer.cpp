@@ -3,6 +3,7 @@
 #include "Physic.h"
 #include "core/math/Vector.h"
 #include "core/math/type.h"
+#include <cstdio>
 
 namespace proxo {
 
@@ -52,6 +53,7 @@ void threadRenderTask(void* data, positive threadId, positive threadsCount)
 
 	for(positive y = threadId; y < that->imageBuffer->height;
 	    y += threadsCount) {
+		if(threadId == 0) printf("%d%%\n", y*100/that->imageBuffer->height);
 		for(positive x = 0; x < that->imageBuffer->width; x++) {
 			rayDir[0] = ((real) x / cam.screenWidth) * dx + xmin;
 			rayDir[1] = (1 - (real) y / cam.screenHeight) * dy + ymin;
@@ -64,7 +66,7 @@ void threadRenderTask(void* data, positive threadId, positive threadsCount)
 		}
 	}
 }
-#include <cstdio>
+
 positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
     real maxIntensity, positive* lastFace, vec3 colorOut, real* depthOut,
     TreeStack& stack)
@@ -100,12 +102,9 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 		vec4 Pb     = pool->vertexPool + Ib * VEC4_SCALARS_COUNT;
 		vec4 Pc     = pool->vertexPool + Ic * VEC4_SCALARS_COUNT;
 
-		real point[VEC4_SCALARS_COUNT] = {
-			Ka * Pa[0] + Kb * Pb[0] + Kc * Pc[0],
+		real point[VEC4_SCALARS_COUNT] = { Ka * Pa[0] + Kb * Pb[0] + Kc * Pc[0],
 			Ka * Pa[1] + Kb * Pb[1] + Kc * Pc[1],
-			Ka * Pa[2] + Kb * Pb[2] + Kc * Pc[2],
-			1
-		};
+			Ka * Pa[2] + Kb * Pb[2] + Kc * Pc[2], 1 };
 
 		/// Get material
 		Material mat; // ambient=occlusion, diffuse=direct light,
@@ -118,84 +117,77 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 			    + Kc * Mc[Pool::MAT_INDEX_GREEN],
 			Ka * Ma[Pool::MAT_INDEX_BLUE] + Kb * Mb[Pool::MAT_INDEX_BLUE]
 			    + Kc * Mc[Pool::MAT_INDEX_BLUE] };
-		mat.ambient = Ka * Ma[Pool::MAT_INDEX_AMBIENT]
+		mat.ambient = Ma[Pool::MAT_INDEX_AMBIENT];/*
 		    + Kb * Mb[Pool::MAT_INDEX_AMBIENT]
-		    + Kc * Mc[Pool::MAT_INDEX_AMBIENT];
-		mat.diffuse = Ka * Ma[Pool::MAT_INDEX_DIFFUSE]
+		    + Kc * Mc[Pool::MAT_INDEX_AMBIENT];*/
+		mat.diffuse = Ma[Pool::MAT_INDEX_DIFFUSE];/*
 		    + Kb * Mb[Pool::MAT_INDEX_DIFFUSE]
-		    + Kc * Mc[Pool::MAT_INDEX_DIFFUSE];
-		mat.specular = Ka * Ma[Pool::MAT_INDEX_SPECULAR]
+		    + Kc * Mc[Pool::MAT_INDEX_DIFFUSE];*/
+		mat.specular = Ma[Pool::MAT_INDEX_SPECULAR];/*
 		    + Kb * Mb[Pool::MAT_INDEX_SPECULAR]
-		    + Kc * Mc[Pool::MAT_INDEX_SPECULAR];
-		mat.shininess = Ka * Ma[Pool::MAT_INDEX_SHININESS]
+		    + Kc * Mc[Pool::MAT_INDEX_SPECULAR];*/
+		mat.shininess = Ma[Pool::MAT_INDEX_SHININESS];/*
 		    + Kb * Mb[Pool::MAT_INDEX_SHININESS]
-		    + Kc * Mc[Pool::MAT_INDEX_SHININESS];
-		mat.emissive = Ka * Ma[Pool::MAT_INDEX_EMISSIVE]
+		    + Kc * Mc[Pool::MAT_INDEX_SHININESS];*/
+		mat.emissive = Ma[Pool::MAT_INDEX_EMISSIVE];/*
 		    + Kb * Mb[Pool::MAT_INDEX_EMISSIVE]
-		    + Kc * Mc[Pool::MAT_INDEX_EMISSIVE];
-		mat.reflect = Ka * Ma[Pool::MAT_INDEX_REFLECT]
+		    + Kc * Mc[Pool::MAT_INDEX_EMISSIVE];*/
+		// TODO reflect = specular; remove reflect
+		mat.reflect = Ma[Pool::MAT_INDEX_REFLECT];/*
 		    + Kb * Mb[Pool::MAT_INDEX_REFLECT]
-		    + Kc * Mc[Pool::MAT_INDEX_REFLECT];
-		mat.refractiveIndex = Ka * Ma[Pool::MAT_INDEX_REFRACTIVE]
+		    + Kc * Mc[Pool::MAT_INDEX_REFLECT];*/
+		mat.refractiveIndex = Ma[Pool::MAT_INDEX_REFRACTIVE];/*
 		    + Kb * Mb[Pool::MAT_INDEX_REFRACTIVE]
-		    + Kc * Mc[Pool::MAT_INDEX_REFRACTIVE];
-		mat.depthAbsorbtion = Ka * Ma[Pool::MAT_INDEX_ABSORPTION]
+		    + Kc * Mc[Pool::MAT_INDEX_REFRACTIVE];*/
+		// TODO Absorption RGB
+		mat.depthAbsorbtion = Ma[Pool::MAT_INDEX_ABSORPTION];/*
 		    + Kb * Mb[Pool::MAT_INDEX_ABSORPTION]
-		    + Kc * Mc[Pool::MAT_INDEX_ABSORPTION];
-		real emissive[VEC3_SCALARS_COUNT] = {
-			color[0] * mat.emissive,
-			color[1] * mat.emissive,
-			color[2] * mat.emissive
-		};
-		
+		    + Kc * Mc[Pool::MAT_INDEX_ABSORPTION];*/
+		real emissive[VEC3_SCALARS_COUNT] = { color[0] * mat.emissive,
+			color[1] * mat.emissive, color[2] * mat.emissive };
+
 		/// Normal, might be overided by normal map
-		real normal[VEC4_SCALARS_COUNT] = { Ka
-			        * pool->normalPool[Ia * VEC4_SCALARS_COUNT + 0]
-			    + Kb * pool->normalPool[Ib * VEC4_SCALARS_COUNT + 0]
-			    + Kc * pool->normalPool[Ic * VEC4_SCALARS_COUNT + 0],
-			Ka * pool->normalPool[Ia * VEC4_SCALARS_COUNT + 1]
-			    + Kb * pool->normalPool[Ib * VEC4_SCALARS_COUNT + 1]
-			    + Kc * pool->normalPool[Ic * VEC4_SCALARS_COUNT + 1],
-			Ka * pool->normalPool[Ia * VEC4_SCALARS_COUNT + 2]
-			    + Kb * pool->normalPool[Ib * VEC4_SCALARS_COUNT + 2]
-			    + Kc * pool->normalPool[Ic * VEC4_SCALARS_COUNT + 2],
-			0 };
-		normalize(normal);
-		multiply(normal, intersect.intersectionSide);
-		
+		real normal[VEC4_SCALARS_COUNT] = {0,0,0,0};
+		bool normalInitialized = false;
+
 		/// Textures
-		Texture * texture = pool->texturePool[intersect.face[3]];
+		Texture* texture = pool->texturePool[intersect.face[3]];
 		if(texture != NULL) {
 			vec2 mapa = pool->mappingPool + Ia * VEC2_SCALARS_COUNT;
 			vec2 mapb = pool->mappingPool + Ib * VEC2_SCALARS_COUNT;
 			vec2 mapc = pool->mappingPool + Ic * VEC2_SCALARS_COUNT;
-			real u = Ka *  + mapa[0] + Kb * mapb[0] + Kc * mapc[0];
-			real v = Ka *  + mapa[1] + Kb * mapb[1] + Kc * mapc[1];
+			real u    = Ka * mapa[0] + Kb * mapb[0] + Kc * mapc[0];
+			real v    = Ka * mapa[1] + Kb * mapb[1] + Kc * mapc[1];
 
-			real * texel = texture->getData(u, v);
-			
+			real* texel = texture->getData(u, v);
+
 			if(texture->hasField(Texture::FLAG_DIFFUSE_RGB)) {
-				vec3 diffuse_tex = texel + texture->getFieldOffset(Texture::DIFFUSE_RGB);
+				vec3 diffuse_tex =
+				    texel + texture->getFieldOffset(Texture::DIFFUSE_RGB);
 				color[0] *= diffuse_tex[0];
 				color[1] *= diffuse_tex[1];
 				color[2] *= diffuse_tex[2];
 			}
 			if(texture->hasField(Texture::FLAG_AMBIENT_I)) {
-				real ambient_tex = texel[texture->getFieldOffset(Texture::AMBIENT_I)];
+				real ambient_tex =
+				    texel[texture->getFieldOffset(Texture::AMBIENT_I)];
 				mat.ambient *= ambient_tex;
 			}
 			if(texture->hasField(Texture::FLAG_SPECULAR_I)) {
-				real specular_tex = texel[texture->getFieldOffset(Texture::SPECULAR_I)];
+				real specular_tex =
+				    texel[texture->getFieldOffset(Texture::SPECULAR_I)];
 				mat.specular *= specular_tex;
 			}
 			if(texture->hasField(Texture::FLAG_EMISSIVE_RGB)) {
-				vec3 emissive_tex = texel + texture->getFieldOffset(Texture::EMISSIVE_RGB);
+				vec3 emissive_tex =
+				    texel + texture->getFieldOffset(Texture::EMISSIVE_RGB);
 				emissive[0] += emissive_tex[0] * (1 - emissive[0]);
 				emissive[1] += emissive_tex[1] * (1 - emissive[1]);
 				emissive[2] += emissive_tex[2] * (1 - emissive[2]);
 			}
 			if(texture->hasField(Texture::FLAG_SHININESS_I)) {
-				real shininess_tex = texel[texture->getFieldOffset(Texture::SHININESS_I)];
+				real shininess_tex =
+				    texel[texture->getFieldOffset(Texture::SHININESS_I)];
 				mat.shininess = shininess_tex;
 			}
 			if(texture->hasField(Texture::FLAG_NORMAL_XYZ)) {
@@ -204,43 +196,58 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 				Texture::normalMapToWorldCoord(
 				    Pa, Pb, Pc, mapa, mapb, mapc, normal_tex, normal);
 				multiply(normal, intersect.intersectionSide);
+				normalInitialized = true;
 			}
+		}
+		if(!normalInitialized) {
+			normal[0] = Ka * pool->normalPool[Ia * VEC4_SCALARS_COUNT + 0]
+			    + Kb * pool->normalPool[Ib * VEC4_SCALARS_COUNT + 0]
+			    + Kc * pool->normalPool[Ic * VEC4_SCALARS_COUNT + 0];
+			normal[1] = Ka * pool->normalPool[Ia * VEC4_SCALARS_COUNT + 1]
+			    + Kb * pool->normalPool[Ib * VEC4_SCALARS_COUNT + 1]
+			    + Kc * pool->normalPool[Ic * VEC4_SCALARS_COUNT + 1];
+			normal[2] = Ka * pool->normalPool[Ia * VEC4_SCALARS_COUNT + 2]
+			    + Kb * pool->normalPool[Ib * VEC4_SCALARS_COUNT + 2]
+			    + Kc * pool->normalPool[Ic * VEC4_SCALARS_COUNT + 2];
+			normalize(normal);
+			multiply(normal, intersect.intersectionSide);
+			normalInitialized = true;
+
 		}
 
 		colorOut[0] = emissive[0];
 		colorOut[1] = emissive[1];
 		colorOut[2] = emissive[2];
-		// lights/shadow // depthAbsorption == +inf && reflect < 1 ;
-		// specular=reflect
-		// [*(1-refractRatioFromLight)] (ignore specular)
 
+		// lights/shadow // depthAbsorption == 1 && reflect < 1 ;
 		if(mat.depthAbsorbtion > 1 - EPSILON)
 			for(positive i = 0; i < pool->currentLightsCount; i++) {
-				// real directIntensity = (1 - mat.reflect);
-
 				bool shadow = false;
+
 				if(pool->lightPool[i]->castShadow) {
 					real lightDir[VEC4_SCALARS_COUNT];
 					real dist = pool->lightPool[i]->getDirectionToSource(
 					    point, lightDir);
-					// TODO find one face (no ordering needed)
+					// TODO path to light in straight line with absorption
 					IntersectionData intersectLight;
 					intersectTree(point, lightDir, tree, stack,
-					    pool->vertexPool, intersect.face,
-					    intersectLight); 
+					    pool->vertexPool, intersect.face, intersectLight);
 					shadow = intersectLight.intersectionSide != 0
 					    && intersectLight.depth < dist;
 				}
+
 				if(!shadow) {
 					// lighting!
+					// TODO compute fresnel coef for reflection/specular
+					// intensity (translucent object)
 					pool->lightPool[i]->lighting(color, normal, point,
 					    mat.ambient, mat.diffuse, mat.specular, mat.shininess,
 					    colorOut);
 				}
 			}
 
-		// refractive // reflect < 1 && refractRatio > 0 && depthAbsorbtion <
-		// +inf
+
+		// refractive // reflect < 1 && refractRatio > 0 && depthAbsorbtion < 1
 		real refractDir[VEC4_SCALARS_COUNT];
 		real refractRatio = 1;
 
@@ -267,8 +274,7 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 			}
 		}
 
-		// reflect // reflect > 0 || (refractRation < 1 && depthAbsorbtion <
-		// +inf)
+		// reflect // reflect > 0 || (refractRation < 1 && depthAbsorbtion < 1)
 		real reflectDir[VEC4_SCALARS_COUNT];
 		reflect(dir, normal, reflectDir);
 		real reflectIntensity =

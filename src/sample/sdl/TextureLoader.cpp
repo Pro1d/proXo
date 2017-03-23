@@ -27,7 +27,8 @@ void getPixel(
 			return;
 
 		case 3:
-			if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {
+			SDL_GetRGB(*(Uint32*) p, surface->format, &r, &g, &b);
+			/*if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {
 				r = p[0];
 				g = p[1];
 				b = p[2];
@@ -36,7 +37,7 @@ void getPixel(
 				b = p[0];
 				g = p[1];
 				r = p[2];
-			}
+			}*/
 			return;
 
 		case 4:
@@ -158,7 +159,7 @@ void TextureLoader::colorBitmapToTexture(
 	for(integer y = 0; y < (integer) bmp->h; y++) {
 		for(integer x = 0; x < (integer) bmp->w; x++) {
 			Uint8 r, g, b;
-			getPixel(bmp, x, y, r, g, b);
+			getPixel(bmp, x, bmp->h-y-1, r, g, b);
 			real* data           = texture.getData(x, y);
 			data[dataOffset + 0] = (real) r / 255;
 			data[dataOffset + 1] = (real) g / 255;
@@ -173,7 +174,7 @@ void TextureLoader::intensityBitmapToTexture(
 	for(integer y = 0; y < (integer) bmp->h; y++) {
 		for(integer x = 0; x < (integer) bmp->w; x++) {
 			Uint8 r, g, b;
-			getPixel(bmp, x, y, r, g, b);
+			getPixel(bmp, x, bmp->h-y-1, r, g, b);
 			real* data       = texture.getData(x, y);
 			data[dataOffset] = (real) r / 255;
 		}
@@ -186,7 +187,7 @@ void TextureLoader::normalBitmapToTexture(
 	for(integer y = 0; y < (integer) bmp->h; y++) {
 		for(integer x = 0; x < (integer) bmp->w; x++) {
 			Uint8 nx, ny, nz;
-			getPixel(bmp, x, y, nx, ny, nz);
+			getPixel(bmp, x, bmp->h-y-1, nx, ny, nz);
 			real* data           = texture.getData(x, y);
 			data[dataOffset + 0] = ((real) nx / 255) * 2 - 1;
 			data[dataOffset + 1] = ((real) ny / 255) * 2 - 1;

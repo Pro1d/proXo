@@ -37,7 +37,8 @@ int main(int argc, char** argv)
 
 	SceneParser parser;
 	Scene scene;
-	if(!parser.readScene("media/", "parc.scene", scene)) {
+	const char* sceneFileName = argc >= 2 ? argv[1] : "parc.scene";
+	if(!parser.readScene("media/", sceneFileName, scene)) {
 		printf("readScene failed!\n");
 		return 2;
 	}
@@ -111,7 +112,9 @@ int main(int argc, char** argv)
 							break;
 						case SDLK_F10:
 							if(!rayTracingRenderView) {
+								Uint32 t = SDL_GetTicks();
 								rayTracer.render();
+								printf("Ray tracer - render time: %f seconds\n", (float)(SDL_GetTicks() - t)/1000);
 								rayTracingRenderView = true;
 							}
 							else {

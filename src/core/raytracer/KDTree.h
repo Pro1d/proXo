@@ -7,7 +7,7 @@
 
 namespace proxo {
 
-#define MINIMUM_FACES_TREE 10
+#define MINIMUM_FACES_TREE 50
 
 enum {
 	BOUND_X_MIN,

@@ -69,7 +69,7 @@ void KDTree::build(Pool& pool)
 	real size[3] = { bounds[BOUND_X_MAX] - bounds[BOUND_X_MIN],
 		bounds[BOUND_Y_MAX] - bounds[BOUND_Y_MIN],
 		bounds[BOUND_Z_MAX] - bounds[BOUND_Z_MIN] };
-
+	printf("%d %d %d\n", isLocked[0], isLocked[1], isLocked[2]);
 	if(facesCount < MINIMUM_FACES_TREE
 	    || (isLocked[0] && isLocked[1] && isLocked[2])) {
 		isLeaf = true;
@@ -79,13 +79,20 @@ void KDTree::build(Pool& pool)
 	// Choose cut axis
 
 	positive cutAxis = 0;
-	if(size[1] > size[0] || isLocked[0])
+	if((size[1] > size[0] || isLocked[0]) && !isLocked[1])
 		cutAxis = 1;
-	if((size[2] > size[1] || isLocked[1]) && (size[2] > size[0] || isLocked[0]))
+	if((size[2] > size[1] || isLocked[1]) && (size[2] > size[0] || isLocked[0]) && !isLocked[2])
 		cutAxis = 2;
 
+	real mean = 0;
+	for(positive i = 0; i < facesCount; i++) {
+		mean += pool.vertexPool[faces[i*4+0]*VEC4_SCALARS_COUNT+cutAxis];
+		mean += pool.vertexPool[faces[i*4+1]*VEC4_SCALARS_COUNT+cutAxis];
+		mean += pool.vertexPool[faces[i*4+2]*VEC4_SCALARS_COUNT+cutAxis];
+	}
+
 	// choose cut value
-	real cutValue = size[cutAxis] / 2 + bounds[cutAxis];
+	real cutValue = mean / (3*facesCount); //size[cutAxis] / 2 + bounds[cutAxis];
 
 	// separate faces in second side from faces in first/middle side
 	positive firstBegin = 0, firstEnd = facesCount;
@@ -133,7 +140,7 @@ void KDTree::build(Pool& pool)
 	firstEnd = middleBegin;
 
 	// recc build
-	bool isWiselySplitted = firstBegin < firstEnd && secondBegin < secondEnd;
+	bool isWiselySplitted = firstBegin < firstEnd && secondBegin < secondEnd && (middleEnd-middleBegin) < facesCount/2;
 	if(isWiselySplitted) {
 		if(middleBegin < middleEnd) {
 			middleSubTree =
@@ -152,7 +159,8 @@ void KDTree::build(Pool& pool)
 		}
 	}
 	else {
-		isLeaf = true;
+		isLocked[cutAxis] = true;
+		build(pool);
 	}
 }
 

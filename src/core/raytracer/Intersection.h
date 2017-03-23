@@ -17,9 +17,9 @@ public:
 integer intersectTriangle(vec3 orig, vec3 dir, vec3 vert0, vec3 vert1,
     vec3 vert2, real* t, real* u, real* v);
 real intersectAxialParallelepiped(
-    vec4 orig, vec4 dir, vec3 paralMin, vec3 paralMax);
-void pushSubTree(vec3 orig, vec3 dir, KDTree* tree, TreeStack& stack);
-void intersectSetOfTriangles(vec3 orig, vec3 dir, positive* faces,
+    vec3 orig, vec3 inv_dir, real* paralMinMax);
+void pushSubTree(vec3 orig, vec3 inv_dir, KDTree* tree, TreeStack& stack);
+void intersectSetOfTriangles(vec3 orig, vec3 inv_dir, positive* faces,
     positive facesCount, vec4 vertices, positive* faceToIgnore,
     IntersectionData& out);
 void intersectTree(vec3 orig, vec3 dir, KDTree* tree, TreeStack& stack,

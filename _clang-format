@@ -20,5 +20,5 @@ UseTab: ForIndentation
 AllowShortFunctionsOnASingleLine: Inline
 BreakBeforeTernaryOperators: false
 BreakConstructorInitializersBeforeComma: false
-
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
 

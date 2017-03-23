@@ -167,6 +167,12 @@ bool SceneParser::readScene(
 		}
 	}
 
+	if(scene.world == NULL)
+		scene.world = new Container(0,0,0);
+
+	if(scene.body == NULL)
+		scene.body = new Container(0,0,0);
+
 	fclose(file);
 	if(state == ST_ERROR || state != ST_MAIN)
 		return false;
@@ -362,6 +368,7 @@ void SceneParser::parseStateObjects(Scene& scene)
 	std::string currentName;
 	StanfordParser objectParser;
 	TextureLoader textureLoader;
+	char fullPath[256];
 
 	while(state == ST_OBJECTS && nextWord(word)) {
 		int key = wordToKey(word);
@@ -405,40 +412,50 @@ void SceneParser::parseStateObjects(Scene& scene)
 					state = ST_ERROR;
 					break;
 				}
+				strcpy(fullPath, directory);
+				strcat(fullPath, word);
 				textureLoader.addImageFile(
-				    std::string(word), Texture::NORMAL_XYZ);
+				    std::string(fullPath), Texture::NORMAL_XYZ);
 				break;
 			case AMBIENT:
 				if(!nextWord(word) || currentName.empty()) {
 					state = ST_ERROR;
 					break;
 				}
+				strcpy(fullPath, directory);
+				strcat(fullPath, word);
 				textureLoader.addImageFile(
-				    std::string(word), Texture::AMBIENT_I);
+				    std::string(fullPath), Texture::AMBIENT_I);
 				break;
 			case DIFFUSE:
 				if(!nextWord(word) || currentName.empty()) {
 					state = ST_ERROR;
 					break;
 				}
+				strcpy(fullPath, directory);
+				strcat(fullPath, word);
 				textureLoader.addImageFile(
-				    std::string(word), Texture::DIFFUSE_RGB);
+				    std::string(fullPath), Texture::DIFFUSE_RGB);
 				break;
 			case SPECULAR:
 				if(!nextWord(word) || currentName.empty()) {
 					state = ST_ERROR;
 					break;
 				}
+				strcpy(fullPath, directory);
+				strcat(fullPath, word);
 				textureLoader.addImageFile(
-				    std::string(word), Texture::SPECULAR_I);
+				    std::string(fullPath), Texture::SPECULAR_I);
 				break;
 			case SHININESS:
 				if(!nextWord(word) || currentName.empty()) {
 					state = ST_ERROR;
 					break;
 				}
+				strcpy(fullPath, directory);
+				strcat(fullPath, word);
 				textureLoader.addImageFile(
-				    std::string(word), Texture::SHININESS_I);
+				    std::string(fullPath), Texture::SHININESS_I);
 				break;
 			case END:
 				// Finish the previous object
