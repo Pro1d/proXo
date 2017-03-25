@@ -24,15 +24,9 @@ void SpotLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient,
 		return;
 
 	real distToLightInv = sqrt_inv(distToLight2);
-	// intensity reduction with distance
-	real lightIntensityInv = 1 + distToLight2 * transformedReductionFactor;
 
 	// normalize L
 	multiply(L, distToLightInv);
-
-	real LdotNormal = dot(L, normal);
-	// dot product for diffuse intensity
-	real D = std::max((real) 0, LdotNormal);
 
 	// Intensity from cut off/fall off
 	real I = -dot(transformedDirection, L);
@@ -45,9 +39,16 @@ void SpotLight::lighting(vec4 color, vec4 normal, vec4 point, real ambient,
 		I = (cutOff - I) / (cutOff - fallOff);
 	}
 	else {
-		// center: full intesity
+		// center: full intensity
 		I = 1;
 	}
+
+	// intensity reduction with distance
+	real lightIntensityInv = 1 + distToLight2 * transformedReductionFactor;
+
+	real LdotNormal = dot(L, normal);
+	// dot product for diffuse intensity
+	real D = std::max((real) 0, LdotNormal);
 
 	// R: reflect of L with normal
 	real N = 2 * LdotNormal;

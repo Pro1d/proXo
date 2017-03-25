@@ -37,7 +37,10 @@ void Scene::print()
 	world->print(1);
 	printf("Body\n");
 	body->print(1);
+}
 
+void Scene::printSize()
+{
 	positive vertices, faces, lights;
 	getCounts(vertices, faces, lights);
 	printf("Total vertices count: %d\n", vertices);

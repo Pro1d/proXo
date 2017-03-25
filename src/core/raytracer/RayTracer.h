@@ -2,6 +2,7 @@
 #define __RAY_TRACER_H__
 
 #include "KDTree.h"
+#include "DepthOfField.h"
 #include "core/common/Pool.h"
 #include "core/common/SceneToPool.h"
 #include "core/model/Scene.h"
@@ -15,8 +16,13 @@ public:
 	RayTracer(Buffer* imageBuffer, Scene* scene);
 	~RayTracer();
 	void setScene(Scene* scene);
+	void setDepthOfField(real distanceFocus, real apertureSize);
+	void setDepthOfFieldWithAutoFocus(real apertureSize);
+
 	void createMatchingPool();
 	void render();
+	static void threadRenderTask(void* data, positive threadId, positive threadsCount);
+	
 	positive getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 	    real maxIntensity, positive* lastFace, vec3 colorOut, real* depthOut,
 	    TreeStack& stack);
@@ -27,6 +33,9 @@ public:
 	Buffer* imageBuffer;
 	MultiThread multithread;
 	SceneToPool sceneToPool;
+private:
+	DepthOfField dof_;
+	bool autofocus_;
 };
 
 } // namespace proxo

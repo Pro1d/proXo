@@ -1,7 +1,7 @@
 #include "RayTracer.h"
+#include "DepthOfField.h"
 #include "Intersection.h"
 #include "Physic.h"
-#include "DepthOfField.h"
 #include "core/math/Vector.h"
 #include "core/math/type.h"
 #include <cstdio>
@@ -11,8 +11,12 @@ namespace proxo {
 #define EPSILON ((real) 1 / 255)
 
 RayTracer::RayTracer(Buffer* imageBuffer, Scene* scene)
-    : scene(scene), pool(NULL), tree(NULL), imageBuffer(imageBuffer),
-      multithread(THREADS_COUNT), sceneToPool(multithread)
+    : scene(scene),
+      pool(NULL),
+      tree(NULL),
+      imageBuffer(imageBuffer),
+      multithread(THREADS_COUNT),
+      sceneToPool(multithread)
 {
 }
 
@@ -38,13 +42,23 @@ void RayTracer::createMatchingPool()
 	pool = new Pool(vertices, faces, lights, scene->objects.size());
 }
 
-void threadRenderTask(void* data, positive threadId, positive threadsCount)
+void RayTracer::setDepthOfField(real distanceFocus, real aperture)
 {
-	DepthOfField dof;
-	dof.setAperture(0.01);
-	dof.setFocusDistance(2);
-	dof.updatePattern(5, 2);
+	dof_.setAperture(aperture);
+	dof_.setFocusDistance(distanceFocus);
+	dof_.updatePattern(5, 2);
+	autofocus_ = false;
+}
 
+void RayTracer::setDepthOfFieldWithAutoFocus(real aperture)
+{
+	dof_.setAperture(aperture);
+	autofocus_ = true;
+}
+
+void RayTracer::threadRenderTask(
+    void* data, positive threadId, positive threadsCount)
+{
 	RayTracer* that = (RayTracer*) data;
 	TreeStack stack(512);
 
@@ -57,9 +71,11 @@ void threadRenderTask(void* data, positive threadId, positive threadsCount)
 	real ymin = cam.ymin;
 	real dy   = cam.ymax - ymin;
 
+	if(threadId == 0)
+		printf("Rendering... 0%%\n");
+
 	for(positive y = threadId; y < that->imageBuffer->height;
 	    y += threadsCount) {
-		if(threadId == 0) printf("%d%%\n", y*100/that->imageBuffer->height);
 
 		for(positive x = 0; x < that->imageBuffer->width; x++) {
 			rayDir[0] = ((real) x / cam.screenWidth) * dx + xmin;
@@ -72,10 +88,11 @@ void threadRenderTask(void* data, positive threadId, positive threadsCount)
 			that->getColor(rayOrig, rayDir, 1, 1, NULL, pxl + 1, pxl, stack);
 
 			positive count = 1;
-			for(DepthOfField::OriginsIterator oi = dof.begin(); oi != dof.end(); ++oi, count++) {
+			for(DepthOfField::OriginsIterator oi = that->dof_.begin();
+			    oi != that->dof_.end(); ++oi, count++) {
 				real p[VEC3_SCALARS_COUNT], d;
 				real ro[VEC4_SCALARS_COUNT], rd[VEC4_SCALARS_COUNT];
-				dof.getDirection(rayDir, oi, rd, ro);
+				that->dof_.getDirection(rayDir, oi, rd, ro);
 				that->getColor(ro, rd, 1, 1, NULL, p, &d, stack);
 				pxl[1] += p[0];
 				pxl[2] += p[1];
@@ -86,6 +103,10 @@ void threadRenderTask(void* data, positive threadId, positive threadsCount)
 			pxl[2] /= count;
 			pxl[3] /= count;
 		}
+
+		if(threadId == 0)
+			printf("\033[1ARendering... %d%%\n",
+			    y * 100 / that->imageBuffer->height);
 	}
 }
 
@@ -139,46 +160,46 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 			    + Kc * Mc[Pool::MAT_INDEX_GREEN],
 			Ka * Ma[Pool::MAT_INDEX_BLUE] + Kb * Mb[Pool::MAT_INDEX_BLUE]
 			    + Kc * Mc[Pool::MAT_INDEX_BLUE] };
-		mat.ambient = Ma[Pool::MAT_INDEX_AMBIENT];/*
-		    + Kb * Mb[Pool::MAT_INDEX_AMBIENT]
-		    + Kc * Mc[Pool::MAT_INDEX_AMBIENT];*/
-		mat.diffuse = Ma[Pool::MAT_INDEX_DIFFUSE];/*
-		    + Kb * Mb[Pool::MAT_INDEX_DIFFUSE]
-		    + Kc * Mc[Pool::MAT_INDEX_DIFFUSE];*/
-		mat.specular = Ma[Pool::MAT_INDEX_SPECULAR];/*
-		    + Kb * Mb[Pool::MAT_INDEX_SPECULAR]
-		    + Kc * Mc[Pool::MAT_INDEX_SPECULAR];*/
-		mat.shininess = Ma[Pool::MAT_INDEX_SHININESS];/*
-		    + Kb * Mb[Pool::MAT_INDEX_SHININESS]
-		    + Kc * Mc[Pool::MAT_INDEX_SHININESS];*/
-		mat.emissive = Ma[Pool::MAT_INDEX_EMISSIVE];/*
-		    + Kb * Mb[Pool::MAT_INDEX_EMISSIVE]
-		    + Kc * Mc[Pool::MAT_INDEX_EMISSIVE];*/
+		mat.ambient = Ma[Pool::MAT_INDEX_AMBIENT]; /*
+		     + Kb * Mb[Pool::MAT_INDEX_AMBIENT]
+		     + Kc * Mc[Pool::MAT_INDEX_AMBIENT];*/
+		mat.diffuse = Ma[Pool::MAT_INDEX_DIFFUSE]; /*
+		     + Kb * Mb[Pool::MAT_INDEX_DIFFUSE]
+		     + Kc * Mc[Pool::MAT_INDEX_DIFFUSE];*/
+		mat.specular = Ma[Pool::MAT_INDEX_SPECULAR]; /*
+		     + Kb * Mb[Pool::MAT_INDEX_SPECULAR]
+		     + Kc * Mc[Pool::MAT_INDEX_SPECULAR];*/
+		mat.shininess = Ma[Pool::MAT_INDEX_SHININESS]; /*
+		     + Kb * Mb[Pool::MAT_INDEX_SHININESS]
+		     + Kc * Mc[Pool::MAT_INDEX_SHININESS];*/
+		mat.emissive = Ma[Pool::MAT_INDEX_EMISSIVE]; /*
+		     + Kb * Mb[Pool::MAT_INDEX_EMISSIVE]
+		     + Kc * Mc[Pool::MAT_INDEX_EMISSIVE];*/
 		// TODO reflect = specular; remove reflect
-		mat.reflect = Ma[Pool::MAT_INDEX_REFLECT];/*
-		    + Kb * Mb[Pool::MAT_INDEX_REFLECT]
-		    + Kc * Mc[Pool::MAT_INDEX_REFLECT];*/
-		mat.refractiveIndex = Ma[Pool::MAT_INDEX_REFRACTIVE];/*
-		    + Kb * Mb[Pool::MAT_INDEX_REFRACTIVE]
-		    + Kc * Mc[Pool::MAT_INDEX_REFRACTIVE];*/
+		mat.reflect = Ma[Pool::MAT_INDEX_REFLECT]; /*
+		     + Kb * Mb[Pool::MAT_INDEX_REFLECT]
+		     + Kc * Mc[Pool::MAT_INDEX_REFLECT];*/
+		mat.refractiveIndex = Ma[Pool::MAT_INDEX_REFRACTIVE]; /*
+		     + Kb * Mb[Pool::MAT_INDEX_REFRACTIVE]
+		     + Kc * Mc[Pool::MAT_INDEX_REFRACTIVE];*/
 		// TODO Absorption RGB
-		mat.depthAbsorbtion = Ma[Pool::MAT_INDEX_ABSORPTION];/*
-		    + Kb * Mb[Pool::MAT_INDEX_ABSORPTION]
-		    + Kc * Mc[Pool::MAT_INDEX_ABSORPTION];*/
+		mat.depthAbsorbtion = Ma[Pool::MAT_INDEX_ABSORPTION]; /*
+		     + Kb * Mb[Pool::MAT_INDEX_ABSORPTION]
+		     + Kc * Mc[Pool::MAT_INDEX_ABSORPTION];*/
 		real emissive[VEC3_SCALARS_COUNT] = { color[0] * mat.emissive,
 			color[1] * mat.emissive, color[2] * mat.emissive };
 
 		/// Normal, might be overided by normal map
-		real normal[VEC4_SCALARS_COUNT] = {0,0,0,0};
+		real normal[VEC4_SCALARS_COUNT] = { 0, 0, 0, 0 };
 		normal[0] = Ka * pool->normalPool[Ia * VEC4_SCALARS_COUNT + 0]
-			+ Kb * pool->normalPool[Ib * VEC4_SCALARS_COUNT + 0]
-			+ Kc * pool->normalPool[Ic * VEC4_SCALARS_COUNT + 0];
+		    + Kb * pool->normalPool[Ib * VEC4_SCALARS_COUNT + 0]
+		    + Kc * pool->normalPool[Ic * VEC4_SCALARS_COUNT + 0];
 		normal[1] = Ka * pool->normalPool[Ia * VEC4_SCALARS_COUNT + 1]
-			+ Kb * pool->normalPool[Ib * VEC4_SCALARS_COUNT + 1]
-			+ Kc * pool->normalPool[Ic * VEC4_SCALARS_COUNT + 1];
+		    + Kb * pool->normalPool[Ib * VEC4_SCALARS_COUNT + 1]
+		    + Kc * pool->normalPool[Ic * VEC4_SCALARS_COUNT + 1];
 		normal[2] = Ka * pool->normalPool[Ia * VEC4_SCALARS_COUNT + 2]
-			+ Kb * pool->normalPool[Ib * VEC4_SCALARS_COUNT + 2]
-			+ Kc * pool->normalPool[Ic * VEC4_SCALARS_COUNT + 2];
+		    + Kb * pool->normalPool[Ib * VEC4_SCALARS_COUNT + 2]
+		    + Kc * pool->normalPool[Ic * VEC4_SCALARS_COUNT + 2];
 		normalize(normal);
 
 		/// Textures
@@ -238,32 +259,43 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 		// lights/shadow // depthAbsorption == 1 && reflect < 1 ;
 		if(mat.depthAbsorbtion > 1 - EPSILON)
 			for(positive i = 0; i < pool->currentLightsCount; i++) {
-				bool shadow = false;
+				bool shadow       = false;
+				Light* light      = pool->lightPool[i];
 
-				if(pool->lightPool[i]->castShadow) {
-					real lightDir[VEC4_SCALARS_COUNT];
-					real dist = pool->lightPool[i]->getDirectionToSource(
-					    point, lightDir);
-					// TODO path to light in straight line with absorption
-					IntersectionData intersectLight;
-					intersectTree(point, lightDir, tree, stack,
-					    pool->vertexPool, intersect.face, intersectLight);
-					shadow = intersectLight.intersectionSide != 0
-					    && intersectLight.depth < dist;
-				}
+				// Get the potential lighting color
+				real lightingColor[VEC3_SCALARS_COUNT] = { 0, 0, 0 };
+				real ambient = mat.ambient * (1 - mat.reflect);
+				real diffuse = mat.diffuse * (1 - mat.reflect);
+				// TODO compute fresnel coef for reflection/specular
+				// intensity (translucent object)
+				light->lighting(color, normal, point, ambient, diffuse,
+				    mat.specular, mat.shininess, lightingColor);
 
-				if(!shadow) {
-					// lighting!
-					// TODO compute fresnel coef for reflection/specular
-					// intensity (translucent object)
-					real ambient = mat.ambient * (1-mat.reflect);
-					real diffuse = mat.diffuse * (1-mat.reflect);
-					pool->lightPool[i]->lighting(color, normal, point,
-					    ambient, diffuse, mat.specular, mat.shininess,
-					    colorOut);
+				if(lightingColor[0] > EPSILON || lightingColor[1] > EPSILON
+				    || lightingColor[2] > EPSILON) {
+
+					// Test light occlusion (shadow)
+					if(light->castShadow) {
+						real lightDir[VEC4_SCALARS_COUNT];
+						real dist =
+						    light->getDirectionToSource(point, lightDir);
+						// TODO path to light in straight line with absorption
+						IntersectionData intersectLight;
+						intersectTree(point, lightDir, tree, stack,
+						    pool->vertexPool, intersect.face, intersectLight);
+						shadow = intersectLight.intersectionSide != 0
+						    && intersectLight.depth < dist;
+					}
+
+					// apply lighting
+					if(!shadow) {
+						// lighting!
+						colorOut[0] += lightingColor[0];
+						colorOut[1] += lightingColor[1];
+						colorOut[2] += lightingColor[2];
+					}
 				}
 			}
-
 
 		// refractive // reflect < 1 && refractRatio > 0 && depthAbsorbtion < 1
 		real refractDir[VEC4_SCALARS_COUNT];
@@ -321,14 +353,29 @@ void RayTracer::render()
 		delete tree;
 	pool->reset();
 	imageBuffer->clear();
-
 	sceneToPool.run(*scene, *pool, false);
+	scene->printSize();
 
 	tree = new KDTree(*pool, pool->facePool, 0, pool->currentFacesCount);
 	tree->build(*pool);
-	//tree->print();
 
-	multithread.execute(threadRenderTask, this);
+	// Auto focus enabled: find distance to nearest object in middle of the
+	// screen
+	if(autofocus_) {
+		IntersectionData intersect;
+		TreeStack stack(512);
+		real orig[VEC3_SCALARS_COUNT] = { 0, 0, 0 };
+		real dir[VEC3_SCALARS_COUNT]  = { 0, 0, -1 };
+		intersectTree(
+		    orig, dir, tree, stack, pool->vertexPool, NULL, intersect);
+		if(intersect.intersectionSide == 0)
+			dof_.setFocusDistance(scene->camera.zNear);
+		else
+			dof_.setFocusDistance(intersect.depth);
+		dof_.updatePattern(5, 2);
+	}
+
+	multithread.execute(RayTracer::threadRenderTask, this);
 }
 
 } // namespace proxo

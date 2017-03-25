@@ -12,7 +12,7 @@
 
 #define SCREEN_WIDTH 1366
 #define SCREEN_HEIGHT 768
-#define SAMPLE_SIZE 2
+#define SAMPLE_SIZE 1
 
 using namespace proxo;
 
@@ -45,11 +45,14 @@ int main(int argc, char** argv)
 	Buffer buf(SCREEN_WIDTH * SAMPLE_SIZE, SCREEN_HEIGHT * SAMPLE_SIZE);
 	scene.camera.setScreenSize(
 	    SCREEN_WIDTH * SAMPLE_SIZE, SCREEN_HEIGHT * SAMPLE_SIZE);
-	scene.print();
+	scene.printSize();
+	
 	Engine realTimeEngine(&buf, &scene);
 	realTimeEngine.createMatchingPool();
+
 	RayTracer rayTracer(&buf, &scene);
 	rayTracer.createMatchingPool();
+	rayTracer.setDepthOfFieldWithAutoFocus(0.02);
 
 	CameraController controller;
 	controller.setCamera(&scene.camera);

@@ -12,6 +12,7 @@ void normalize(vec4 in, vec4 out);
 void normalize(vec3 v);
 void reflect(vec4 i, vec4 normal, vec4 reflectOut);
 real squaredLength(vec3 a);
+real squaredDistance(vec3 pointA, vec3 pointB);
 void substract(vec4 a, vec4 b, vec4 out);
 void multiply(vec4 a, real k);
 bool isFaceOrientationZPositive(vec4 A, vec4 B, vec4 C);
@@ -60,6 +61,14 @@ inline void reflect(vec4 i, vec4 normal, vec4 reflectOut)
 inline real squaredLength(vec3 a)
 {
 	return a[0] * a[0] + a[1] * a[1] + a[2] * a[2];
+}
+
+inline real squaredDistance(vec3 pointA, vec3 pointB)
+{
+	real d[VEC4_SCALARS_COUNT];
+	substract(pointA, pointB, d);
+
+	return squaredLength(d);
 }
 
 inline void substract(vec4 a, vec4 b, vec4 out)

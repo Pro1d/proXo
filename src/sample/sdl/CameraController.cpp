@@ -82,8 +82,6 @@ bool CameraController::handleEvent(SDL_Event& event)
 			break;
 		case SDL_MOUSEMOTION:
 			if(event.motion.xrel != 0 && isMouseGrabbed) {
-				printf("mouse %d (%d) %d (%d)\n", event.motion.x,
-				    event.motion.xrel, event.motion.y, event.motion.yrel);
 				if(mouseMapping.count(MOUSE_X) > 0) {
 					int action = mouseMapping[MOUSE_X];
 					if(ROTATE_BACKWARD <= action && action <= ROTATE_LEFT) {

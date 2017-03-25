@@ -20,6 +20,7 @@ public:
 	void setIntensity(real i);
 	void setReductionFactor(real i);
 	void updateDistanceMax();
+	real getDistanceMax();
 	void setFallOff(real i);
 	void setCutOff(real i);
 

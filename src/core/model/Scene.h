@@ -15,6 +15,7 @@ public:
 	Scene();
 	~Scene();
 	void print();
+	void printSize();
 	void getCounts(positive& vertices, positive& faces, positive& lights);
 
 	Container* world;

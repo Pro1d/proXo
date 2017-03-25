@@ -3,6 +3,7 @@
 #include "core/math/Vector.h"
 #include "core/math/type.h"
 #include <algorithm>
+#include <limits>
 
 namespace proxo {
 
@@ -39,12 +40,14 @@ void Light::setDirection(vec3 dir)
 	direction[1] = dir[1];
 	direction[2] = dir[2];
 }
+
 void Light::setPosition(vec3 pos)
 {
 	position[0] = pos[0];
 	position[1] = pos[1];
 	position[2] = pos[2];
 }
+
 void Light::setColor(vec3 c)
 {
 	color[0] = c[0];
@@ -57,6 +60,7 @@ void Light::setIntensity(real i)
 	intensity = i;
 	updateDistanceMax();
 }
+
 void Light::setReductionFactor(real i)
 {
 	reductionFactor = i;
@@ -67,11 +71,20 @@ void Light::updateDistanceMax()
 	real k = 1.0 / 255;
 	if(reductionFactor > 0)
 		distanceMax = (intensity - k) / (k * reductionFactor);
+	else
+		distanceMax = std::numeric_limits<real>::infinity();
 }
+
+real Light::getDistanceMax()
+{
+	return distanceMax;
+}
+
 void Light::setFallOff(real i)
 {
 	fallOff = cos(toRadians(i));
 }
+
 void Light::setCutOff(real i)
 {
 	cutOff = cos(toRadians(i));
