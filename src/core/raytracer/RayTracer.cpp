@@ -1,6 +1,7 @@
 #include "RayTracer.h"
 #include "Intersection.h"
 #include "Physic.h"
+#include "DepthOfField.h"
 #include "core/math/Vector.h"
 #include "core/math/type.h"
 #include <cstdio>
@@ -39,6 +40,11 @@ void RayTracer::createMatchingPool()
 
 void threadRenderTask(void* data, positive threadId, positive threadsCount)
 {
+	DepthOfField dof;
+	dof.setAperture(0.01);
+	dof.setFocusDistance(2);
+	dof.updatePattern(5, 2);
+
 	RayTracer* that = (RayTracer*) data;
 	TreeStack stack(512);
 
@@ -54,6 +60,7 @@ void threadRenderTask(void* data, positive threadId, positive threadsCount)
 	for(positive y = threadId; y < that->imageBuffer->height;
 	    y += threadsCount) {
 		if(threadId == 0) printf("%d%%\n", y*100/that->imageBuffer->height);
+
 		for(positive x = 0; x < that->imageBuffer->width; x++) {
 			rayDir[0] = ((real) x / cam.screenWidth) * dx + xmin;
 			rayDir[1] = (1 - (real) y / cam.screenHeight) * dy + ymin;
@@ -63,6 +70,21 @@ void threadRenderTask(void* data, positive threadId, positive threadsCount)
 			vec4 pxl = that->imageBuffer->getPtr(x, y);
 
 			that->getColor(rayOrig, rayDir, 1, 1, NULL, pxl + 1, pxl, stack);
+
+			positive count = 1;
+			for(DepthOfField::OriginsIterator oi = dof.begin(); oi != dof.end(); ++oi, count++) {
+				real p[VEC3_SCALARS_COUNT], d;
+				real ro[VEC4_SCALARS_COUNT], rd[VEC4_SCALARS_COUNT];
+				dof.getDirection(rayDir, oi, rd, ro);
+				that->getColor(ro, rd, 1, 1, NULL, p, &d, stack);
+				pxl[1] += p[0];
+				pxl[2] += p[1];
+				pxl[3] += p[2];
+			}
+
+			pxl[1] /= count;
+			pxl[2] /= count;
+			pxl[3] /= count;
 		}
 	}
 }
@@ -148,7 +170,16 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 
 		/// Normal, might be overided by normal map
 		real normal[VEC4_SCALARS_COUNT] = {0,0,0,0};
-		bool normalInitialized = false;
+		normal[0] = Ka * pool->normalPool[Ia * VEC4_SCALARS_COUNT + 0]
+			+ Kb * pool->normalPool[Ib * VEC4_SCALARS_COUNT + 0]
+			+ Kc * pool->normalPool[Ic * VEC4_SCALARS_COUNT + 0];
+		normal[1] = Ka * pool->normalPool[Ia * VEC4_SCALARS_COUNT + 1]
+			+ Kb * pool->normalPool[Ib * VEC4_SCALARS_COUNT + 1]
+			+ Kc * pool->normalPool[Ic * VEC4_SCALARS_COUNT + 1];
+		normal[2] = Ka * pool->normalPool[Ia * VEC4_SCALARS_COUNT + 2]
+			+ Kb * pool->normalPool[Ib * VEC4_SCALARS_COUNT + 2]
+			+ Kc * pool->normalPool[Ic * VEC4_SCALARS_COUNT + 2];
+		normalize(normal);
 
 		/// Textures
 		Texture* texture = pool->texturePool[intersect.face[3]];
@@ -195,25 +226,10 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 				    texel + texture->getFieldOffset(Texture::NORMAL_XYZ);
 				Texture::normalMapToWorldCoord(
 				    Pa, Pb, Pc, mapa, mapb, mapc, normal_tex, normal);
-				multiply(normal, intersect.intersectionSide);
-				normalInitialized = true;
 			}
 		}
-		if(!normalInitialized) {
-			normal[0] = Ka * pool->normalPool[Ia * VEC4_SCALARS_COUNT + 0]
-			    + Kb * pool->normalPool[Ib * VEC4_SCALARS_COUNT + 0]
-			    + Kc * pool->normalPool[Ic * VEC4_SCALARS_COUNT + 0];
-			normal[1] = Ka * pool->normalPool[Ia * VEC4_SCALARS_COUNT + 1]
-			    + Kb * pool->normalPool[Ib * VEC4_SCALARS_COUNT + 1]
-			    + Kc * pool->normalPool[Ic * VEC4_SCALARS_COUNT + 1];
-			normal[2] = Ka * pool->normalPool[Ia * VEC4_SCALARS_COUNT + 2]
-			    + Kb * pool->normalPool[Ib * VEC4_SCALARS_COUNT + 2]
-			    + Kc * pool->normalPool[Ic * VEC4_SCALARS_COUNT + 2];
-			normalize(normal);
-			multiply(normal, intersect.intersectionSide);
-			normalInitialized = true;
 
-		}
+		multiply(normal, intersect.intersectionSide);
 
 		colorOut[0] = emissive[0];
 		colorOut[1] = emissive[1];
@@ -240,8 +256,10 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 					// lighting!
 					// TODO compute fresnel coef for reflection/specular
 					// intensity (translucent object)
+					real ambient = mat.ambient * (1-mat.reflect);
+					real diffuse = mat.diffuse * (1-mat.reflect);
 					pool->lightPool[i]->lighting(color, normal, point,
-					    mat.ambient, mat.diffuse, mat.specular, mat.shininess,
+					    ambient, diffuse, mat.specular, mat.shininess,
 					    colorOut);
 				}
 			}
@@ -308,7 +326,7 @@ void RayTracer::render()
 
 	tree = new KDTree(*pool, pool->facePool, 0, pool->currentFacesCount);
 	tree->build(*pool);
-	tree->print(0);
+	//tree->print();
 
 	multithread.execute(threadRenderTask, this);
 }

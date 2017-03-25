@@ -69,7 +69,7 @@ void KDTree::build(Pool& pool)
 	real size[3] = { bounds[BOUND_X_MAX] - bounds[BOUND_X_MIN],
 		bounds[BOUND_Y_MAX] - bounds[BOUND_Y_MIN],
 		bounds[BOUND_Z_MAX] - bounds[BOUND_Z_MIN] };
-	printf("%d %d %d\n", isLocked[0], isLocked[1], isLocked[2]);
+
 	if(facesCount < MINIMUM_FACES_TREE
 	    || (isLocked[0] && isLocked[1] && isLocked[2])) {
 		isLeaf = true;
@@ -92,7 +92,7 @@ void KDTree::build(Pool& pool)
 	}
 
 	// choose cut value
-	real cutValue = mean / (3*facesCount); //size[cutAxis] / 2 + bounds[cutAxis];
+	real cutValue = mean / (3*facesCount);
 
 	// separate faces in second side from faces in first/middle side
 	positive firstBegin = 0, firstEnd = facesCount;
@@ -140,7 +140,7 @@ void KDTree::build(Pool& pool)
 	firstEnd = middleBegin;
 
 	// recc build
-	bool isWiselySplitted = firstBegin < firstEnd && secondBegin < secondEnd && (middleEnd-middleBegin) < facesCount/2;
+	bool isWiselySplitted = firstBegin < firstEnd && secondBegin < secondEnd;
 	if(isWiselySplitted) {
 		if(middleBegin < middleEnd) {
 			middleSubTree =

@@ -25,7 +25,7 @@ public:
 	~KDTree();
 	void build(Pool& pool);
 	void setBounds(Pool& pool);
-	void print(positive depth);
+	void print(positive depth = 0);
 
 	real bounds[6]; // xmin, ymin, zmin, xmax, ymax, zmax
 	KDTree* middleSubTree;
