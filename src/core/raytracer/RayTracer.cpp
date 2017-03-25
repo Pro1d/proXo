@@ -42,20 +42,6 @@ void RayTracer::createMatchingPool()
 	pool = new Pool(vertices, faces, lights, scene->objects.size());
 }
 
-void RayTracer::setDepthOfField(real distanceFocus, real aperture)
-{
-	dof_.setAperture(aperture);
-	dof_.setFocusDistance(distanceFocus);
-	dof_.updatePattern(5, 2);
-	autofocus_ = false;
-}
-
-void RayTracer::setDepthOfFieldWithAutoFocus(real aperture)
-{
-	dof_.setAperture(aperture);
-	autofocus_ = true;
-}
-
 void RayTracer::threadRenderTask(
     void* data, positive threadId, positive threadsCount)
 {
@@ -361,7 +347,7 @@ void RayTracer::render()
 
 	// Auto focus enabled: find distance to nearest object in middle of the
 	// screen
-	if(autofocus_) {
+	if(scene->camera.autofocus) {
 		IntersectionData intersect;
 		TreeStack stack(512);
 		real orig[VEC3_SCALARS_COUNT] = { 0, 0, 0 };
@@ -369,11 +355,15 @@ void RayTracer::render()
 		intersectTree(
 		    orig, dir, tree, stack, pool->vertexPool, NULL, intersect);
 		if(intersect.intersectionSide == 0)
-			dof_.setFocusDistance(scene->camera.zNear);
+			dof_.setFocusDistance(scene->camera.distanceFocus);
 		else
 			dof_.setFocusDistance(intersect.depth);
-		dof_.updatePattern(5, 2);
 	}
+	else {
+		dof_.setFocusDistance(scene->camera.distanceFocus);
+	}
+	dof_.setAperture(scene->camera.aperture);
+	dof_.updatePattern(5, 2);
 
 	multithread.execute(RayTracer::threadRenderTask, this);
 }

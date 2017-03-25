@@ -8,8 +8,17 @@
 namespace proxo {
 
 Camera::Camera()
-    : fieldOfView(70 * PI / 180), zNear(0.5), zFar(100), screenWidth(512),
-      screenHeight(512)
+    : fieldOfView(70 * PI / 180),
+      zNear(0.5),
+      zFar(100),
+      screenWidth(768),
+      screenHeight(512),
+      targetWidth(768),
+      targetHeight(512),
+      supersampling(0),
+      aperture(0),
+      distanceFocus(1),
+      autofocus(true)
 {
 	identity(position);
 	identity(projection);
@@ -98,13 +107,6 @@ void Camera::setOrthographics(real zNear, real zFar, real width, real height)
 	fieldOfView = 0;
 }
 
-void Camera::setScreenSize(real w, real h)
-{
-	screenWidth  = w;
-	screenHeight = h;
-	updateProjection();
-}
-
 void Camera::setFieldOfView(real fov)
 {
 	fieldOfView = fov;
@@ -165,6 +167,30 @@ void Camera::setDirection(vec3 dir)
 		multiplyMM(rotations, position, tmp);
 		copyMatrix(position, tmp);
 	}
+}
+
+void Camera::setAperture(real radius)
+{
+	aperture = radius;
+}
+
+void Camera::setDistanceFocus(real dist)
+{
+	distanceFocus = dist;
+}
+
+void Camera::setAutoFocus(bool enable)
+{
+	autofocus = enable;
+}
+
+void Camera::setRenderTarget(positive w, positive h, positive ss)
+{
+	targetWidth   = w;
+	targetHeight  = h;
+	supersampling = ss;
+	screenWidth   = w << ss;
+	screenHeight  = h << ss;
 }
 
 bool Camera::isShpereVisible(vec3 center, real radius)

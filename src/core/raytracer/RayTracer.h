@@ -16,8 +16,6 @@ public:
 	RayTracer(Buffer* imageBuffer, Scene* scene);
 	~RayTracer();
 	void setScene(Scene* scene);
-	void setDepthOfField(real distanceFocus, real apertureSize);
-	void setDepthOfFieldWithAutoFocus(real apertureSize);
 
 	void createMatchingPool();
 	void render();
@@ -35,7 +33,6 @@ public:
 	SceneToPool sceneToPool;
 private:
 	DepthOfField dof_;
-	bool autofocus_;
 };
 
 } // namespace proxo

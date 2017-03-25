@@ -26,15 +26,8 @@ int main(int argc, char** argv)
 	// make sure SDL cleans up before exit
 	atexit(SDL_Quit);
 
-	// create a new window
-	SDL_Surface* screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 24,
-	    SDL_HWACCEL | SDL_HWSURFACE | SDL_DOUBLEBUF);
-	if(!screen) {
-		printf("Unable to set %dx%d video: %s\n", SCREEN_WIDTH, SCREEN_HEIGHT,
-		    SDL_GetError());
-		return 4;
-	}
 
+	// Load scene from file
 	SceneParser parser;
 	Scene scene;
 	const char* sceneFileName = argc >= 2 ? argv[1] : "parc.scene";
@@ -42,17 +35,28 @@ int main(int argc, char** argv)
 		printf("readScene failed!\n");
 		return 2;
 	}
-	Buffer buf(SCREEN_WIDTH * SAMPLE_SIZE, SCREEN_HEIGHT * SAMPLE_SIZE);
-	scene.camera.setScreenSize(
-	    SCREEN_WIDTH * SAMPLE_SIZE, SCREEN_HEIGHT * SAMPLE_SIZE);
 	scene.printSize();
+
+	positive screen_width = scene.camera.targetWidth;
+	positive screen_height = scene.camera.targetHeight;
+	positive sample_size = 1 << scene.camera.supersampling;
+
+	// create a new window
+	SDL_Surface* screen = SDL_SetVideoMode(screen_width, screen_height, 24,
+	    SDL_HWACCEL | SDL_HWSURFACE | SDL_DOUBLEBUF);
+	if(!screen) {
+		printf("Unable to set %dx%d video: %s\n", screen_width, screen_height,
+		    SDL_GetError());
+		return 4;
+	}
+	
+	Buffer buf(screen_width * sample_size, screen_height * sample_size);
 	
 	Engine realTimeEngine(&buf, &scene);
 	realTimeEngine.createMatchingPool();
 
 	RayTracer rayTracer(&buf, &scene);
 	rayTracer.createMatchingPool();
-	rayTracer.setDepthOfFieldWithAutoFocus(0.02);
 
 	CameraController controller;
 	controller.setCamera(&scene.camera);
@@ -80,11 +84,11 @@ int main(int argc, char** argv)
 	controller.assignMouse(YAW_LEFT, MOUSE_X);
 
 	SDL_Surface* buffer = SDL_CreateRGBSurface(
-	    SDL_HWSURFACE, SCREEN_WIDTH, SCREEN_HEIGHT, 24, 0, 0, 0, 0);
+	    SDL_HWSURFACE, screen_width, screen_height, 24, 0, 0, 0, 0);
 	Uint32 time               = SDL_GetTicks();
 	bool rayTracingRenderView = false;
 
-	BufferToBitmap btb(buf, buffer, SAMPLE_SIZE);
+	BufferToBitmap btb(buf, buffer, sample_size);
 
 	// program main loop
 	bool done = false;
@@ -145,7 +149,7 @@ int main(int argc, char** argv)
 			printf("%dms \n", SDL_GetTicks() - t);
 		}
 		else {
-			bufferToBitmap24bpp(buf, buffer, SAMPLE_SIZE);
+			bufferToBitmap24bpp(buf, buffer, sample_size);
 		}
 
 		// clear screen

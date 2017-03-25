@@ -25,7 +25,7 @@ materials
 	name water absorption 0 refractive_index 1.33 reflect 0
 end
 
-camera pos 5 -8 2 lookat 0 -2 2.95 zmax 100 fov 70
+camera target 1366 768 1 aperture 0.01 pos 5 -8 2 lookat 0 -2 2.95 zmax 100 fov 70
 
 world 2 2 3 
     light sun dir 6 2 -1 intensity 0.6
