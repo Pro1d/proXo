@@ -59,6 +59,10 @@ enum {
 	FOV,
 	LOOKAT,
 	ZMAX,
+	APERTURE,
+	FOCUS,
+	AUTOFOCUS,
+	TARGET,
 	/** Ray Tracing
     REFRACTIVE_INDEX, REFRACTIVE_INDEX_R, REFRACTIVE_INDEX_G,
     REFRACTIVE_INDEX_B,
@@ -67,14 +71,13 @@ enum {
     */
 	KEY_COUNT
 };
-static const char* keyName[KEY_COUNT] = {
-	"materials", "objects", "body", "world", "skybox", "name", "data", "light",
-	"sun", "point", "spot", "dir", "pos", "cutoff", "falloff", "attenuation",
-	"intensity", "color", "color255", "ambient", "diffuse", "specular",
-	"shininess", "emissive", "normal", "reflect", "refractive_index",
-	"absorption", "object", "container", "end", "t", "s", "r", "tx", "ty", "tz",
-	"rx", "ry", "rz", "material", "camera", "fov", "lookat", "zmax",
-};
+static const char* keyName[KEY_COUNT] = { "materials", "objects", "body",
+	"world", "skybox", "name", "data", "light", "sun", "point", "spot", "dir",
+	"pos", "cutoff", "falloff", "attenuation", "intensity", "color", "color255",
+	"ambient", "diffuse", "specular", "shininess", "emissive", "normal",
+	"reflect", "refractive_index", "absorption", "object", "container", "end",
+	"t", "s", "r", "tx", "ty", "tz", "rx", "ry", "rz", "material", "camera",
+	"fov", "lookat", "zmax", "aperture", "focus", "autofocus", "target" };
 char commmentCharacter = '#';
 
 enum {
@@ -140,8 +143,10 @@ bool SceneParser::readScene(
 							state = ST_CAMERA;
 							break;
 						default:
-							if(word[0] != '\0')
+							if(word[0] != '\0') {
 								state = ST_ERROR;
+								printf("Error: Unexpected: \'%s\'\n", word);
+							}
 							break;
 					}
 				}
@@ -163,6 +168,7 @@ bool SceneParser::readScene(
 				break;
 			default:
 				state = ST_ERROR;
+				printf("Error: Unexpected: \'%s\'\n", word);
 				break;
 		}
 	}
@@ -182,8 +188,12 @@ bool SceneParser::readScene(
 void SceneParser::parseWorld(Scene& scene)
 {
 	int o, c, l;
-	if(scene.world != NULL || !nextInteger(o) || !nextInteger(c)
-	    || !nextInteger(l)) {
+	if(scene.world != NULL) {
+		printf("Error: Block \'world\' is already defined\n");
+		state = ST_ERROR;
+		return;
+	}
+	if(!nextInteger(o) || !nextInteger(c) || !nextInteger(l)) {
 		state = ST_ERROR;
 		return;
 	}
@@ -195,8 +205,12 @@ void SceneParser::parseWorld(Scene& scene)
 void SceneParser::parseBody(Scene& scene)
 {
 	int o, c, l;
-	if(scene.body != NULL || !nextInteger(o) || !nextInteger(c)
-	    || !nextInteger(l)) {
+	if(scene.body != NULL) {
+		printf("Error: Block \'body\' is already defined\n");
+		state = ST_ERROR;
+		return;
+	}
+	if(!nextInteger(o) || !nextInteger(c) || !nextInteger(l)) {
 		state = ST_ERROR;
 		return;
 	}
@@ -255,7 +269,12 @@ void SceneParser::parseStateCamera(Scene& scene)
 				break;
 			case FOV:
 				real fov;
-				if(!nextReal(fov) || fov <= 0 || fov >= 180) {
+				if(!nextReal(fov)) {
+					state = ST_ERROR;
+					break;
+				}
+				else if(fov <= 0 || fov >= 180) {
+					printf("Error: The value of fov must be in range 0..180\n");
 					state = ST_ERROR;
 					break;
 				}
@@ -269,8 +288,41 @@ void SceneParser::parseStateCamera(Scene& scene)
 				}
 				scene.camera.setDepthMax(z);
 				break;
+			case APERTURE:
+				real radius;
+				if(!nextReal(radius)) {
+					state = ST_ERROR;
+					break;
+				}
+				scene.camera.setAperture(radius);
+				break;
+			case FOCUS:
+				real zfocus;
+				if(!nextReal(zfocus)) {
+					state = ST_ERROR;
+					break;
+				}
+				scene.camera.setDistanceFocus(zfocus);
+				break;
+			case AUTOFOCUS:
+				scene.camera.setAutoFocus(true);
+				break;
+			case TARGET:
+				integer size[3];
+				if(!nextIntegers(size, 3)) {
+					state = ST_ERROR;
+					return;
+				}
+				else if(size[0] <= 0 || size[1] <= 0 || size[2] < 0) {
+					printf("Error: The render target's width and height must be > 0 and supersampling >= 0\n"); 
+					state = ST_ERROR;
+					break;
+				}
+				scene.camera.setRenderTarget((positive) size[0], (positive) size[1], (positive) size[2]);
+				break;
 			default:
 				state = ST_ERROR;
+				printf("Error: Unexpected: \'%s\'\n", word);
 				break;
 		}
 	}
@@ -357,6 +409,7 @@ void SceneParser::parseStateMaterials(Scene& scene)
 				break;
 			default:
 				state = ST_ERROR;
+				printf("Error: Unexpected: \'%s\'\n", word);
 				break;
 		}
 	}
@@ -467,6 +520,7 @@ void SceneParser::parseStateObjects(Scene& scene)
 				break;
 			default:
 				state = ST_ERROR;
+				printf("Error: Unexpected: \'%s\'\n", word);
 				break;
 		}
 	}
@@ -566,6 +620,7 @@ void SceneParser::parseContainer(
 				return;
 			default:
 				state = ST_ERROR;
+				printf("Error: Unexpected: \'%s\'\n", word);
 				break;
 		}
 	}
@@ -578,11 +633,13 @@ bool SceneParser::parseObject(Container& container, Scene& scene)
 	std::string name;
 
 	if(!nextWord(word)) {
+		printf("Error: Missing object\'s name\n");
 		state = ST_ERROR;
 		return false;
 	}
 	name = word;
 	if(scene.objects.count(name) == 0) {
+		printf("Error: Unknown object \'%s\'\n", word);
 		state = ST_ERROR;
 		return false;
 	}
@@ -664,6 +721,7 @@ bool SceneParser::parseObject(Container& container, Scene& scene)
 				}
 				name = word;
 				if(scene.materials.count(name) == 0) {
+					printf("Error: Unknown material \'%s\'\n", word);
 					state = ST_ERROR;
 					break;
 				}
@@ -697,6 +755,7 @@ bool SceneParser::parseObject(Container& container, Scene& scene)
 				return true;
 			default:
 				state = ST_ERROR;
+				printf("Error: Unexpected: \'%s\'\n", word);
 				break;
 		}
 	}
@@ -835,6 +894,7 @@ bool SceneParser::parseLight(Container& container, Scene& scene)
 
 			case SPOT:
 				if(light != NULL) {
+					printf("Error: \'%s\', light type is already defined\n", word);
 					state = ST_ERROR;
 					break;
 				}
@@ -843,6 +903,7 @@ bool SceneParser::parseLight(Container& container, Scene& scene)
 				break;
 			case SUN:
 				if(light != NULL) {
+					printf("Error: \'%s\', light type is already defined\n", word);
 					state = ST_ERROR;
 					break;
 				}
@@ -851,6 +912,7 @@ bool SceneParser::parseLight(Container& container, Scene& scene)
 				break;
 			case POINT:
 				if(light != NULL) {
+					printf("Error: \'%s\', light type is already defined\n", word);
 					state = ST_ERROR;
 					break;
 				}
@@ -859,6 +921,7 @@ bool SceneParser::parseLight(Container& container, Scene& scene)
 				break;
 			case AMBIENT:
 				if(light != NULL) {
+					printf("Error: \'%s\', light type is already defined\n", word);
 					state = ST_ERROR;
 					break;
 				}
@@ -868,6 +931,7 @@ bool SceneParser::parseLight(Container& container, Scene& scene)
 
 			case LIGHT:
 				if(light == NULL) {
+					printf("Error: uncomplete light definition\n");
 					delete[] matrix;
 					state = ST_ERROR;
 				}
@@ -878,6 +942,7 @@ bool SceneParser::parseLight(Container& container, Scene& scene)
 				return false;
 			case OBJECT:
 				if(light == NULL) {
+					printf("Error: uncomplete light definition\n");
 					delete[] matrix;
 					state = ST_ERROR;
 				}
@@ -888,6 +953,7 @@ bool SceneParser::parseLight(Container& container, Scene& scene)
 				return false;
 			case CONTAINER:
 				if(light == NULL) {
+					printf("Error: uncomplete light definition\n");
 					delete[] matrix;
 					state = ST_ERROR;
 				}
@@ -906,6 +972,7 @@ bool SceneParser::parseLight(Container& container, Scene& scene)
 				return false;
 			case END:
 				if(light == NULL) {
+					printf("Error: uncomplete light definition\n");
 					delete[] matrix;
 					state = ST_ERROR;
 				}
@@ -915,6 +982,7 @@ bool SceneParser::parseLight(Container& container, Scene& scene)
 				return true;
 			default:
 				state = ST_ERROR;
+				printf("Error: Unexpected: \'%s\'\n", word);
 				break;
 		}
 	}
@@ -963,9 +1031,37 @@ bool SceneParser::nextInteger(int& out)
 	}
 
 	if(!success)
-		printf("%d nextInteger failed\n", state);
+		printf("Error: %d nextInteger failed\n", state);
 
 	return success;
+}
+
+bool SceneParser::nextIntegers(integer* out, int count)
+{
+	char w[20];
+	char* endptr;
+	int total = count;
+	while(--count >= 0) {
+		bool success = false;
+		if(fscanf(file, "%s", w) == 1) {
+			if(!filterComment(w)) {
+				*out = (integer) strtoll(w, &endptr, 10);
+				out++;
+				success = (*endptr == '\0');
+			}
+			else {
+				count++;
+				success = true;
+			}
+		}
+
+		if(!success) {
+			printf("Error: %d nextIntegers failed %d/%d\n", state, count + 1, total);
+			return false;
+		}
+	}
+
+	return true;
 }
 
 bool SceneParser::nextReal(real& out)
@@ -984,7 +1080,7 @@ bool SceneParser::nextReal(real& out)
 	}
 
 	if(!success)
-		printf("%d nextReal failed\n", state);
+		printf("Error: %d nextReal failed\n", state);
 
 	return success;
 }
@@ -1009,7 +1105,7 @@ bool SceneParser::nextReals(real* out, int count)
 		}
 
 		if(!success) {
-			printf("%d nextReals failed %d/%d\n", state, count + 1, total);
+			printf("Error: %d nextReals failed %d/%d\n", state, count + 1, total);
 			return false;
 		}
 	}
@@ -1036,6 +1132,6 @@ int SceneParser::wordToKey(char* w)
 			return i;
 		}
 	}
-	printf("%d Unknown key word \"%s\"\n", state, w);
+	printf("Error: %d Unknown key word \"%s\"\n", state, w);
 	return -1;
 }

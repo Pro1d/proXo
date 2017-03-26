@@ -14,12 +14,15 @@ public:
 	void setDepthMax(real zFar);
 	void setFrustrum(real zNear, real zFar, real width, real height);
 	void setOrthographics(real zNear, real zFar, real width, real height);
-	void setScreenSize(real w, real h);
 	void updateProjection();
 
 	void lookAt(vec3 target);
 	void setPosition(vec3 pos);
 	void setDirection(vec3 dir);
+	void setAperture(real radius);
+	void setDistanceFocus(real dist);
+	void setAutoFocus(bool enable);
+	void setRenderTarget(positive w, positive h, positive ss);
 
 	bool isShpereVisible(vec3 center, real radius);
 
@@ -31,6 +34,9 @@ public:
 	real xmin, xmax;
 	real ymin, ymax;
 	real screenWidth, screenHeight;
+	positive targetWidth, targetHeight, supersampling;
+	real aperture, distanceFocus;
+	bool autofocus;
 };
 
 } // namespace proxo

@@ -16,8 +16,6 @@ public:
 	RayTracer(Buffer* imageBuffer, Scene* scene);
 	~RayTracer();
 	void setScene(Scene* scene);
-	void setDepthOfField(real distanceFocus, real apertureSize);
-	void setDepthOfFieldWithAutoFocus(real apertureSize);
 
 	void createMatchingPool();
 	void render();
@@ -25,7 +23,7 @@ public:
 	
 	positive getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 	    real maxIntensity, positive* lastFace, vec3 colorOut, real* depthOut,
-	    TreeStack& stack);
+	    TreeStack& stack, positive depth);
 
 	Scene* scene;
 	Pool* pool;
@@ -35,7 +33,7 @@ public:
 	SceneToPool sceneToPool;
 private:
 	DepthOfField dof_;
-	bool autofocus_;
+	positive depthMax;
 };
 
 } // namespace proxo

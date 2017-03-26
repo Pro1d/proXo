@@ -22,6 +22,7 @@ protected:
 	bool filterComment(const char* w);
 	bool nextWord(char* w);
 	bool nextInteger(int& out);
+	bool nextIntegers(proxo::integer* out, int count);
 	bool nextReal(proxo::real& out);
 	bool nextReals(proxo::real* out, int count);
 	void skipLine();
