@@ -33,7 +33,7 @@ world 2 2 3
 
 	object puddle material water
 	object ground
-	container 4 3 0 
+	container 8 8 4 
         object grass
 
         container 2 0 0 ty -2 

@@ -16,7 +16,8 @@ RayTracer::RayTracer(Buffer* imageBuffer, Scene* scene)
       tree(NULL),
       imageBuffer(imageBuffer),
       multithread(THREADS_COUNT),
-      sceneToPool(multithread)
+      sceneToPool(multithread),
+	  depthMax(30)
 {
 }
 
@@ -71,7 +72,7 @@ void RayTracer::threadRenderTask(
 
 			vec4 pxl = that->imageBuffer->getPtr(x, y);
 
-			that->getColor(rayOrig, rayDir, 1, 1, NULL, pxl + 1, pxl, stack);
+			that->getColor(rayOrig, rayDir, 1, 1, NULL, pxl + 1, pxl, stack, 0);
 
 			positive count = 1;
 			for(DepthOfField::OriginsIterator oi = that->dof_.begin();
@@ -79,7 +80,7 @@ void RayTracer::threadRenderTask(
 				real p[VEC3_SCALARS_COUNT], d;
 				real ro[VEC4_SCALARS_COUNT], rd[VEC4_SCALARS_COUNT];
 				that->dof_.getDirection(rayDir, oi, rd, ro);
-				that->getColor(ro, rd, 1, 1, NULL, p, &d, stack);
+				that->getColor(ro, rd, 1, 1, NULL, p, &d, stack, 0);
 				pxl[1] += p[0];
 				pxl[2] += p[1];
 				pxl[3] += p[2];
@@ -98,13 +99,13 @@ void RayTracer::threadRenderTask(
 
 positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
     real maxIntensity, positive* lastFace, vec3 colorOut, real* depthOut,
-    TreeStack& stack)
+    TreeStack& stack, positive depth)
 {
 	colorOut[0] = 0;
 	colorOut[1] = 0;
 	colorOut[2] = 0;
 
-	if(maxIntensity < (real) 1 / 255)
+	if(maxIntensity < (real) 1 / 255 || depth >= depthMax)
 		return 0;
 
 	IntersectionData intersect;
@@ -300,7 +301,7 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 				        refractDepth); // with material color
 				getColor(point, refractDir, mat.refractiveIndex,
 				    refractIntensity * (1 - absorption) * maxIntensity,
-				    intersect.face, refractColor, &refractDepth, stack);
+				    intersect.face, refractColor, &refractDepth, stack, depth+1);
 				colorOut[0] +=
 				    refractColor[0] * refractIntensity * (1 - absorption);
 				colorOut[1] +=
@@ -320,7 +321,7 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 			real reflectDepth;
 			getColor(point, reflectDir, currentRefractiveIndex,
 			    reflectIntensity * maxIntensity, intersect.face, reflectColor,
-			    &reflectDepth, stack);
+			    &reflectDepth, stack, depth+1);
 			colorOut[0] += reflectColor[0] * reflectIntensity;
 			colorOut[1] += reflectColor[1] * reflectIntensity;
 			colorOut[2] += reflectColor[2] * reflectIntensity;
@@ -347,7 +348,7 @@ void RayTracer::render()
 
 	// Auto focus enabled: find distance to nearest object in middle of the
 	// screen
-	if(scene->camera.autofocus) {
+	/*if(scene->camera.autofocus) {
 		IntersectionData intersect;
 		TreeStack stack(512);
 		real orig[VEC3_SCALARS_COUNT] = { 0, 0, 0 };
@@ -363,7 +364,7 @@ void RayTracer::render()
 		dof_.setFocusDistance(scene->camera.distanceFocus);
 	}
 	dof_.setAperture(scene->camera.aperture);
-	dof_.updatePattern(5, 2);
+	dof_.updatePattern(5, 2);*/
 
 	multithread.execute(RayTracer::threadRenderTask, this);
 }

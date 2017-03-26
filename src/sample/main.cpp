@@ -10,10 +10,6 @@
 #include "sdl/wrapper.h"
 #include <SDL/SDL.h>
 
-#define SCREEN_WIDTH 1366
-#define SCREEN_HEIGHT 768
-#define SAMPLE_SIZE 1
-
 using namespace proxo;
 
 int main(int argc, char** argv)

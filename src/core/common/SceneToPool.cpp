@@ -157,10 +157,16 @@ void SceneToPool::objectToPool(Object& object, Material& material, Pool& pool,
 			return;
 	}
 	
-	// Add Texture to pool
-	positive texture_id = pool.currentTexturesCount;
-	pool.texturePool[texture_id] = object.texture;
-	pool.currentTexturesCount++;
+	// Get texture id in pool (if already in pool)
+	positive texture_id;
+	for(texture_id = 0; texture_id < pool.currentTexturesCount; texture_id++)
+		if(pool.texturePool[texture_id] == object.texture)
+			break;
+	// Add texture to pool if not in pool
+	if(texture_id == pool.currentTexturesCount) {
+		pool.texturePool[texture_id] = object.texture;
+		pool.currentTexturesCount++;
+	}
 
 	// inputs for objectToPoolThread
 	ObjectToPoolInputs inputs = { matrix, &object, &material, &pool, texture_id };

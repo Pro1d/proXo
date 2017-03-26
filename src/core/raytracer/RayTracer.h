@@ -23,7 +23,7 @@ public:
 	
 	positive getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 	    real maxIntensity, positive* lastFace, vec3 colorOut, real* depthOut,
-	    TreeStack& stack);
+	    TreeStack& stack, positive depth);
 
 	Scene* scene;
 	Pool* pool;
@@ -33,6 +33,7 @@ public:
 	SceneToPool sceneToPool;
 private:
 	DepthOfField dof_;
+	positive depthMax;
 };
 
 } // namespace proxo
