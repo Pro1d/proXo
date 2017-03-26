@@ -21,6 +21,7 @@ public:
 
 	OriginsIterator begin();
 	OriginsIterator end();
+	positive getRaysCount();
 
 	void getDirection(
 	    vec3 mainDir, OriginsIterator oi, vec4 outDir, vec4 outOrig);

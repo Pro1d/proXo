@@ -95,6 +95,7 @@ void RayTracer::threadRenderTask(
 			printf("\033[1ARendering... %d%%\n",
 			    y * 100 / that->imageBuffer->height);
 	}
+	printf("\033[1ARendering... 100%%\n");
 }
 
 positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
@@ -348,7 +349,7 @@ void RayTracer::render()
 
 	// Auto focus enabled: find distance to nearest object in middle of the
 	// screen
-	/*if(scene->camera.autofocus) {
+	if(scene->camera.autofocus) {
 		IntersectionData intersect;
 		TreeStack stack(512);
 		real orig[VEC3_SCALARS_COUNT] = { 0, 0, 0 };
@@ -364,7 +365,10 @@ void RayTracer::render()
 		dof_.setFocusDistance(scene->camera.distanceFocus);
 	}
 	dof_.setAperture(scene->camera.aperture);
-	dof_.updatePattern(5, 2);*/
+	dof_.updatePattern(5, 2);
+
+	printf("Render target: %dx%d\n", (integer) scene->camera.screenWidth, (integer) scene->camera.screenHeight);
+	printf("DoF: %d rays\n",dof_.getRaysCount()); 
 
 	multithread.execute(RayTracer::threadRenderTask, this);
 }

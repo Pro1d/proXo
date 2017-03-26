@@ -279,6 +279,7 @@ void SceneParser::parseStateCamera(Scene& scene)
 					break;
 				}
 				scene.camera.setFieldOfView(toRadians(fov));
+				scene.camera.updateProjection();
 				break;
 			case ZMAX:
 				real z;
@@ -287,6 +288,7 @@ void SceneParser::parseStateCamera(Scene& scene)
 					break;
 				}
 				scene.camera.setDepthMax(z);
+				scene.camera.updateProjection();
 				break;
 			case APERTURE:
 				real radius;
@@ -319,6 +321,7 @@ void SceneParser::parseStateCamera(Scene& scene)
 					break;
 				}
 				scene.camera.setRenderTarget((positive) size[0], (positive) size[1], (positive) size[2]);
+				scene.camera.updateProjection();
 				break;
 			default:
 				state = ST_ERROR;

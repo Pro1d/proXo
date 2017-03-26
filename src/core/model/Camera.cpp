@@ -110,7 +110,6 @@ void Camera::setOrthographics(real zNear, real zFar, real width, real height)
 void Camera::setFieldOfView(real fov)
 {
 	fieldOfView = fov;
-	updateProjection();
 }
 
 real Camera::getFieldOfView()

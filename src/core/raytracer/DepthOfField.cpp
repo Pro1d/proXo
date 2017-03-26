@@ -53,6 +53,11 @@ DepthOfField::OriginsIterator DepthOfField::end()
 	return origins_.end();
 }
 
+positive DepthOfField::getRaysCount()
+{
+	return origins_.size();
+}
+
 void DepthOfField::getDirection(
     vec3 mainDir, OriginsIterator oi, vec4 outDir, vec4 outOrig)
 {
