@@ -1,8 +1,9 @@
 #ifndef __RAY_TRACER_H__
 #define __RAY_TRACER_H__
 
-#include "KDTree.h"
 #include "DepthOfField.h"
+#include "Intersection.h"
+#include "KDTree.h"
 #include "core/common/Pool.h"
 #include "core/common/SceneToPool.h"
 #include "core/model/Scene.h"
@@ -19,8 +20,11 @@ public:
 
 	void createMatchingPool();
 	void render();
-	static void threadRenderTask(void* data, positive threadId, positive threadsCount);
-	
+	static void threadRenderTask(
+	    void* data, positive threadId, positive threadsCount);
+
+	void getPointData(IntersectionData& intersect, Pool* pool, Material& mat,
+	    vec4 point, vec4 normal, vec3 color, vec3 emissive);
 	positive getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 	    real maxIntensity, positive* lastFace, vec3 colorOut, real* depthOut,
 	    TreeStack& stack, positive depth);
@@ -31,6 +35,7 @@ public:
 	Buffer* imageBuffer;
 	MultiThread multithread;
 	SceneToPool sceneToPool;
+
 private:
 	DepthOfField dof_;
 	positive depthMax;
@@ -38,4 +43,4 @@ private:
 
 } // namespace proxo
 
-#endif // __ENGINE_H__
+#endif // __RAY_TRACER_H__
