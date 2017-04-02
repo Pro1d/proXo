@@ -53,23 +53,25 @@ integer intersectTriangle(vec3 orig, vec3 dir, vec3 vert0, vec3 vert1,
 }
 
 // paralSize = width / 2, height / 2, depth / 2
-real intersectAxialParallelepiped(
-    vec3 orig, vec3 inv_dir, real* paralMinMax)
+real intersectAxialParallelepiped(vec3 orig, vec3 inv_dir, real* paralMinMax)
 {
 	// ray is of form R + t D; assign min t as thit; normal N
 	real tmin = 0, tmax = std::numeric_limits<real>::infinity();
 	// intersect ray with x, y, z ``slabs'' (k = 0, 1, 2)
 	for(int k = 0; k < 3; k++) {
 		if(inv_dir[k] != std::numeric_limits<real>::infinity()) {
-			real t1 = (paralMinMax[k] - orig[k]) * inv_dir[k]; // plane x_k = -dx_k
-			real t2 = (paralMinMax[k+BOUND_X_MAX] - orig[k]) * inv_dir[k]; // plane x_k = +dx_k
-			tmin    = std::max(tmin, std::min(t1, t2)); // intersect [tmin..
-			tmax    = std::min(tmax, std::max(t1, t2)); // tmax], [t1..t2]
+			real t1 =
+			    (paralMinMax[k] - orig[k]) * inv_dir[k]; // plane x_k = -dx_k
+			real t2 = (paralMinMax[k + BOUND_X_MAX] - orig[k])
+			    * inv_dir[k]; // plane x_k = +dx_k
+			tmin = std::max(tmin, std::min(t1, t2)); // intersect [tmin..
+			tmax = std::min(tmax, std::max(t1, t2)); // tmax], [t1..t2]
 			if(tmax <= tmin)
 				return (real) -1; // no intersection
 		}
 		// ray parallel to plane
-		else if(paralMinMax[k] > orig[k] || orig[k] > paralMinMax[k+BOUND_X_MAX]) {
+		else if(paralMinMax[k] > orig[k]
+		    || orig[k] > paralMinMax[k + BOUND_X_MAX]) {
 			return (real) -1; // no intersection
 		}
 	}
@@ -79,16 +81,16 @@ real intersectAxialParallelepiped(
 
 void pushSubTree(vec3 orig, vec3 inv_dir, KDTree* tree, TreeStack& stack)
 {
-	real distFirst = intersectAxialParallelepiped(orig, inv_dir,
-	    tree->firstSubTree->bounds);
-	real distSecond = intersectAxialParallelepiped(orig, inv_dir,
-	    tree->secondSubTree->bounds);
+	real distFirst =
+	    intersectAxialParallelepiped(orig, inv_dir, tree->firstSubTree->bounds);
+	real distSecond = intersectAxialParallelepiped(
+	    orig, inv_dir, tree->secondSubTree->bounds);
 	bool intersectFirst  = distFirst >= 0;
 	bool intersectSecond = distSecond >= 0;
 
 	if(tree->middleSubTree != NULL) {
-		real distMiddle = intersectAxialParallelepiped(orig, inv_dir,
-		    tree->middleSubTree->bounds);
+		real distMiddle = intersectAxialParallelepiped(
+		    orig, inv_dir, tree->middleSubTree->bounds);
 		bool intersectMiddle = distMiddle >= 0;
 
 		if((distFirst < distSecond && intersectFirst) || !intersectSecond) {
@@ -175,8 +177,7 @@ void intersectSetOfTriangles(vec3 orig, vec3 dir, positive* faces,
 		vec4 v3 = vertices + f[2] * VEC4_SCALARS_COUNT;
 		integer intersect =
 		    intersectTriangle(orig, dir, v1, v2, v3, &t, &u, &v);
-		if(intersect != 0 && 0 < t && t < out.depth
-		    && f != faceToIgnore) {
+		if(intersect != 0 && 0 < t && t < out.depth && f != faceToIgnore) {
 			out.intersectionSide = intersect;
 			out.depth            = t;
 			out.uv[0]            = u;
@@ -186,16 +187,39 @@ void intersectSetOfTriangles(vec3 orig, vec3 dir, positive* faces,
 	}
 }
 
+void intersectSetOfTrianglesAllSorted(vec3 orig, vec3 dir, positive* faces,
+    positive facesCount, vec4 vertices, positive* faceToIgnore,
+    SortedIntersectionsData& out)
+{
+	positive* facesEnd = faces + facesCount * 4;
+	for(positive* f = faces; f < facesEnd; f += 4) {
+		real t, u, v;
+		vec4 v1 = vertices + f[0] * VEC4_SCALARS_COUNT;
+		vec4 v2 = vertices + f[1] * VEC4_SCALARS_COUNT;
+		vec4 v3 = vertices + f[2] * VEC4_SCALARS_COUNT;
+		integer intersect =
+		    intersectTriangle(orig, dir, v1, v2, v3, &t, &u, &v);
+		if(intersect != 0 && 0 < t && f != faceToIgnore) {
+			IntersectionData i;
+			i.intersectionSide = intersect;
+			i.depth            = t;
+			i.uv[0]            = u;
+			i.uv[1]            = v;
+			i.face             = f;
+			out.push(i);
+		}
+	}
+}
+
 void intersectTree(vec3 orig, vec3 dir, KDTree* root, TreeStack& stack,
     vec4 vertices, positive* faceToIgnore, IntersectionData& out)
 {
-	KDTree** empty       = stack.treeStackTop;
-	out.intersectionSide = 0;
-	out.depth            = std::numeric_limits<real>::infinity();
+	KDTree** empty                   = stack.treeStackTop;
+	out.intersectionSide             = 0;
+	out.depth                        = std::numeric_limits<real>::infinity();
 	real inv_dir[VEC3_SCALARS_COUNT] = { 1 / dir[0], 1 / dir[1], 1 / dir[2] };
-	
-	real distRoot = intersectAxialParallelepiped(
-	    orig, inv_dir, root->bounds);
+
+	real distRoot = intersectAxialParallelepiped(orig, inv_dir, root->bounds);
 	if(distRoot < 0)
 		return;
 	stack.push(root, distRoot);
@@ -215,6 +239,33 @@ void intersectTree(vec3 orig, vec3 dir, KDTree* root, TreeStack& stack,
 			else {
 				pushSubTree(orig, inv_dir, node, stack);
 			}
+		}
+	}
+}
+
+void intersectTreeAllSorted(vec3 orig, vec3 dir, KDTree* root, TreeStack& stack,
+    vec4 vertices, positive* faceToIgnore, SortedIntersectionsData& out)
+{
+	KDTree** empty = stack.treeStackTop;
+	out.reset();
+	real inv_dir[VEC3_SCALARS_COUNT] = { 1 / dir[0], 1 / dir[1], 1 / dir[2] };
+
+	real distRoot = intersectAxialParallelepiped(orig, inv_dir, root->bounds);
+	if(distRoot < 0)
+		return;
+	stack.push(root, distRoot);
+
+	while(stack.treeStackTop != empty) {
+		KDTree* node;
+		real depth;
+		stack.pop(node, depth);
+
+		if(node->isLeaf) {
+			intersectSetOfTrianglesAllSorted(orig, dir, node->faces,
+			    node->facesCount, vertices, faceToIgnore, out);
+		}
+		else {
+			pushSubTree(orig, inv_dir, node, stack);
 		}
 	}
 }
