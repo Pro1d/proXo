@@ -4,6 +4,7 @@
 #include "DepthOfField.h"
 #include "Intersection.h"
 #include "KDTree.h"
+#include "MaterialStack.h"
 #include "core/common/Pool.h"
 #include "core/common/SceneToPool.h"
 #include "core/model/Scene.h"
@@ -25,9 +26,20 @@ public:
 
 	void getPointData(IntersectionData& intersect, Pool* pool, Material& mat,
 	    vec4 point, vec4 normal, vec3 color, vec3 emissive);
-	positive getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
-	    real maxIntensity, positive* lastFace, vec3 colorOut, real* depthOut,
-	    TreeStack& stack, positive depth);
+	void getLightingColor(vec3 color, vec4 point, vec4 normal, Material& mat,
+	    IntersectionData& intersect, TreeStack& treeStack,
+	    MaterialStack& matStack, vec3 colorOut);
+	void getRefractionColor(vec4 point, vec4 normal, vec3 dir, Material& mat,
+	    IntersectionData& intersect, TreeStack& treeStack,
+	    MaterialStack& matStack, real maxIntensity, vec3 colorOut,
+	    real& refractRatioOut, positive depth);
+	void getReflectionColor(vec4 point, vec4 normal, vec3 dir,
+	    real refractRatio, Material& mat, IntersectionData& intersect,
+	    TreeStack& treeStack, MaterialStack& matStack, real maxIntensity,
+	    vec3 colorOut, positive depth);
+	void getColor(vec3 orig, vec3 dir, real maxIntensity, positive* lastFace,
+	    vec3 colorOut, real* depthOut, TreeStack& treeStack,
+	    MaterialStack& matStack, positive depth = 0);
 
 	Scene* scene;
 	Pool* pool;

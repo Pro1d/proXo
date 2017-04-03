@@ -3,6 +3,8 @@
 #include "core/math/Vector.h"
 #include "core/math/type.h"
 #include <cstdio>
+#include <cmath>
+#include <limits>
 
 namespace proxo {
 
@@ -45,7 +47,8 @@ void RayTracer::threadRenderTask(
     void* data, positive threadId, positive threadsCount)
 {
 	RayTracer* that = (RayTracer*) data;
-	TreeStack stack(512);
+	TreeStack treeStack(64);
+	MaterialStack matStack(256, 1.0, 1.0);
 
 	real rayOrig[VEC4_SCALARS_COUNT] = { 0, 0, 0, 1 };
 	real rayDir[VEC4_SCALARS_COUNT]  = { 0, 0, 0, 0 };
@@ -72,7 +75,8 @@ void RayTracer::threadRenderTask(
 			vec4 pxl = that->imageBuffer->getPtr(x, y);
 
 			// Cast ray
-			that->getColor(rayOrig, rayDir, 1, 1, NULL, pxl + 1, pxl, stack, 0);
+			that->getColor(
+			    rayOrig, rayDir, 1, NULL, pxl + 1, pxl, treeStack, matStack);
 
 			// Cast more ray for depth of field
 			positive count = 1;
@@ -83,7 +87,7 @@ void RayTracer::threadRenderTask(
 				real ro[VEC4_SCALARS_COUNT], rd[VEC4_SCALARS_COUNT];
 				that->dof_.getDirection(rayDir, oi, rd, ro);
 				// Cast ray
-				that->getColor(ro, rd, 1, 1, NULL, p, &d, stack, 0);
+				that->getColor(ro, rd, 1, NULL, p, &d, treeStack, matStack);
 				// Add color to pixel
 				pxl[1] += p[0];
 				pxl[2] += p[1];
@@ -216,9 +220,114 @@ void RayTracer::getPointData(IntersectionData& intersect, Pool* pool,
 	multiply(normal, intersect.intersectionSide);
 }
 
-positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
-    real maxIntensity, positive* lastFace, vec3 colorOut, real* depthOut,
-    TreeStack& stack, positive depth)
+void RayTracer::getLightingColor(vec3 color, vec4 point, vec4 normal,
+    Material& mat, IntersectionData& intersect, TreeStack& treeStack,
+    MaterialStack& matStack, vec3 colorOut)
+{
+	for(positive i = 0; i < pool->currentLightsCount; i++) {
+		bool shadow  = false;
+		Light* light = pool->lightPool[i];
+
+		// Get the potential lighting color
+		real lightingColor[VEC3_SCALARS_COUNT] = { 0, 0, 0 };
+		real ambient = mat.ambient * (1 - mat.reflect);
+		real diffuse = mat.diffuse * (1 - mat.reflect);
+		// TODO compute fresnel coef for reflection/specular
+		// intensity (translucent object)
+		light->lighting(color, normal, point, ambient, diffuse, mat.specular,
+		    mat.shininess, lightingColor);
+
+		if(lightingColor[0] > EPSILON || lightingColor[1] > EPSILON
+		    || lightingColor[2] > EPSILON) {
+
+			// Test light occlusion (shadow)
+			if(light->castShadow) {
+				real lightDir[VEC4_SCALARS_COUNT];
+				real dist = light->getDirectionToSource(point, lightDir);
+				// TODO path to light in straight line with absorption
+				IntersectionData intersectLight;
+				intersectTree(point, lightDir, tree, treeStack,
+				    pool->vertexPool, intersect.face, intersectLight);
+				shadow = intersectLight.intersectionSide != 0
+				    && intersectLight.depth < dist;
+			}
+
+			// apply lighting
+			if(!shadow) {
+				// lighting!
+				colorOut[0] += lightingColor[0];
+				colorOut[1] += lightingColor[1];
+				colorOut[2] += lightingColor[2];
+			}
+		}
+	}
+}
+
+void RayTracer::getRefractionColor(vec4 point, vec4 normal, vec3 dir, Material& mat,
+    IntersectionData& intersect, TreeStack& treeStack, MaterialStack& matStack,
+    real maxIntensity, vec3 colorOut, real& refractRatioOut, positive depth)
+{
+	InnerMaterial innerMat      = matStack.top();
+	real currentRefractiveIndex = innerMat.refractive_index;
+
+	real refractDir[VEC4_SCALARS_COUNT];
+	refractRatioOut = refractRay(
+	    dir, normal, currentRefractiveIndex, mat.refractiveIndex, refractDir);
+	real refractIntensity = (1 - mat.reflect) * refractRatioOut;
+
+	if(refractIntensity > EPSILON) {
+		real refractColor[VEC3_SCALARS_COUNT];
+		real refractDepth = 1.0; // TODO
+		real absorption   = mat.depthAbsorbtion == 0 ?
+		    0 :
+		    pow(mat.depthAbsorbtion,
+		        refractDepth); // TODO with material color
+
+		if(intersect.intersectionSide == 1)
+			matStack.push(mat.refractiveIndex, mat.depthAbsorbtion);
+		else
+			matStack.pop();
+
+		// Cast refracted ray
+		getColor(point, refractDir,
+		    refractIntensity * (1 - absorption) * maxIntensity, intersect.face,
+		    refractColor, &refractDepth, treeStack, matStack, depth + 1);
+
+		if(intersect.intersectionSide == 1)
+			matStack.pop();
+		else
+			matStack.push(innerMat);
+
+		colorOut[0] += refractColor[0] * refractIntensity * (1 - absorption);
+		colorOut[1] += refractColor[1] * refractIntensity * (1 - absorption);
+		colorOut[2] += refractColor[2] * refractIntensity * (1 - absorption);
+	}
+}
+
+void RayTracer::getReflectionColor(vec4 point, vec4 normal, vec3 dir,
+    real refractRatio, Material& mat, IntersectionData& intersect,
+    TreeStack& treeStack, MaterialStack& matStack, real maxIntensity,
+    vec3 colorOut, positive depth)
+{
+	real reflectDir[VEC4_SCALARS_COUNT];
+	reflect(dir, normal, reflectDir);
+	real reflectIntensity = 1 - refractRatio * (1 - mat.reflect);
+	if(reflectIntensity > EPSILON) {
+		real reflectColor[VEC3_SCALARS_COUNT];
+		real reflectDepth;
+		// Cast refletc ray
+		getColor(point, reflectDir, reflectIntensity * maxIntensity,
+		    intersect.face, reflectColor, &reflectDepth, treeStack, matStack,
+		    depth + 1);
+		colorOut[0] += reflectColor[0] * reflectIntensity;
+		colorOut[1] += reflectColor[1] * reflectIntensity;
+		colorOut[2] += reflectColor[2] * reflectIntensity;
+	}
+}
+
+void RayTracer::getColor(vec3 orig, vec3 dir, real maxIntensity,
+    positive* lastFace, vec3 colorOut, real* depthOut, TreeStack& treeStack,
+    MaterialStack& matStack, positive depth)
 {
 	colorOut[0] = 0;
 	colorOut[1] = 0;
@@ -226,12 +335,12 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 
 	// Avoid infinite reccursion
 	if(maxIntensity < (real) 1 / 255 || depth >= depthMax)
-		return 0;
+		return;
 
 	// Get ray first intersection
 	IntersectionData intersect;
 	intersectTree(
-	    orig, dir, tree, stack, pool->vertexPool, lastFace, intersect);
+	    orig, dir, tree, treeStack, pool->vertexPool, lastFace, intersect);
 
 	/// TODO translucent, couleur perçue absorbée par épaisseur d'objet pas
 	/// complètement transparent
@@ -250,100 +359,32 @@ positive RayTracer::getColor(vec3 orig, vec3 dir, real currentRefractiveIndex,
 		colorOut[0] = emissive[0];
 		colorOut[1] = emissive[1];
 		colorOut[2] = emissive[2];
+		*depthOut = intersect.depth;
 
-		// lights/shadow // depthAbsorption == 1 TODO allow translucent object
-		// to be lighted for specular (with fresnel coeffs)
+		// lights/shadow // depthAbsorption == 1 
+		// TODO allow translucent object to receive specular light (with fresnel coeffs)
 		if(mat.depthAbsorbtion > 1 - EPSILON) {
-			for(positive i = 0; i < pool->currentLightsCount; i++) {
-				bool shadow  = false;
-				Light* light = pool->lightPool[i];
-
-				// Get the potential lighting color
-				real lightingColor[VEC3_SCALARS_COUNT] = { 0, 0, 0 };
-				real ambient = mat.ambient * (1 - mat.reflect);
-				real diffuse = mat.diffuse * (1 - mat.reflect);
-				// TODO compute fresnel coef for reflection/specular
-				// intensity (translucent object)
-				light->lighting(color, normal, point, ambient, diffuse,
-				    mat.specular, mat.shininess, lightingColor);
-
-				if(lightingColor[0] > EPSILON || lightingColor[1] > EPSILON
-				    || lightingColor[2] > EPSILON) {
-
-					// Test light occlusion (shadow)
-					if(light->castShadow) {
-						real lightDir[VEC4_SCALARS_COUNT];
-						real dist =
-						    light->getDirectionToSource(point, lightDir);
-						// TODO path to light in straight line with absorption
-						IntersectionData intersectLight;
-						intersectTree(point, lightDir, tree, stack,
-						    pool->vertexPool, intersect.face, intersectLight);
-						shadow = intersectLight.intersectionSide != 0
-						    && intersectLight.depth < dist;
-					}
-
-					// apply lighting
-					if(!shadow) {
-						// lighting!
-						colorOut[0] += lightingColor[0];
-						colorOut[1] += lightingColor[1];
-						colorOut[2] += lightingColor[2];
-					}
-				}
-			}
+			getLightingColor(color, point, normal, mat, intersect, treeStack, matStack, colorOut);
 		}
 
 		// refractive // reflect < 1 && refractRatio > 0 && depthAbsorbtion < 1
-		real refractDir[VEC4_SCALARS_COUNT];
 		real refractRatio = 1;
 
 		if(mat.depthAbsorbtion < (1 - EPSILON)) {
-			refractRatio = refractRay(dir, normal, currentRefractiveIndex,
-			    mat.refractiveIndex, refractDir);
-			real refractIntensity = (1 - mat.reflect) * refractRatio;
-			if(refractIntensity > EPSILON) {
-				real refractColor[VEC3_SCALARS_COUNT];
-				real refractDepth = 1.0;
-				real absorption   = mat.depthAbsorbtion == 0 ?
-				    0 :
-				    pow(mat.depthAbsorbtion,
-				        refractDepth); // with material color
-				// Cast refracted ray
-				getColor(point, refractDir, mat.refractiveIndex,
-				    refractIntensity * (1 - absorption) * maxIntensity,
-				    intersect.face, refractColor, &refractDepth, stack,
-				    depth + 1);
-				colorOut[0] +=
-				    refractColor[0] * refractIntensity * (1 - absorption);
-				colorOut[1] +=
-				    refractColor[1] * refractIntensity * (1 - absorption);
-				colorOut[2] +=
-				    refractColor[2] * refractIntensity * (1 - absorption);
-			}
+			getRefractionColor(point, normal, dir, mat, intersect, treeStack,
+			    matStack, maxIntensity, colorOut, refractRatio, depth);
 		}
 
 		// reflect // reflect > 0 || (refractRation < 1 && depthAbsorbtion < 1)
-		real reflectDir[VEC4_SCALARS_COUNT];
-		reflect(dir, normal, reflectDir);
-		real reflectIntensity = 1 - refractRatio * (1 - mat.reflect);
-		if(reflectIntensity > EPSILON) {
-			real reflectColor[VEC3_SCALARS_COUNT];
-			real reflectDepth;
-			// Cast refletc ray
-			getColor(point, reflectDir, currentRefractiveIndex,
-			    reflectIntensity * maxIntensity, intersect.face, reflectColor,
-			    &reflectDepth, stack, depth + 1);
-			colorOut[0] += reflectColor[0] * reflectIntensity;
-			colorOut[1] += reflectColor[1] * reflectIntensity;
-			colorOut[2] += reflectColor[2] * reflectIntensity;
-		}
+		getReflectionColor(point, normal, dir, refractRatio, mat, intersect, treeStack, matStack, maxIntensity, colorOut, depth);
 	}
 	else {
 		// skybox
+		colorOut[0] = 1;
+		colorOut[1] = 1;
+		colorOut[2] = 1;
+		*depthOut = std::numeric_limits<real>::infinity();
 	}
-
-	return 0;
 }
 
 void RayTracer::render()
@@ -362,11 +403,11 @@ void RayTracer::render()
 	// screen
 	if(scene->camera.autofocus) {
 		IntersectionData intersect;
-		TreeStack stack(512);
+		TreeStack treeStack(512);
 		real orig[VEC3_SCALARS_COUNT] = { 0, 0, 0 };
 		real dir[VEC3_SCALARS_COUNT]  = { 0, 0, -1 };
 		intersectTree(
-		    orig, dir, tree, stack, pool->vertexPool, NULL, intersect);
+		    orig, dir, tree, treeStack, pool->vertexPool, NULL, intersect);
 		if(intersect.intersectionSide == 0)
 			dof_.setFocusDistance(scene->camera.distanceFocus);
 		else
