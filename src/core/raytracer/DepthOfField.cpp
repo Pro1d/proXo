@@ -1,6 +1,7 @@
 #include "DepthOfField.h"
 #include "core/math/Vector.h"
 #include <cmath>
+#include <limits>
 
 #include <iostream>
 namespace proxo {
@@ -65,12 +66,22 @@ void DepthOfField::getDirection(
 	outOrig[1] = oi->second;
 	outOrig[2] = 0;
 	outOrig[3] = 1;
+	
+	if(fabs(focusDistance_) == std::numeric_limits<real>::infinity()) {
+		outDir[0] = mainDir[0];
+		outDir[1] = mainDir[1];
+		outDir[2] = mainDir[2];
+		outDir[3] = 1;
+	}
+	else {
+		real focusPoint[VEC4_SCALARS_COUNT] = { mainDir[0] * focusDistance_,
+			mainDir[1] * focusDistance_, mainDir[2] * focusDistance_, 1 };
 
-	real focusPoint[VEC4_SCALARS_COUNT] = { mainDir[0] * focusDistance_,
-		mainDir[1] * focusDistance_, mainDir[2] * focusDistance_, 1 };
-
-	substract(focusPoint, outOrig, outDir);
-	normalize(outDir);
+		substract(focusPoint, outOrig, outDir);
+		if(focusDistance_ < 0)
+			multiply(outDir, -1);
+		normalize(outDir);
+	}
 }
 
 } // namespace proxo
