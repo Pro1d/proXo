@@ -403,7 +403,7 @@ void RayTracer::render()
 	// screen
 	if(scene->camera.autofocus) {
 		IntersectionData intersect;
-		TreeStack treeStack(512);
+		TreeStack treeStack(64);
 		real orig[VEC3_SCALARS_COUNT] = { 0, 0, 0 };
 		real dir[VEC3_SCALARS_COUNT]  = { 0, 0, -1 };
 		intersectTree(

@@ -17,7 +17,8 @@ struct IntersectionData {
 
 class SortedIntersectionsData : public std::priority_queue<IntersectionData> {
 public:
-	void reset() {
+	void reset()
+	{
 		this->SortedIntersectionsData::c.clear();
 		containsOpaqueFace = false;
 	}
@@ -29,15 +30,16 @@ integer intersectTriangle(vec3 orig, vec3 dir, vec3 vert0, vec3 vert1,
 real intersectAxialParallelepiped(vec3 orig, vec3 inv_dir, real* paralMinMax);
 void pushSubTree(vec3 orig, vec3 inv_dir, KDTree* tree, TreeStack& stack);
 void intersectSetOfTriangles(vec3 orig, vec3 inv_dir, positive* faces,
-    positive facesCount, vec4 vertices, positive* faceToIgnore,
+    positive facesCount, vec4 vertices, vec16 materials, positive* faceToIgnore,
     IntersectionData& out);
-void intersectSetOfTrianglesAllSorted(vec3 orig, vec3 dir, positive* faces,
+void intersectSetOfTrianglesLighting(vec3 orig, vec3 dir, positive* faces,
     positive facesCount, vec4 vertices, positive* faceToIgnore,
     SortedIntersectionsData& out);
 void intersectTree(vec3 orig, vec3 dir, KDTree* tree, TreeStack& stack,
     vec4 vertices, positive* faceToIgnore, IntersectionData& out);
-void intersectTreeAllSorted(vec3 orig, vec3 dir, KDTree* root, TreeStack& stack,
-    vec4 vertices, positive* faceToIgnore, SortedIntersectionsData& out);
+void intersectTreeLighting(vec3 orig, vec3 dir, KDTree* root, TreeStack& stack,
+    vec4 vertices, vec16 materials, positive* faceToIgnore,
+    SortedIntersectionsData& out);
 
 } // namespace proxo
 

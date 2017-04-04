@@ -187,8 +187,8 @@ void intersectSetOfTriangles(vec3 orig, vec3 dir, positive* faces,
 	}
 }
 
-void intersectSetOfTrianglesAllSorted(vec3 orig, vec3 dir, positive* faces,
-    positive facesCount, vec4 vertices, positive* faceToIgnore,
+void intersectSetOfTrianglesLighting(vec3 orig, vec3 dir, positive* faces,
+    positive facesCount, vec4 vertices, vec16 materials, positive* faceToIgnore,
     SortedIntersectionsData& out)
 {
 	positive* facesEnd = faces + facesCount * 4;
@@ -200,6 +200,13 @@ void intersectSetOfTrianglesAllSorted(vec3 orig, vec3 dir, positive* faces,
 		integer intersect =
 		    intersectTriangle(orig, dir, v1, v2, v3, &t, &u, &v);
 		if(intersect != 0 && 0 < t && f != faceToIgnore) {
+			// Stop immediately if this is an opaque face
+			real absorption = materials[f[0]*VEC16_SCALARS_COUNT+Pool::MAT_INDEX_ABSORPTION];
+			if(absorption >= 1.0 - 1.0/255) {
+				out.containsOpaqueFace = true;
+				break;
+			}
+			// Otherwise register the face
 			IntersectionData i;
 			i.intersectionSide = intersect;
 			i.depth            = t;
@@ -214,7 +221,7 @@ void intersectSetOfTrianglesAllSorted(vec3 orig, vec3 dir, positive* faces,
 void intersectTree(vec3 orig, vec3 dir, KDTree* root, TreeStack& stack,
     vec4 vertices, positive* faceToIgnore, IntersectionData& out)
 {
-	KDTree** empty                   = stack.treeStackTop;
+	stack.clear();
 	out.intersectionSide             = 0;
 	out.depth                        = std::numeric_limits<real>::infinity();
 	real inv_dir[VEC3_SCALARS_COUNT] = { 1 / dir[0], 1 / dir[1], 1 / dir[2] };
@@ -224,12 +231,12 @@ void intersectTree(vec3 orig, vec3 dir, KDTree* root, TreeStack& stack,
 		return;
 	stack.push(root, distRoot);
 
-	while(stack.treeStackTop != empty) {
+	while(!stack.empty()) {
 		KDTree* node;
 		real depth;
 		stack.pop(node, depth);
 
-		/// Testi if this node can contain faces closer than the actual nearest
+		/// Test if this node can contain faces closer than the actual nearest
 		/// face.
 		if(depth < out.depth) {
 			if(node->isLeaf) {
@@ -243,10 +250,11 @@ void intersectTree(vec3 orig, vec3 dir, KDTree* root, TreeStack& stack,
 	}
 }
 
-void intersectTreeAllSorted(vec3 orig, vec3 dir, KDTree* root, TreeStack& stack,
-    vec4 vertices, positive* faceToIgnore, SortedIntersectionsData& out)
+void intersectTreeLighting(vec3 orig, vec3 dir, KDTree* root, TreeStack& stack,
+    vec4 vertices, vec16 materials, positive* faceToIgnore,
+    SortedIntersectionsData& out)
 {
-	KDTree** empty = stack.treeStackTop;
+	stack.clear();
 	out.reset();
 	real inv_dir[VEC3_SCALARS_COUNT] = { 1 / dir[0], 1 / dir[1], 1 / dir[2] };
 
@@ -255,14 +263,18 @@ void intersectTreeAllSorted(vec3 orig, vec3 dir, KDTree* root, TreeStack& stack,
 		return;
 	stack.push(root, distRoot);
 
-	while(stack.treeStackTop != empty) {
+	while(!stack.empty()) {
 		KDTree* node;
 		real depth;
 		stack.pop(node, depth);
 
 		if(node->isLeaf) {
-			intersectSetOfTrianglesAllSorted(orig, dir, node->faces,
-			    node->facesCount, vertices, faceToIgnore, out);
+			intersectSetOfTrianglesLighting(orig, dir, node->faces,
+			    node->facesCount, vertices, materials, faceToIgnore, out);
+
+			// End immediately if an opaque face has been found
+			if(out.containsOpaqueFace)
+				break;
 		}
 		else {
 			pushSubTree(orig, inv_dir, node, stack);

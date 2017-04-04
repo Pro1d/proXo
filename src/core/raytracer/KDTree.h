@@ -49,12 +49,18 @@ public:
 		delete[] treeStack;
 		delete[] distanceStack;
 	}
+	bool empty();
 	void clear();
 	void push(KDTree*& t, real d);
 	void pop(KDTree*& t, real& d);
 	KDTree **treeStack, **treeStackTop;
 	real *distanceStack, *distanceStackTop;
 };
+
+inline bool TreeStack::empty()
+{
+	return treeStack == treeStackTop;
+}
 
 inline void TreeStack::clear()
 {
