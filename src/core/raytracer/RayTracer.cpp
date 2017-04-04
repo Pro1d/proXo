@@ -245,11 +245,10 @@ void RayTracer::getLightingColor(vec3 color, vec4 point, vec4 normal,
 				real lightDir[VEC4_SCALARS_COUNT];
 				real dist = light->getDirectionToSource(point, lightDir);
 				// TODO path to light in straight line with absorption
-				IntersectionData intersectLight;
-				intersectTree(point, lightDir, tree, treeStack,
-				    pool->vertexPool, intersect.face, intersectLight);
-				shadow = intersectLight.intersectionSide != 0
-				    && intersectLight.depth < dist;
+				SortedIntersectionsData intersectLight;
+				intersectTreeLighting(point, lightDir, tree, treeStack,
+				    pool->vertexPool, pool->materialPool, intersect.face, dist, intersectLight);
+				shadow = intersectLight.containsOpaqueFace;
 			}
 
 			// apply lighting

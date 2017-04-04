@@ -79,19 +79,19 @@ real intersectAxialParallelepiped(vec3 orig, vec3 inv_dir, real* paralMinMax)
 	return tmin;
 }
 
-void pushSubTree(vec3 orig, vec3 inv_dir, KDTree* tree, TreeStack& stack)
+void pushSubTree(vec3 orig, vec3 inv_dir, KDTree* tree, TreeStack& stack, real distanceMax)
 {
 	real distFirst =
 	    intersectAxialParallelepiped(orig, inv_dir, tree->firstSubTree->bounds);
 	real distSecond = intersectAxialParallelepiped(
 	    orig, inv_dir, tree->secondSubTree->bounds);
-	bool intersectFirst  = distFirst >= 0;
-	bool intersectSecond = distSecond >= 0;
+	bool intersectFirst  = distFirst >= 0 && distFirst < distanceMax;
+	bool intersectSecond = distSecond >= 0 && distSecond < distanceMax;
 
 	if(tree->middleSubTree != NULL) {
 		real distMiddle = intersectAxialParallelepiped(
 		    orig, inv_dir, tree->middleSubTree->bounds);
-		bool intersectMiddle = distMiddle >= 0;
+		bool intersectMiddle = distMiddle >= 0 && distMiddle < distanceMax;
 
 		if((distFirst < distSecond && intersectFirst) || !intersectSecond) {
 			if((distMiddle < distFirst && intersectMiddle) || !intersectFirst) {
@@ -189,7 +189,7 @@ void intersectSetOfTriangles(vec3 orig, vec3 dir, positive* faces,
 
 void intersectSetOfTrianglesLighting(vec3 orig, vec3 dir, positive* faces,
     positive facesCount, vec4 vertices, vec16 materials, positive* faceToIgnore,
-    SortedIntersectionsData& out)
+    real distanceMax, SortedIntersectionsData& out)
 {
 	positive* facesEnd = faces + facesCount * 4;
 	for(positive* f = faces; f < facesEnd; f += 4) {
@@ -199,10 +199,11 @@ void intersectSetOfTrianglesLighting(vec3 orig, vec3 dir, positive* faces,
 		vec4 v3 = vertices + f[2] * VEC4_SCALARS_COUNT;
 		integer intersect =
 		    intersectTriangle(orig, dir, v1, v2, v3, &t, &u, &v);
-		if(intersect != 0 && 0 < t && f != faceToIgnore) {
+		if(intersect != 0 && 0 < t && f != faceToIgnore && t < distanceMax) {
 			// Stop immediately if this is an opaque face
-			real absorption = materials[f[0]*VEC16_SCALARS_COUNT+Pool::MAT_INDEX_ABSORPTION];
-			if(absorption >= 1.0 - 1.0/255) {
+			real absorption = materials[f[0] * VEC16_SCALARS_COUNT
+			    + Pool::MAT_INDEX_ABSORPTION];
+			if(absorption >= 1.0 - 1.0 / 255) {
 				out.containsOpaqueFace = true;
 				break;
 			}
@@ -251,7 +252,7 @@ void intersectTree(vec3 orig, vec3 dir, KDTree* root, TreeStack& stack,
 }
 
 void intersectTreeLighting(vec3 orig, vec3 dir, KDTree* root, TreeStack& stack,
-    vec4 vertices, vec16 materials, positive* faceToIgnore,
+    vec4 vertices, vec16 materials, positive* faceToIgnore, real distanceMax,
     SortedIntersectionsData& out)
 {
 	stack.clear();
@@ -270,14 +271,15 @@ void intersectTreeLighting(vec3 orig, vec3 dir, KDTree* root, TreeStack& stack,
 
 		if(node->isLeaf) {
 			intersectSetOfTrianglesLighting(orig, dir, node->faces,
-			    node->facesCount, vertices, materials, faceToIgnore, out);
+			    node->facesCount, vertices, materials, faceToIgnore,
+			    distanceMax, out);
 
 			// End immediately if an opaque face has been found
 			if(out.containsOpaqueFace)
 				break;
 		}
 		else {
-			pushSubTree(orig, inv_dir, node, stack);
+			pushSubTree(orig, inv_dir, node, stack, distanceMax);
 		}
 	}
 }
