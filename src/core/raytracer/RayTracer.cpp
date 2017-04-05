@@ -147,11 +147,10 @@ void RayTracer::getPointData(IntersectionData& intersect, Pool* pool,
 	mat.specular   = Ma[Pool::MAT_INDEX_SPECULAR];
 	mat.shininess  = Ma[Pool::MAT_INDEX_SHININESS];
 	mat.emissive   = Ma[Pool::MAT_INDEX_EMISSIVE];
-	// TODO reflect = specular; remove reflect
-	mat.reflect         = Ma[Pool::MAT_INDEX_REFLECT];
 	mat.refractiveIndex = Ma[Pool::MAT_INDEX_REFRACTIVE];
-	// TODO Absorption RGB
-	mat.depthAbsorbtion = Ma[Pool::MAT_INDEX_ABSORPTION];
+	mat.depthAbsorption[0] = Ma[Pool::MAT_INDEX_ABSORPTION_RED];
+	mat.depthAbsorption[1] = Ma[Pool::MAT_INDEX_ABSORPTION_GREEN];
+	mat.depthAbsorption[2] = Ma[Pool::MAT_INDEX_ABSORPTION_BLUE];
 
 	for(positive i  = 0; i < 3; i++)
 		emissive[i] = color[i] * mat.emissive;
@@ -230,8 +229,8 @@ void RayTracer::getLightingColor(vec3 color, vec4 point, vec4 normal,
 
 		// Get the potential lighting color
 		real lightingColor[VEC3_SCALARS_COUNT] = { 0, 0, 0 };
-		real ambient = mat.ambient * (1 - mat.reflect);
-		real diffuse = mat.diffuse * (1 - mat.reflect);
+		real ambient = mat.ambient * (1 - mat.specular);
+		real diffuse = mat.diffuse * (1 - mat.specular);
 		// TODO compute fresnel coef for reflection/specular
 		// intensity (translucent object)
 		light->lighting(color, normal, point, ambient, diffuse, mat.specular,
@@ -272,34 +271,35 @@ void RayTracer::getRefractionColor(vec4 point, vec4 normal, vec3 dir, Material& 
 	real refractDir[VEC4_SCALARS_COUNT];
 	refractRatioOut = refractRay(
 	    dir, normal, currentRefractiveIndex, mat.refractiveIndex, refractDir);
-	real refractIntensity = (1 - mat.reflect) * refractRatioOut;
+	real refractIntensity = (1 - mat.specular) * refractRatioOut;
 
 	if(refractIntensity > EPSILON) {
 		real refractColor[VEC3_SCALARS_COUNT];
 		real refractDepth = 1.0; // TODO
-		real absorption   = mat.depthAbsorbtion == 0 ?
-		    0 :
-		    pow(mat.depthAbsorbtion,
-		        refractDepth); // TODO with material color
 
 		if(intersect.intersectionSide == 1)
-			matStack.push(mat.refractiveIndex, mat.depthAbsorbtion);
+			matStack.push(mat.refractiveIndex, mat.depthAbsorption);
 		else
 			matStack.pop();
 
 		// Cast refracted ray
-		getColor(point, refractDir,
-		    refractIntensity * (1 - absorption) * maxIntensity, intersect.face,
-		    refractColor, &refractDepth, treeStack, matStack, depth + 1);
+		getColor(point, refractDir, refractIntensity * maxIntensity,
+		    intersect.face, refractColor, &refractDepth, treeStack, matStack,
+		    depth + 1);
 
 		if(intersect.intersectionSide == 1)
 			matStack.pop();
 		else
 			matStack.push(innerMat);
 
-		colorOut[0] += refractColor[0] * refractIntensity * (1 - absorption);
-		colorOut[1] += refractColor[1] * refractIntensity * (1 - absorption);
-		colorOut[2] += refractColor[2] * refractIntensity * (1 - absorption);
+		vec3 ab           = mat.depthAbsorption;
+		real absorption_r = ab[0] == 0 ? 0 : pow(ab[0], refractDepth);
+		real absorption_g = ab[1] == 0 ? 0 : pow(ab[1], refractDepth);
+		real absorption_b = ab[2] == 0 ? 0 : pow(ab[2], refractDepth);
+		// TODO with material color
+		colorOut[0] += refractColor[0] * refractIntensity * (1 - absorption_r);
+		colorOut[1] += refractColor[1] * refractIntensity * (1 - absorption_g);
+		colorOut[2] += refractColor[2] * refractIntensity * (1 - absorption_b);
 	}
 }
 
@@ -310,7 +310,7 @@ void RayTracer::getReflectionColor(vec4 point, vec4 normal, vec3 dir,
 {
 	real reflectDir[VEC4_SCALARS_COUNT];
 	reflect(dir, normal, reflectDir);
-	real reflectIntensity = 1 - refractRatio * (1 - mat.reflect);
+	real reflectIntensity = 1 - refractRatio * (1 - mat.specular);
 	if(reflectIntensity > EPSILON) {
 		real reflectColor[VEC3_SCALARS_COUNT];
 		real reflectDepth;
@@ -360,16 +360,20 @@ void RayTracer::getColor(vec3 orig, vec3 dir, real maxIntensity,
 		colorOut[2] = emissive[2];
 		*depthOut = intersect.depth;
 
+		bool isOpaque = mat.depthAbsorption[0] > 1 - EPSILON
+		    && mat.depthAbsorption[1] > 1 - EPSILON
+		    && mat.depthAbsorption[2] > 1 - EPSILON;
+
 		// lights/shadow // depthAbsorption == 1 
 		// TODO allow translucent object to receive specular light (with fresnel coeffs)
-		if(mat.depthAbsorbtion > 1 - EPSILON) {
+		if(isOpaque) {
 			getLightingColor(color, point, normal, mat, intersect, treeStack, matStack, colorOut);
 		}
 
 		// refractive // reflect < 1 && refractRatio > 0 && depthAbsorbtion < 1
 		real refractRatio = 1;
 
-		if(mat.depthAbsorbtion < (1 - EPSILON)) {
+		if(!isOpaque) {
 			getRefractionColor(point, normal, dir, mat, intersect, treeStack,
 			    matStack, maxIntensity, colorOut, refractRatio, depth);
 		}

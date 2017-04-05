@@ -14,9 +14,8 @@ public:
 	real shininess;
 	real emissive;
 
-	real reflect; // vec3 rgb ?
 	real refractiveIndex; // vec3 rgb ?
-	real depthAbsorbtion;
+	real depthAbsorption[VEC3_SCALARS_COUNT];
 
 protected:
 private:

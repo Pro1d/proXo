@@ -21,8 +21,8 @@ objects
 end
 
 materials
-	name glass absorption 0.2 refractive_index 1.5 reflect 0 
-	name water absorption 0 refractive_index 1.33 reflect 0
+	name glass absorption 0.2 0.2 0.2 refractive_index 1.5 specular 0 
+	name water absorption 0 0 0 refractive_index 1.33 specular 0
 end
 
 camera target 1366 768 1 aperture 0.0 pos 5 -8 2 lookat 0 -2 2.95 zmax 100 fov 70

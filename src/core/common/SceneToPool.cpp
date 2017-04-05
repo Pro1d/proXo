@@ -115,9 +115,10 @@ void SceneToPool::objectToPoolThread(
 		materials[Pool::MAT_INDEX_SPECULAR]   = material.specular;
 		materials[Pool::MAT_INDEX_SHININESS]  = material.shininess;
 		materials[Pool::MAT_INDEX_EMISSIVE]   = material.emissive;
-		materials[Pool::MAT_INDEX_REFLECT]    = material.reflect;
 		materials[Pool::MAT_INDEX_REFRACTIVE] = material.refractiveIndex;
-		materials[Pool::MAT_INDEX_ABSORPTION] = material.depthAbsorbtion;
+		materials[Pool::MAT_INDEX_ABSORPTION_RED] = material.depthAbsorption[0];
+		materials[Pool::MAT_INDEX_ABSORPTION_GREEN] = material.depthAbsorption[1];
+		materials[Pool::MAT_INDEX_ABSORPTION_BLUE] = material.depthAbsorption[2];
 		materials += VEC16_SCALARS_COUNT;
 
 		// copy colors, mappings and textures

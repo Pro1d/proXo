@@ -201,9 +201,12 @@ void intersectSetOfTrianglesLighting(vec3 orig, vec3 dir, positive* faces,
 		    intersectTriangle(orig, dir, v1, v2, v3, &t, &u, &v);
 		if(intersect != 0 && 0 < t && f != faceToIgnore && t < distanceMax) {
 			// Stop immediately if this is an opaque face
-			real absorption = materials[f[0] * VEC16_SCALARS_COUNT
-			    + Pool::MAT_INDEX_ABSORPTION];
-			if(absorption >= 1.0 - 1.0 / 255) {
+			vec3 absorption = materials + f[0] * VEC16_SCALARS_COUNT
+			    + Pool::MAT_INDEX_ABSORPTION_RED;
+			bool isOpaque = absorption[0] > 1 - 1.0 / 255
+			    && absorption[1] > 1 - 1.0 / 255
+			    && absorption[2] > 1 - 1.0 / 255;
+			if(isOpaque) {
 				out.containsOpaqueFace = true;
 				break;
 			}

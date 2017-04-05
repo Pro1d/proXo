@@ -39,7 +39,6 @@ enum {
 	SHININESS,
 	EMISSIVE,
 	NORMAL,
-	REFLECT,
 	REFRACTIVE_INDEX,
 	ABSORBTION,
 	OBJECT,
@@ -75,9 +74,9 @@ static const char* keyName[KEY_COUNT] = { "materials", "objects", "body",
 	"world", "skybox", "name", "data", "light", "sun", "point", "spot", "dir",
 	"pos", "cutoff", "falloff", "attenuation", "intensity", "color", "color255",
 	"ambient", "diffuse", "specular", "shininess", "emissive", "normal",
-	"reflect", "refractive_index", "absorption", "object", "container", "end",
-	"t", "s", "r", "tx", "ty", "tz", "rx", "ry", "rz", "material", "camera",
-	"fov", "lookat", "zmax", "aperture", "focus", "autofocus", "target" };
+	"refractive_index", "absorption", "object", "container", "end", "t", "s",
+	"r", "tx", "ty", "tz", "rx", "ry", "rz", "material", "camera", "fov",
+	"lookat", "zmax", "aperture", "focus", "autofocus", "target" };
 char commmentCharacter = '#';
 
 enum {
@@ -337,6 +336,7 @@ void SceneParser::parseStateMaterials(Scene& scene)
 {
 	char word[128];
 	real r;
+	real a[3];
 	std::string currentName;
 
 	while(state == ST_MATERIALS && nextWord(word)) {
@@ -393,19 +393,14 @@ void SceneParser::parseStateMaterials(Scene& scene)
 				}
 				scene.materials[currentName]->refractiveIndex = r;
 				break;
-			case REFLECT:
-				if(!nextReal(r) || currentName.empty()) {
-					state = ST_ERROR;
-					break;
-				}
-				scene.materials[currentName]->reflect = r;
-				break;
 			case ABSORBTION:
-				if(!nextReal(r) || currentName.empty()) {
+				if(!nextReals(a, 3) || currentName.empty()) {
 					state = ST_ERROR;
 					break;
 				}
-				scene.materials[currentName]->depthAbsorbtion = r;
+				scene.materials[currentName]->depthAbsorption[0] = a[0];
+				scene.materials[currentName]->depthAbsorption[1] = a[1];
+				scene.materials[currentName]->depthAbsorption[2] = a[2];
 				break;
 			case END:
 				state = ST_MAIN;
