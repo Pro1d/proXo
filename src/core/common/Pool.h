@@ -31,9 +31,7 @@ public:
 
 	vec4 vertexPool;
 	vec4 normalPool;
-	vec16 materialPool; // r, g, b, ambient, diffuse, specular, shininess,
-	// emissive, reflect,
-	// refractiveIndex, depthAbsorption
+	vec16 materialPool;
 	vec2 mappingPool;
 	positive currentVerticesCount;
 	Texture** texturePool;

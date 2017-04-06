@@ -47,7 +47,7 @@ void RayTracer::threadRenderTask(
     void* data, positive threadId, positive threadsCount)
 {
 	RayTracer* that = (RayTracer*) data;
-	TreeStack treeStack(64);
+	TreeStack treeStack(256);
 	MaterialStack matStack(256, 1.0, 1.0);
 
 	real rayOrig[VEC4_SCALARS_COUNT] = { 0, 0, 0, 1 };

@@ -26,7 +26,7 @@ public:
 	const InnerMaterial* topPtr();
 	void pop(const InnerMaterial*& topPtr);
 private:
-	InnerMaterial* stack;
+	InnerMaterial*const stack;
 	InnerMaterial* stackTop;
 };
 
