@@ -3,12 +3,12 @@
 
 #include "core/model/Scene.h"
 #include <cstdio>
+#include <string>
 
 class SceneParser {
 public:
 	SceneParser();
-	bool readScene(
-	    const char* directoryName, const char* filename, proxo::Scene& scene);
+	bool readScene(const std::string& filename, proxo::Scene& scene);
 
 protected:
 	void parseBody(proxo::Scene& scene);
@@ -31,7 +31,7 @@ protected:
 
 private:
 	FILE* file;
-	const char* directory;
+	std::string directory;
 	int state;
 };
 

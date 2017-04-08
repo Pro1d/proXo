@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <string>
 
 #include "core/math/basics.h"
 #include "core/model/Scene.h"
@@ -26,8 +27,8 @@ int main(int argc, char** argv)
 	// Load scene from file
 	SceneParser parser;
 	Scene scene;
-	const char* sceneFileName = argc >= 2 ? argv[1] : "parc.scene";
-	if(!parser.readScene("media/", sceneFileName, scene)) {
+	std::string sceneFileName = argc >= 2 ? argv[1] : "media/parc.scene";
+	if(!parser.readScene(sceneFileName, scene)) {
 		printf("readScene failed!\n");
 		return 2;
 	}

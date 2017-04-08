@@ -95,16 +95,15 @@ SceneParser::SceneParser()
 	// ctor
 }
 
-bool SceneParser::readScene(
-    const char* directoryName, const char* filename, Scene& scene)
+bool SceneParser::readScene(const std::string& filename, Scene& scene)
 {
-	char fullPath[256];
-	strcpy(fullPath, directoryName);
-	strcat(fullPath, filename);
-	directory = directoryName;
-	file      = fopen(fullPath, "r");
-	if(file == NULL)
+	std::size_t d = filename.find_last_of("/\\");
+	directory     = (d == std::string::npos ? "./" : filename.substr(0, d + 1));
+	file          = fopen(filename.c_str(), "r");
+	if(file == NULL) {
+		printf("Error: cannot open file %s\n", filename.c_str());
 		return false;
+	}
 
 	state = ST_MAIN;
 	char word[128];
@@ -449,11 +448,8 @@ void SceneParser::parseStateObjects(Scene& scene)
 					state = ST_ERROR;
 					break;
 				}
-				char fullPath[256];
-				strcpy(fullPath, directory);
-				strcat(fullPath, word);
 				if(!objectParser.readObject(
-				       fullPath, *scene.objects[currentName])) {
+				       (directory+word).c_str(), *scene.objects[currentName])) {
 					state = ST_ERROR;
 					printf("Error loading object \"%s\"\n", fullPath);
 				}
@@ -463,50 +459,40 @@ void SceneParser::parseStateObjects(Scene& scene)
 					state = ST_ERROR;
 					break;
 				}
-				strcpy(fullPath, directory);
-				strcat(fullPath, word);
 				textureLoader.addImageFile(
-				    std::string(fullPath), Texture::NORMAL_XYZ);
+				    directory+word, Texture::NORMAL_XYZ);
 				break;
 			case AMBIENT:
 				if(!nextWord(word) || currentName.empty()) {
 					state = ST_ERROR;
 					break;
 				}
-				strcpy(fullPath, directory);
-				strcat(fullPath, word);
 				textureLoader.addImageFile(
-				    std::string(fullPath), Texture::AMBIENT_I);
+				    directory+word, Texture::AMBIENT_I);
 				break;
 			case DIFFUSE:
 				if(!nextWord(word) || currentName.empty()) {
 					state = ST_ERROR;
 					break;
 				}
-				strcpy(fullPath, directory);
-				strcat(fullPath, word);
 				textureLoader.addImageFile(
-				    std::string(fullPath), Texture::DIFFUSE_RGB);
+				    directory+word, Texture::DIFFUSE_RGB);
 				break;
 			case SPECULAR:
 				if(!nextWord(word) || currentName.empty()) {
 					state = ST_ERROR;
 					break;
 				}
-				strcpy(fullPath, directory);
-				strcat(fullPath, word);
 				textureLoader.addImageFile(
-				    std::string(fullPath), Texture::SPECULAR_I);
+				    directory+word, Texture::SPECULAR_I);
 				break;
 			case SHININESS:
 				if(!nextWord(word) || currentName.empty()) {
 					state = ST_ERROR;
 					break;
 				}
-				strcpy(fullPath, directory);
-				strcat(fullPath, word);
 				textureLoader.addImageFile(
-				    std::string(fullPath), Texture::SHININESS_I);
+				    directory+word, Texture::SHININESS_I);
 				break;
 			case END:
 				// Finish the previous object
