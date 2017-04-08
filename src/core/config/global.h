@@ -8,7 +8,7 @@
 /// Optimization / precision
 
 // Comment/Uncomment
-//#define USE_DOUBLE_PRECISION_FLOATING_VALUE
+#define USE_DOUBLE_PRECISION_FLOATING_VALUE
 #define USE_64_BITS_INTEGER_VALUE
 
 #define FASTEST_INV_SQRT 0

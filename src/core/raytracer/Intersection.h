@@ -13,7 +13,7 @@ struct IntersectionData {
 	real uv[2];
 	real depth;
 	integer intersectionSide; // -1 culling, 0 no intersect, 1 intersect
-	bool operator<(IntersectionData const& b) const { return depth < b.depth; }
+	bool operator<(IntersectionData const& b) const { return depth > b.depth; }
 };
 
 class SortedIntersectionsData : public std::priority_queue<IntersectionData> {

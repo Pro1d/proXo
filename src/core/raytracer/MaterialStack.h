@@ -12,6 +12,7 @@ struct InnerMaterial {
 
 class MaterialStack {
 public:
+	MaterialStack(const MaterialStack & m);
 	MaterialStack(positive maxSize, real refractive_index, real absorption);
 	MaterialStack(positive maxSize, real refractive_index, vec3 absorption);
 	~MaterialStack();
@@ -23,72 +24,61 @@ public:
 	const InnerMaterial& top();
 	void pop();
 	bool empty();
-	const InnerMaterial* topPtr();
-	void pop(const InnerMaterial*& topPtr);
+
 private:
-	InnerMaterial*const stack;
-	InnerMaterial* stackTop;
+	InnerMaterial*const stack_;
+	InnerMaterial* stackTop_;
+	positive maxSize_;
 };
 
 inline void MaterialStack::push(const InnerMaterial& mat)
 {
-	++stackTop;
-	*stackTop = mat;
+	++stackTop_;
+	*stackTop_ = mat;
 }
 
 inline void MaterialStack::push(real refractive_index, vec3 absorption)
 {
-	++stackTop;
-	stackTop->refractive_index = refractive_index;
-	stackTop->absorption[0]    = absorption[0];
-	stackTop->absorption[1]    = absorption[1];
-	stackTop->absorption[2]    = absorption[2];
+	++stackTop_;
+	stackTop_->refractive_index = refractive_index;
+	stackTop_->absorption[0]    = absorption[0];
+	stackTop_->absorption[1]    = absorption[1];
+	stackTop_->absorption[2]    = absorption[2];
 }
 
 inline void MaterialStack::push(real refractive_index, real absorption)
 {
-	++stackTop;
-	stackTop->refractive_index = refractive_index;
-	stackTop->absorption[0]    = absorption;
-	stackTop->absorption[1]    = absorption;
-	stackTop->absorption[2]    = absorption;
+	++stackTop_;
+	stackTop_->refractive_index = refractive_index;
+	stackTop_->absorption[0]    = absorption;
+	stackTop_->absorption[1]    = absorption;
+	stackTop_->absorption[2]    = absorption;
 }
 
 inline void MaterialStack::push(
     real refractive_index, real absorption, vec3 color)
 {
-	++stackTop;
-	stackTop->refractive_index = refractive_index;
-	stackTop->absorption[0]    = absorption * (1 - color[0]);
-	stackTop->absorption[1]    = absorption * (1 - color[1]);
-	stackTop->absorption[2]    = absorption * (1 - color[2]);
+	++stackTop_;
+	stackTop_->refractive_index = refractive_index;
+	stackTop_->absorption[0]    = absorption * (1 - color[0]);
+	stackTop_->absorption[1]    = absorption * (1 - color[1]);
+	stackTop_->absorption[2]    = absorption * (1 - color[2]);
 }
 
 inline const InnerMaterial& MaterialStack::top()
 {
-	return *stackTop;
+	return *stackTop_;
 }
 
 inline void MaterialStack::pop()
 {
 	if(!empty())
-		--stackTop;
+		--stackTop_;
 }
 
 inline bool MaterialStack::empty()
 {
-	return stackTop == stack;
-}
-
-inline const InnerMaterial* MaterialStack::topPtr()
-{
-	return stackTop;
-}
-
-inline void MaterialStack::pop(const InnerMaterial*& topPtr)
-{
-	if(topPtr != stack)
-		--topPtr;
+	return stackTop_ == stack_;
 }
 
 } // namespace proxo

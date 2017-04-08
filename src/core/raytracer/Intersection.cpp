@@ -31,23 +31,20 @@ integer intersectTriangle(vec3 orig, vec3 dir, vec3 vert0, vec3 vert1,
 	else /** face // ray */
 		return 0;
 
+	inv_det = 1 / det;
 	substract(orig, vert0, tvec);
 
-	*u = dot(tvec, pvec);
-	if(*u < 0 || *u > det)
+	*u = dot(tvec, pvec) * inv_det;
+	if(*u < 0 || *u > 1)
 		return 0;
 
 	cross(tvec, edge1, qvec);
 
-	*v = dot(dir, qvec);
-	if(*v < 0 || *u + *v > det)
+	*v = dot(dir, qvec) * inv_det;
+	if(*v < 0 || *u + *v > 1)
 		return 0;
 
-	*t      = dot(edge2, qvec);
-	inv_det = 1 / det;
-	*t *= inv_det;
-	*u *= inv_det;
-	*v *= inv_det;
+	*t = dot(edge2, qvec) * inv_det;
 
 	return side;
 }
@@ -203,9 +200,9 @@ void intersectSetOfTrianglesLighting(vec3 orig, vec3 dir, positive* faces,
 			// Stop immediately if this is an opaque face
 			vec3 absorption = materials + f[0] * VEC16_SCALARS_COUNT
 			    + Pool::MAT_INDEX_ABSORPTION_RED;
-			bool isOpaque = absorption[0] > 1 - 1.0 / 255
-			    && absorption[1] > 1 - 1.0 / 255
-			    && absorption[2] > 1 - 1.0 / 255;
+			bool isOpaque = absorption[0] > 1 - 1.0 / (255*255)
+			    && absorption[1] > 1 - 1.0 / (255*255)
+			    && absorption[2] > 1 - 1.0 / (255*255);
 			if(isOpaque) {
 				out.containsOpaqueFace = true;
 				break;
