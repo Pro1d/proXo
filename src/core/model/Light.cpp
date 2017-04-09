@@ -92,6 +92,7 @@ void Light::transform(mat4 matrix)
 	real squaredScale          = getMatrixSquaredScale(matrix);
 	transformedDistanceMax     = distanceMax / squaredScale;
 	transformedReductionFactor = reductionFactor * squaredScale;
+	transformedRadius = radius * sqrt_inv(squaredScale);
 }
 
 real Light::specularIntensity(real RdotV, real shininess)

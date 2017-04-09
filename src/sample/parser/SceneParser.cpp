@@ -33,6 +33,7 @@ enum {
 	INTENSITY,
 	COLOR,
 	COLOR255,
+	RADIUS,
 	AMBIENT,
 	DIFFUSE,
 	SPECULAR,
@@ -73,10 +74,10 @@ enum {
 static const char* keyName[KEY_COUNT] = { "materials", "objects", "body",
 	"world", "skybox", "name", "data", "light", "sun", "point", "spot", "dir",
 	"pos", "cutoff", "falloff", "attenuation", "intensity", "color", "color255",
-	"ambient", "diffuse", "specular", "shininess", "emissive", "normal",
-	"refractive_index", "absorption", "object", "container", "end", "t", "s",
-	"r", "tx", "ty", "tz", "rx", "ry", "rz", "material", "camera", "fov",
-	"lookat", "zmax", "aperture", "focus", "autofocus", "target" };
+	"radius", "ambient", "diffuse", "specular", "shininess", "emissive",
+	"normal", "refractive_index", "absorption", "object", "container", "end",
+	"t", "s", "r", "tx", "ty", "tz", "rx", "ry", "rz", "material", "camera",
+	"fov", "lookat", "zmax", "aperture", "focus", "autofocus", "target" };
 char commmentCharacter = '#';
 
 enum {
@@ -874,6 +875,13 @@ bool SceneParser::parseLight(Container& container, Scene& scene)
 					break;
 				}
 				light->setReductionFactor(x[0]);
+				break;
+			case RADIUS:
+				if(!nextReals(x, 1)) {
+					state = ST_ERROR;
+					break;
+				}
+				light->setRadius(x[0]);
 				break;
 
 			case SPOT:

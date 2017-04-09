@@ -1,3 +1,4 @@
+#include "BlurLight.h"
 #include "RayTracer.h"
 #include "Physic.h"
 #include "core/math/Vector.h"
@@ -224,6 +225,7 @@ void RayTracer::getLightingColor(vec3 color, vec4 point, vec4 normal,
     MaterialStack& matStack, vec3 colorOut)
 {
 	SortedIntersectionsData intersectLight;
+	BlurLight blurLight;
 
 	for(positive i = 0; i < pool->currentLightsCount; i++) {
 		Light* light = pool->lightPool[i];
@@ -239,57 +241,70 @@ void RayTracer::getLightingColor(vec3 color, vec4 point, vec4 normal,
 
 		if(lightingColor[0] > EPSILON || lightingColor[1] > EPSILON
 		    || lightingColor[2] > EPSILON) {
-
+			
 			real lightDir[VEC4_SCALARS_COUNT];
 			real distToLight = light->getDirectionToSource(point, lightDir);
-			real filter[VEC3_SCALARS_COUNT] = {1,1,1};
-
+			
+			BlurLight::Iterator it = blurLight.set(lightDir, distToLight, light->transformedRadius);
+			
+			real finalFilter[VEC3_SCALARS_COUNT] = {1,1,1};
+			positive count = 1;
+			
 			// Test light occlusion (shadow)
 			if(light->castShadow) {
-				intersectTreeLighting(point, lightDir, tree, treeStack,
-				    pool->vertexPool, pool->materialPool, intersect.face, distToLight,
-				    intersectLight);
+				for(count = 0; !it.end(); count++, it.incr()) {
+					real filter[VEC3_SCALARS_COUNT] = {1,1,1};
+					real dir[VEC3_SCALARS_COUNT];
+					blurLight.getDirection(it, dir);
 
-				real prevDepth = 0;
-				if(!intersectLight.empty()) {
-					MaterialStack ms(matStack);
-					
-					// Go trough translucent material to reach the light source
-					while(!intersectLight.empty()) {
-						IntersectionData intersect = intersectLight.top();
-						intersectLight.pop();
+					intersectTreeLighting(point, dir, tree, treeStack,
+							pool->vertexPool, pool->materialPool, intersect.face, distToLight,
+							intersectLight);
 
-						const real* ab = ms.top().absorption;
-						real depth = intersect.depth - prevDepth;
-						filter[0] *= ab[0] == 0 ? 1 : pow(1-ab[0], depth);
-						filter[1] *= ab[1] == 0 ? 1 : pow(1-ab[1], depth);
-						filter[2] *= ab[2] == 0 ? 1 : pow(1-ab[2], depth);
+					real prevDepth = 0;
+					if(!intersectLight.empty() && !intersectLight.containsOpaqueFace) {
+						MaterialStack ms(matStack);
 
-						// update material stack
-						if(intersect.intersectionSide == 1) {
-							vec16 m = pool->materialPool + intersect.face[0] * VEC16_SCALARS_COUNT;
-							ms.push(m[Pool::MAT_INDEX_REFRACTIVE], m + Pool::MAT_INDEX_ABSORPTION_RED);
+						// Go trough translucent material to reach the light source
+						while(!intersectLight.empty()) {
+							IntersectionData intersect = intersectLight.top();
+							intersectLight.pop();
+
+							const real* ab = ms.top().absorption;
+							real depth = intersect.depth - prevDepth;
+							filter[0] *= ab[0] == 0 ? 1 : pow(1-ab[0], depth);
+							filter[1] *= ab[1] == 0 ? 1 : pow(1-ab[1], depth);
+							filter[2] *= ab[2] == 0 ? 1 : pow(1-ab[2], depth);
+
+							// update material stack
+							if(intersect.intersectionSide == 1) {
+								vec16 m = pool->materialPool + intersect.face[0] * VEC16_SCALARS_COUNT;
+								ms.push(m[Pool::MAT_INDEX_REFRACTIVE], m + Pool::MAT_INDEX_ABSORPTION_RED);
+							}
+							else
+								ms.pop();
+
+							prevDepth = intersect.depth;
 						}
-						else
-							ms.pop();
-
-						prevDepth = intersect.depth;
 					}
-				}
 
-				const real* ab = matStack.top().absorption;
-				real depth = distToLight - prevDepth;
-				filter[0] *= ab[0] == 0 ? 1 : pow(1-ab[0], depth);
-				filter[1] *= ab[1] == 0 ? 1 : pow(1-ab[1], depth);
-				filter[2] *= ab[2] == 0 ? 1 : pow(1-ab[2], depth);
+					const real* ab = matStack.top().absorption;
+					real depth = distToLight - prevDepth;
+					filter[0] *= ab[0] == 0 ? 1 : pow(1-ab[0], depth);
+					filter[1] *= ab[1] == 0 ? 1 : pow(1-ab[1], depth);
+					filter[2] *= ab[2] == 0 ? 1 : pow(1-ab[2], depth);
+					finalFilter[0] += filter[0];
+					finalFilter[1] += filter[1];
+					finalFilter[2] += filter[2];
+				}
 			}
 
 			// apply lighting
 			if(!intersectLight.containsOpaqueFace) {
 				// lighting!
-				colorOut[0] += lightingColor[0] * filter[0];
-				colorOut[1] += lightingColor[1] * filter[1];
-				colorOut[2] += lightingColor[2] * filter[2];
+				colorOut[0] += lightingColor[0] * finalFilter[0]/count;
+				colorOut[1] += lightingColor[1] * finalFilter[1]/count;
+				colorOut[2] += lightingColor[2] * finalFilter[2]/count;
 			}
 		}
 	}

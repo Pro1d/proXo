@@ -43,6 +43,7 @@ public:
 	// Radius of the sphere emitting light (for soft shadow)
 	real position[VEC4_SCALARS_COUNT];
 	real radius;
+	real transformedRadius;
 	bool castShadow;
 };
 
