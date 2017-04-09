@@ -7,31 +7,20 @@
 
 namespace proxo {
 
-Light::Light(bool castShadow) : castShadow(castShadow)
+Light::Light(bool castShadow)
+    : color{ 1, 1, 1 },
+      intensity(1),
+      reductionFactor(0),
+      distanceMax(0),
+      direction{ 1, 0, 0, 0 },
+      position{ 0, 0, 0, 1 },
+      radius(0),
+      castShadow(castShadow)
 {
-	initialize();
 }
 
 Light::~Light()
 {
-}
-
-void Light::initialize()
-{
-	color[0]        = 1;
-	color[1]        = 1;
-	color[2]        = 1;
-	intensity       = 1;
-	reductionFactor = 0;
-	distanceMax     = 0;
-	direction[0]    = 1;
-	direction[1]    = 0;
-	direction[2]    = 0;
-	direction[3]    = 0;
-	position[0]     = 0;
-	position[1]     = 0;
-	position[2]     = 0;
-	position[3]     = 1;
 }
 
 void Light::setDirection(vec3 dir)
@@ -88,6 +77,11 @@ void Light::setFallOff(real i)
 void Light::setCutOff(real i)
 {
 	cutOff = cos(toRadians(i));
+}
+
+void Light::setRadius(real r)
+{
+	radius = r;
 }
 
 void Light::transform(mat4 matrix)

@@ -23,6 +23,7 @@ public:
 	real getDistanceMax();
 	void setFallOff(real i);
 	void setCutOff(real i);
+	void setRadius(real r);
 
 protected:
 	real specularIntensity(real RdotV, real shininess);
@@ -39,7 +40,9 @@ protected:
 	real direction[VEC4_SCALARS_COUNT];
 
 public:
+	// Radius of the sphere emitting light (for soft shadow)
 	real position[VEC4_SCALARS_COUNT];
+	real radius;
 	bool castShadow;
 };
 
