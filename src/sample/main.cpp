@@ -60,15 +60,15 @@ int main(int argc, char** argv)
 	controller.setTranslateSpeed(1.5);
 	controller.setRotateSpeed(30);
 
-	controller.assignKey(MOVE_FORWARD, SDLK_w);
+	controller.assignKey(MOVE_FORWARD, SDLK_z);
 	controller.assignKey(MOVE_BACKWARD, SDLK_s);
-	controller.assignKey(MOVE_LEFT, SDLK_a);
+	controller.assignKey(MOVE_LEFT, SDLK_q);
 	controller.assignKey(MOVE_RIGHT, SDLK_d);
 	controller.assignKey(MOVE_UP, SDLK_SPACE);
 	controller.assignKey(MOVE_DOWN, SDLK_v);
-	controller.assignKey(YAW_LEFT, SDLK_q);
+	controller.assignKey(YAW_LEFT, SDLK_a);
 	controller.assignKey(YAW_RIGHT, SDLK_e);
-	controller.assignKey(ROLL_LEFT, SDLK_z);
+	controller.assignKey(ROLL_LEFT, SDLK_w);
 	controller.assignKey(ROLL_RIGHT, SDLK_x);
 	controller.assignKey(PITCH_DOWN, SDLK_r);
 	controller.assignKey(PITCH_UP, SDLK_f);
