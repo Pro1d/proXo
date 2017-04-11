@@ -25,7 +25,7 @@ MaterialStack::MaterialStack(
 
 MaterialStack::MaterialStack(const MaterialStack & mat)
     : stack_(new InnerMaterial[mat.maxSize_]),
-      stackTop_(stack_),
+      stackTop_(stack_+(mat.stackTop_-mat.stack_)),
       maxSize_(mat.maxSize_)
 {
 	memcpy(stack_, mat.stack_,
