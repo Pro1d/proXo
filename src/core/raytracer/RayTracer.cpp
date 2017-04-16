@@ -442,9 +442,9 @@ void RayTracer::getColor(vec3 orig, vec3 dir, real maxIntensity,
 	}
 	else {
 		// skybox
-		colorOut[0] = 1;
-		colorOut[1] = 1;
-		colorOut[2] = 1;
+		colorOut[0] = 0;
+		colorOut[1] = 0;
+		colorOut[2] = 0;
 		*depthOut   = std::numeric_limits<real>::infinity();
 	}
 }
