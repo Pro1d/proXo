@@ -13,7 +13,8 @@ Why to implement a graphic engine? So many others exist and are much more powerf
 
 ### Ray tracer
 *Keywords: light physics, refraction, reflection, absorption, KDTree, ray-triangle intersection, depth of field, texture, normal map, specular/ambient map.*
-*Insert screenshots here*
+
+Check out these [fantastic results](result/)!
 
 ## Sample demo
 It reads `.scene` files (*TODO: how to write a scene description file*).
