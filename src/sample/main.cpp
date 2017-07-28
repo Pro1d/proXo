@@ -4,7 +4,7 @@
 #include "core/math/basics.h"
 #include "core/model/Scene.h"
 #include "core/raytracer/RayTracer.h"
-#include "core/realtime/Buffer.h"
+#include "core/common/Buffer.h"
 #include "core/realtime/Engine.h"
 #include "parser/SceneParser.h"
 #include "sdl/CameraController.h"

@@ -2,7 +2,7 @@
 #define __SDL_WRAPPER_H__
 
 #include "core/math/basics.h"
-#include "core/realtime/Buffer.h"
+#include "core/common/Buffer.h"
 #include "core/sys/Multithreading.h"
 #include <SDL/SDL.h>
 

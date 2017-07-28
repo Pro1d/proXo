@@ -1,7 +1,7 @@
 #ifndef __RASTERIZER_H__
 #define __RASTERIZER_H__
 
-#include "Buffer.h"
+#include "core/common/Buffer.h"
 #include "core/math/type.h"
 
 namespace proxo {

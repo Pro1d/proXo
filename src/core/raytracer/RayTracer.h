@@ -8,7 +8,7 @@
 #include "core/common/Pool.h"
 #include "core/common/SceneToPool.h"
 #include "core/model/Scene.h"
-#include "core/realtime/Buffer.h"
+#include "core/common/Buffer.h"
 #include "core/sys/Multithreading.h"
 
 namespace proxo {
