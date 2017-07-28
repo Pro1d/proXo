@@ -6,6 +6,7 @@
 #include "core/raytracer/RayTracer.h"
 #include "core/common/Buffer.h"
 #include "core/realtime/Engine.h"
+#include "core/postproc/RadianceNormalizer.h"
 #include "parser/SceneParser.h"
 #include "sdl/CameraController.h"
 #include "sdl/wrapper.h"
@@ -48,6 +49,9 @@ int main(int argc, char** argv)
 	}
 	
 	Buffer buf(screen_width * sample_size, screen_height * sample_size);
+
+  MultiThread mt(0);
+  RadianceNormalizer radNorm(mt, 0.3, 3);
 	
 	Engine realTimeEngine(&buf, &scene);
 	realTimeEngine.createMatchingPool();
@@ -140,10 +144,13 @@ int main(int argc, char** argv)
 		if(!rayTracingRenderView) {
 			Uint32 t = SDL_GetTicks();
 			realTimeEngine.render();
-			printf("t:%dms ", SDL_GetTicks() - t);
+			printf("r:%03dms ", SDL_GetTicks() - t);
+			t = SDL_GetTicks();
+			radNorm.normalize(buf);
+			printf("n:%03dms ", SDL_GetTicks() - t);
 			t = SDL_GetTicks();
 			btb.convert();
-			printf("%dms \n", SDL_GetTicks() - t);
+			printf("c:%03dms \n", SDL_GetTicks() - t);
 		}
 		else {
 			bufferToBitmap24bpp(buf, buffer, sample_size);

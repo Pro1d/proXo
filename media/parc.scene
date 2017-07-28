@@ -29,7 +29,7 @@ camera target 1366 768 1 aperture 0.0 pos 5 -8 2 lookat 0 -2 2.95 zmax 100 fov 7
 
 world 2 2 3 
     light sun dir 6 2 -1 intensity 0.6
-	light ambient intensity 0.05
+	light ambient intensity 0.25
 
 	object puddle material water
 	object ground
