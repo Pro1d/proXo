@@ -1,5 +1,9 @@
 #include "SceneParser.h"
+#ifdef __ENABLE_SDL__ // Should be done with template/inheritance
 #include "../sdl/TextureLoader.h"
+#else
+#include "TextureLoader.h"
+#endif
 #include "StanfordParser.h"
 #include "core/math/Matrix.h"
 #include "core/math/Vector.h"

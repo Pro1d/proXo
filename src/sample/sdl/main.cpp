@@ -7,9 +7,9 @@
 #include "core/common/Buffer.h"
 #include "core/realtime/Engine.h"
 #include "core/postproc/RadianceNormalizer.h"
-#include "parser/SceneParser.h"
-#include "sdl/CameraController.h"
-#include "sdl/wrapper.h"
+#include "../parser/SceneParser.h"
+#include "CameraController.h"
+#include "wrapper.h"
 #include <SDL/SDL.h>
 
 using namespace proxo;

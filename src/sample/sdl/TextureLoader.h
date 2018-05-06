@@ -31,8 +31,5 @@ private:
 	SDL_Surface* bitmaps_[proxo::Texture::FIELDS_COUNT];
 };
 
-proxo::Texture* loadTextureFromBitmap(std::string const& filename,
-    proxo::Texture::Field field, proxo::Texture* texture = NULL);
-
 #endif
 
