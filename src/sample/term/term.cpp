@@ -24,14 +24,19 @@ proxo::positive BufferToXTerm::bash_color(proxo::vec3 clr)
 
 std::shared_ptr<char> BufferToXTerm::createTextBuffer(proxo::positive w, proxo::positive h)
 {
+  const char* header = "\e[H";
+  proxo::positive header_len = strlen(header);
   const char* data = "\e[38;5;000m\e[48;5;000m\u2580";
   //                  |-+++|+++|+++-|+++|+++|++-+-|-
   proxo::positive data_len = strlen(data);
   const char* nl = "\e[0m\n";
   proxo::positive nl_len = strlen(nl);
 
-  char* buf = new char[(w * data_len + nl_len) * h / 2 + 1];
+  char* buf = new char[header_len + (w * data_len + nl_len) * h / 2 + 1];
   char* cursor = buf;
+
+  memcpy(cursor, header, header_len);
+  cursor += header_len;
   
   for(proxo::positive y = 0; y < h; y += 2) {
     for(proxo::positive x = 0; x < w; x++) {
@@ -60,7 +65,7 @@ std::shared_ptr<char> BufferToXTerm::convert()
 {
   proxo::positive w = buffer.width;
   proxo::positive h = buffer.height;
-  char* cursor = text.get() + 7;
+  char* cursor = text.get() + 3 + 7;
   proxo::vec4 pxlUp = buffer.data + 1;
   proxo::vec4 pxlDown = buffer.data + VEC4_SCALARS_COUNT * w + 1;
   for(proxo::positive y = 0; y < h; y += 2) {

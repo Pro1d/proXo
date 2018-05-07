@@ -44,10 +44,10 @@ int main(int argc, char** argv)
 	while(!done) {
     realTimeEngine.render();
     auto txt = btx.convert();
-    fputs(txt.get(), stdout);
+    fwrite(txt.get(), strlen(txt.get()), 1, stdout);
     fflush(stdout);
-    usleep(500*1000);
-    break;
+    //usleep(300*1000);
+//    break;
 	} // end main loop
 
 	return 0;
