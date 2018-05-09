@@ -55,8 +55,10 @@ std::shared_ptr<char> BufferToXTerm::createIntToStrCache()
   char* cache = new char[256*4];
   char* cursor = cache;
 
-  for(proxo::positive i = 0; i < 256; i++, cursor += 4)
+  for(proxo::positive i = 0; i < 256; i++, cursor += 4) {
     sprintf(cursor, "%03d", i);
+    cursor[3] = 'm';
+  }
 
   return std::shared_ptr<char>{cache};
 }
@@ -83,6 +85,58 @@ std::shared_ptr<char> BufferToXTerm::convert()
   }
   *cursor = '\0';
   return text; // fputs(text.get(), stdout);
+}
+
+std::shared_ptr<char> BufferToXTerm::convert2()
+{
+  const char* header = "\e[H";
+  const char* seqUp = "\e[38;5;";
+  const char* seqDown = "\e[48;5;";
+  const char* seqEnd = "\u2580";
+  proxo::positive header_len = strlen(header);
+  proxo::positive seq_len = strlen(seqUp);
+  proxo::positive end_len = strlen(seqEnd);
+
+  proxo::positive w = buffer.width;
+  proxo::positive h = buffer.height;
+  char* buf = new char[(25 * w + 5) * h + 3];
+  char* cursor = buf;
+  
+  memcpy(cursor, header, header_len);
+  cursor += header_len;
+  
+  proxo::positive lastColorUp= 0, lastColorDown = 0;
+  proxo::vec4 pxlUp = buffer.data + 1;
+  proxo::vec4 pxlDown = buffer.data + VEC4_SCALARS_COUNT * w + 1;
+  
+  for(proxo::positive y = 0; y < h; y += 2) {
+    for(proxo::positive x = 0; x < w;  x++, pxlUp += VEC4_SCALARS_COUNT, pxlDown += VEC4_SCALARS_COUNT) {
+      proxo::positive c0 = bash_color(pxlUp);
+      proxo::positive c1 = bash_color(pxlDown);
+      if(c0 != lastColorUp) {
+        memcpy(cursor, seqUp, seq_len);
+        cursor += seq_len;
+        memcpy(cursor, intToStrCache.get() + 4*c0, 4);
+        cursor += 4;
+        lastColorUp = c0;
+      }
+      if(c1 != lastColorDown) {
+        memcpy(cursor, seqDown, seq_len);
+        cursor += seq_len;
+        memcpy(cursor, intToStrCache.get() + 4*c1, 4);
+        cursor += 4;
+        lastColorDown = c1;
+      }
+      memcpy(cursor, seqEnd, end_len);
+      cursor += end_len;
+    }
+    *cursor = '\n';
+    cursor++;
+    pxlUp += VEC4_SCALARS_COUNT * w;
+    pxlDown += VEC4_SCALARS_COUNT * w;
+  }
+  *cursor = '\0';
+  return std::shared_ptr<char>{buf};
 }
 
 void BufferToXTerm::getViewSize(proxo::positive& w, proxo::positive& h)

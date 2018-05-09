@@ -9,6 +9,7 @@ class BufferToXTerm {
 public:
   BufferToXTerm(proxo::Buffer& buffer);
   std::shared_ptr<char> convert();
+  std::shared_ptr<char> convert2();
   static void getViewSize(proxo::positive& w, proxo::positive& h);
 private:
   static proxo::positive bash_color(proxo::vec3 clr);

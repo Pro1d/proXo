@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <string>
 #include <unistd.h>
+#include <chrono>
 
 using namespace proxo;
 
@@ -43,7 +44,7 @@ int main(int argc, char** argv)
 	bool done = false;
 	while(!done) {
     realTimeEngine.render();
-    auto txt = btx.convert();
+    auto txt = btx.convert2();
     fwrite(txt.get(), strlen(txt.get()), 1, stdout);
     fflush(stdout);
     //usleep(300*1000);

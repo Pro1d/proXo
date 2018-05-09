@@ -12,7 +12,7 @@ target_link_libraries(proxo pthread)
 option(SDL_SAMPLE OFF)
 option(TERM_SAMPLE ON)
 
-add_definitions("-O3" "-march=corei7")
+add_definitions("-O3")
 
 if(${SDL_SAMPLE})
   FILE(GLOB_RECURSE SAMPLE_SOURCES RELATIVE "${CMAKE_SOURCE_DIR}" "src/sample/sdl/*.cpp" "src/sample/parser/*.cpp")
