@@ -43,7 +43,11 @@ int main(int argc, char** argv)
 	// program main loop
 	bool done = false;
 	while(!done) {
+    auto t1 = std::chrono::system_clock::now();
     realTimeEngine.render();
+    auto t2 = std::chrono::system_clock::now();
+    std::chrono::duration<double> diff = t2 - t1;
+    fprintf(stderr, "render: %f sec\n", diff.count());
     auto txt = btx.convert2();
     fwrite(txt.get(), strlen(txt.get()), 1, stdout);
     fflush(stdout);
