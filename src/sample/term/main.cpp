@@ -81,19 +81,43 @@ int main(int argc, char** argv)
 	bool done = false;
 	while(!done) {
     switch(getInput()) {
-    case 'z':
+    case 'z': // pitch down
       applyRotate(scene.camera.position, 0.05, -1, 0, 0);
       break;
-    case 's':
+    case 's': // pitch up
       applyRotate(scene.camera.position, 0.05, 1, 0, 0);
       break;
-    case 'q':
+    case 'q': // yaw left
       applyRotate(scene.camera.position, 0.05, 0, -1, 0);
       break;
-    case 'd':
+    case 'd': // yaw right
       applyRotate(scene.camera.position, 0.05, 0, 1, 0);
       break;
-    case 'e':
+    case 'j': // forward
+      applyTranslate(scene.camera.position, 0, 0, 0.1);
+      break;
+    case 'k': // backward
+      applyTranslate(scene.camera.position, 0, 0, -0.1);
+      break;
+    case 'h': // left
+      applyTranslate(scene.camera.position, 0.1, 0, 0);
+      break;
+    case 'l': // right
+      applyTranslate(scene.camera.position, -0.1, 0, 0);
+      break;
+    case 'u': // up
+      applyTranslate(scene.camera.position, 0, -0.1, 0);
+      break;
+    case 'n': // down
+      applyTranslate(scene.camera.position, 0, 0.1, 0);
+      break;
+    case 'a': // roll 
+      applyRotate(scene.camera.position, 0.05, 0, 0, -1);
+      break;
+    case 'e': // roll
+      applyRotate(scene.camera.position, 0.05, 0, 0, 1);
+      break;
+    case 'x':
       done = true;
       break;
     }
