@@ -25,6 +25,11 @@ It loads `.ply` files ([Stanford PLY - Wikipedia](https://en.wikipedia.org/wiki/
 * The program can generated with a simple `make`. The core of the engine does not have any external dependency, thus it could be compiled apart.
 
 ## Coming soon
+ * better way to reuse proXo.a in other project
+    * public include/ dir
+    * library for sdl binding
+    * cmake export and dependencies
+ * depth=0 intersection faces rasterization option
  * *Documentation for scene file format*
  * *Implement sky box* 
  * *Improve KD-Tree for ray tracer*
