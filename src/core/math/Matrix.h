@@ -65,7 +65,7 @@ inline void identity(mat4 mOut)
 	mOut[15] = 1;
 }
 
-inline void multiplyMM(mat4 A, mat4 B, mat4 mOut)
+inline void multiplyMM(mat4 __restrict A, mat4 __restrict B, mat4 __restrict mOut)
 {
 	mOut[0] = A[0] * B[0] + A[1] * B[4] + A[2] * B[8] + A[3] * B[12];
 	mOut[1] = A[0] * B[1] + A[1] * B[5] + A[2] * B[9] + A[3] * B[13];
@@ -88,7 +88,7 @@ inline void multiplyMM(mat4 A, mat4 B, mat4 mOut)
 	mOut[15] = A[12] * B[3] + A[13] * B[7] + A[14] * B[11] + A[15] * B[15];
 }
 
-inline void multiplyMV(mat4 M, vec4 v, vec4 vOut)
+inline void multiplyMV(mat4 __restrict M, vec4 __restrict v, vec4 __restrict vOut)
 {
 	vOut[0]     = v[0] * M[0] + v[1] * M[1] + v[2] * M[2] + v[3] * M[3];
 	vOut[1]     = v[0] * M[4] + v[1] * M[5] + v[2] * M[6] + v[3] * M[7];
@@ -104,7 +104,7 @@ inline void multiplyMV(mat4 M, vec4 v, vec4 vOut)
 	vOut[3] = (real) 1;
 }
 
-inline void multiplyNoNormalizeMV(mat4 M, vec4 v, vec4 vOut)
+inline void multiplyNoNormalizeMV(mat4 __restrict M, vec4 __restrict v, vec4 __restrict vOut)
 {
 	vOut[0] = v[0] * M[0] + v[1] * M[1] + v[2] * M[2] + v[3] * M[3];
 	vOut[1] = v[0] * M[4] + v[1] * M[5] + v[2] * M[6] + v[3] * M[7];

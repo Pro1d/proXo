@@ -30,7 +30,7 @@ inline real dot(vec4 a, vec4 b)
 	return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 }
 
-inline void cross(vec4 a, vec4 b, vec4 r)
+inline void cross(vec4 __restrict a, vec4 __restrict b, vec4 __restrict r)
 {
 	r[0] = a[1] * b[2] - b[1] * a[2];
 	r[1] = a[2] * b[0] - b[2] * a[0];
@@ -38,7 +38,7 @@ inline void cross(vec4 a, vec4 b, vec4 r)
 	r[3] = 0;
 }
 
-inline void normalize(vec4 in, vec4 out)
+inline void normalize(vec4 __restrict in, vec4 __restrict out)
 {
 	real norm2   = squaredLength(in);
 	real normInv = sqrt_inv(norm2);
@@ -48,7 +48,7 @@ inline void normalize(vec4 in, vec4 out)
 	out[3]       = 0;
 }
 
-inline void reflect(vec4 i, vec4 normal, vec4 reflectOut)
+inline void reflect(vec4 __restrict i, vec4 __restrict normal, vec4 __restrict reflectOut)
 {
 	real k = 2 * dot(i, normal);
 	// r = i - 2*(i.n)*n
@@ -71,7 +71,7 @@ inline real squaredDistance(vec3 pointA, vec3 pointB)
 	return squaredLength(d);
 }
 
-inline void substract(vec4 a, vec4 b, vec4 out)
+inline void substract(vec4 __restrict a, vec4 __restrict b, vec4 __restrict out)
 {
 	out[0] = a[0] - b[0];
 	out[1] = a[1] - b[1];

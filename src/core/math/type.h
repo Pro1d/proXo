@@ -11,7 +11,7 @@ typedef double real;
 typedef float real;
 #endif
 
-#ifdef USE_64_BITS_INTEGER_VALUE
+#ifndef USE_64_BITS_INTEGER_VALUE
 typedef int integer;
 typedef unsigned int positive;
 #else
