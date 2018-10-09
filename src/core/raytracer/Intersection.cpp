@@ -49,11 +49,11 @@ integer intersectTriangle(vec3 orig, vec3 dir, vec3 vert0, vec3 vert1,
 	return side;
 }
 
-// paralSize = width / 2, height / 2, depth / 2
-real intersectAxialParallelepiped(vec3 orig, vec3 inv_dir, real* paralMinMax)
+bool intersectAxialParallelepiped(const vec3 orig, const vec3 inv_dir, const real* paralMinMax, real& tmin, real& tmax)
 {
 	// ray is of form R + t D; assign min t as thit; normal N
-	real tmin = 0, tmax = std::numeric_limits<real>::infinity();
+	tmin = 0;
+  tmax = std::numeric_limits<real>::infinity();
 	// intersect ray with x, y, z ``slabs'' (k = 0, 1, 2)
 	for(int k = 0; k < 3; k++) {
 		if(inv_dir[k] != std::numeric_limits<real>::infinity()) {
@@ -64,110 +64,25 @@ real intersectAxialParallelepiped(vec3 orig, vec3 inv_dir, real* paralMinMax)
 			tmin = std::max(tmin, std::min(t1, t2)); // intersect [tmin..
 			tmax = std::min(tmax, std::max(t1, t2)); // tmax], [t1..t2]
 			if(tmax <= tmin)
-				return (real) -1; // no intersection
+				return false; // no intersection
 		}
 		// ray parallel to plane
 		else if(paralMinMax[k] > orig[k]
 		    || orig[k] > paralMinMax[k + BOUND_X_MAX]) {
-			return (real) -1; // no intersection
+			return false; // no intersection
 		}
 	}
 
-	return tmin;
+	return true;
 }
 
-void pushSubTree(vec3 orig, vec3 inv_dir, KDTree* tree, TreeStack& stack, real distanceMax)
-{
-	real distFirst =
-	    intersectAxialParallelepiped(orig, inv_dir, tree->firstSubTree->bounds);
-	real distSecond = intersectAxialParallelepiped(
-	    orig, inv_dir, tree->secondSubTree->bounds);
-	bool intersectFirst  = distFirst >= 0 && distFirst < distanceMax;
-	bool intersectSecond = distSecond >= 0 && distSecond < distanceMax;
-
-	if(tree->middleSubTree != NULL) {
-		real distMiddle = intersectAxialParallelepiped(
-		    orig, inv_dir, tree->middleSubTree->bounds);
-		bool intersectMiddle = distMiddle >= 0 && distMiddle < distanceMax;
-
-		if((distFirst < distSecond && intersectFirst) || !intersectSecond) {
-			if((distMiddle < distFirst && intersectMiddle) || !intersectFirst) {
-				if(intersectSecond)
-					stack.push(tree->secondSubTree, distSecond);
-				if(intersectFirst)
-					stack.push(tree->firstSubTree, distFirst);
-				if(intersectMiddle)
-					stack.push(tree->middleSubTree, distMiddle);
-			}
-			else if((distMiddle < distSecond && intersectMiddle)
-			    || !intersectSecond) {
-				if(intersectSecond)
-					stack.push(tree->secondSubTree, distSecond);
-				if(intersectMiddle)
-					stack.push(tree->middleSubTree, distMiddle);
-				if(intersectFirst)
-					stack.push(tree->firstSubTree, distFirst);
-			}
-			else {
-				if(intersectMiddle)
-					stack.push(tree->middleSubTree, distMiddle);
-				if(intersectSecond)
-					stack.push(tree->secondSubTree, distSecond);
-				if(intersectFirst)
-					stack.push(tree->firstSubTree, distFirst);
-			}
-		}
-		else {
-			if((distMiddle < distSecond && intersectMiddle)
-			    || !intersectSecond) {
-				if(intersectFirst)
-					stack.push(tree->firstSubTree, distFirst);
-				if(intersectSecond)
-					stack.push(tree->secondSubTree, distSecond);
-				if(intersectMiddle)
-					stack.push(tree->middleSubTree, distMiddle);
-			}
-			else if((distMiddle < distFirst && intersectMiddle)
-			    || !intersectFirst) {
-				if(intersectFirst)
-					stack.push(tree->firstSubTree, distFirst);
-				if(intersectMiddle)
-					stack.push(tree->middleSubTree, distMiddle);
-				if(intersectSecond)
-					stack.push(tree->secondSubTree, distSecond);
-			}
-			else {
-				if(intersectMiddle)
-					stack.push(tree->middleSubTree, distMiddle);
-				if(intersectFirst)
-					stack.push(tree->firstSubTree, distFirst);
-				if(intersectSecond)
-					stack.push(tree->secondSubTree, distSecond);
-			}
-		}
-	}
-	else {
-		if((distFirst < distSecond && intersectFirst) || !intersectSecond) {
-			if(intersectSecond)
-				stack.push(tree->secondSubTree, distSecond);
-			if(intersectFirst)
-				stack.push(tree->firstSubTree, distFirst);
-		}
-		else {
-			if(intersectFirst)
-				stack.push(tree->firstSubTree, distFirst);
-			if(intersectSecond)
-				stack.push(tree->secondSubTree, distSecond);
-		}
-	}
-}
-
-void intersectSetOfTriangles(vec3 orig, vec3 dir, positive* faces,
+void intersectSetOfTriangles(vec3 orig, vec3 dir, positive** faces,
     positive facesCount, vec4 vertices, positive* faceToIgnore,
     IntersectionData& out)
 {
-	positive* facesEnd = faces + facesCount * 4;
-	for(positive* f = faces; f < facesEnd; f += 4) {
+	auto facesEnd = faces + facesCount;
+	for(auto it = faces; it != facesEnd; it++) {
+    const auto f = *it;
 		real t, u, v;
 		vec4 v1 = vertices + f[0] * VEC4_SCALARS_COUNT;
 		vec4 v2 = vertices + f[1] * VEC4_SCALARS_COUNT;
@@ -184,12 +99,13 @@ void intersectSetOfTriangles(vec3 orig, vec3 dir, positive* faces,
 	}
 }
 
-void intersectSetOfTrianglesLighting(vec3 orig, vec3 dir, positive* faces,
+void intersectSetOfTrianglesLighting(vec3 orig, vec3 dir, positive** faces,
     positive facesCount, vec4 vertices, vec16 materials, positive* faceToIgnore,
     real distanceMax, SortedIntersectionsData& out)
 {
-	positive* facesEnd = faces + facesCount * 4;
-	for(positive* f = faces; f < facesEnd; f += 4) {
+	auto facesEnd = faces + facesCount;
+	for(auto it = faces; it != facesEnd; it++) {
+    const auto f = *it;
 		real t, u, v;
 		vec4 v1 = vertices + f[0] * VEC4_SCALARS_COUNT;
 		vec4 v2 = vertices + f[1] * VEC4_SCALARS_COUNT;
@@ -202,7 +118,7 @@ void intersectSetOfTrianglesLighting(vec3 orig, vec3 dir, positive* faces,
 			    + Pool::MAT_INDEX_ABSORPTION_RED;
 			bool isOpaque = absorption[0] > 1 - 1.0 / (255*255)
 			    && absorption[1] > 1 - 1.0 / (255*255)
-			    && absorption[2] > 1 - 1.0 / (255*255);
+			    && absorption[2] > 1 - 1.0 / (255*255); // TODO optim: store isOpaque in 'materials'
 			if(isOpaque) {
 				out.containsOpaqueFace = true;
 				break;
@@ -214,74 +130,148 @@ void intersectSetOfTrianglesLighting(vec3 orig, vec3 dir, positive* faces,
 			i.uv[0]            = u;
 			i.uv[1]            = v;
 			i.face             = f;
-			out.push(i);
+			out.push_back(i); // are we sure it does not reallocate the *data?
 		}
 	}
 }
 
-void intersectTree(vec3 orig, vec3 dir, KDTree* root, TreeStack& stack,
-    vec4 vertices, positive* faceToIgnore, IntersectionData& out)
+/*
+  intersection = none;
+  if (ray intersects root node) {
+      stack.push(root node, tmin, tmax); // stack size max = tree depth Max +/-1
+      while (!stack.empty() && !intersection) {
+          (node, tmin, tmax) = stack.pop();
+          while (!node.isLeaf()) {
+              tsplit = (node.split - ray.origin[node.axis]) / ray.direction[node.axis];
+              if (node.split - ray.origin[node.axis] >= 0) {
+                  first = node.left;
+                  second = node.right;
+              } else {
+                  first = node.right;
+                  second = node.left;
+              }
+              if (tsplit >= tmax || tsplit < 0)
+                  node = first; // update tmin or tmax ? maybe no need in that case. No need!
+              else if (tsplit <= tmin)
+                  node = second; // update tmin or tmax ? maybe no need in that case. No need!
+              else {
+                  stack.push(second, tsplit, tmax);
+                  node = first;
+                  tmax = tsplit;
+              }
+          }
+          foreach (triangle in node) // optim to do add triangle to leaf if not intersect AABB
+              if (ray intersects triangle)
+                  intersection = nearest intersection (in range [tmin; tmax]);
+          if (nearest intersection > tmax) ("in range [tmin; tmax]" -> done here!)
+                  intersection = none; // optim aformentioned could avoid this case
+      }
+  }
+*/
+bool intersectKDTree(NodeStack& stack, KDTree& tree, vec4 vertices, positive* faceToIgnore, vec3 ray_orig, vec3 ray_dir, real dmax, IntersectionData& out)
 {
-	stack.clear();
-	out.intersectionSide             = 0;
-	out.depth                        = std::numeric_limits<real>::infinity();
-	real inv_dir[VEC3_SCALARS_COUNT] = { 1 / dir[0], 1 / dir[1], 1 / dir[2] };
+	out.intersectionSide = 0;
+	out.depth = dmax; //std::numeric_limits<real>::infinity();
+  real ray_inv_dir[VEC3_SCALARS_COUNT] = {
+    1 / ray_dir[0],
+    1 / ray_dir[1],
+    1 / ray_dir[2]
+  };
+  real tmin_root, tmax_root;
+  bool inter_root = intersectAxialParallelepiped(ray_orig, ray_inv_dir, tree.bounds, tmin_root, tmax_root);
+  if(not inter_root || dmax <= tmin_root)
+    return false;
 
-	real distRoot = intersectAxialParallelepiped(orig, inv_dir, root->bounds);
-	if(distRoot < 0)
-		return;
-	stack.push(root, distRoot);
+  stack.clear();
+  stack.push({tree.root, tmin_root, std::min(tmax_root, dmax)});
 
-	while(!stack.empty()) {
-		KDTree* node;
-		real depth;
-		stack.pop(node, depth);
+  while(not stack.empty() && out.intersectionSide == 0) {
+    auto e = stack.pop();
+    
+    while(not e.node->is_leaf) {
+      auto branch = static_cast<Branch*>(e.node);
+      real rel = branch->cutValue - ray_orig[branch->cutAxis];
+      real tsplit = rel * ray_inv_dir[branch->cutAxis];
+      Node* first;
+      Node* second;
+      if(rel >= 0) {
+        first = branch->left;
+        second = branch->right;
+      }
+      else {
+        first = branch->right;
+        second = branch->left;
+      }
+      if(tsplit >= e.tmax || tsplit < 0)
+        e.node = first;
+      else if (tsplit <= e.tmin)
+        e.node = second;
+      else {
+        stack.push({second, tsplit, e.tmax});
+        e.node = first;
+        e.tmax = tsplit;
+      }
+    }
 
-		/// Test if this node can contain faces closer than the actual nearest
-		/// face.
-		if(depth < out.depth) {
-			if(node->isLeaf) {
-				intersectSetOfTriangles(orig, dir, node->faces,
-				    node->facesCount, vertices, faceToIgnore, out);
-			}
-			else {
-				pushSubTree(orig, inv_dir, node, stack);
-			}
-		}
-	}
+    auto leaf = static_cast<Leaf*>(e.node);
+    intersectSetOfTriangles(ray_orig, ray_dir, leaf->facePtrs,
+      leaf->facesCount, vertices, faceToIgnore, out);
+  }
+
+  return out.intersectionSide != 0;
 }
 
-void intersectTreeLighting(vec3 orig, vec3 dir, KDTree* root, TreeStack& stack,
-    vec4 vertices, vec16 materials, positive* faceToIgnore, real distanceMax,
-    SortedIntersectionsData& out)
+bool intersectKDTreeLighting(NodeStack& stack, KDTree& tree, vec4 vertices, vec16 materials, positive* faceToIgnore, vec3 ray_orig, vec3 ray_dir, real dmax, SortedIntersectionsData& out)
 {
-	stack.clear();
-	out.reset();
-	real inv_dir[VEC3_SCALARS_COUNT] = { 1 / dir[0], 1 / dir[1], 1 / dir[2] };
+  out.reset();
+  real ray_inv_dir[VEC3_SCALARS_COUNT] = {
+    1 / ray_dir[0],
+    1 / ray_dir[1],
+    1 / ray_dir[2]
+  };
+  real tmin_root, tmax_root;
+  bool inter_root = intersectAxialParallelepiped(ray_orig, ray_inv_dir, tree.bounds, tmin_root, tmax_root);
+  if(not inter_root || dmax <= tmin_root)
+    return false;
 
-	real distRoot = intersectAxialParallelepiped(orig, inv_dir, root->bounds);
-	if(distRoot < 0)
-		return;
-	stack.push(root, distRoot);
+  stack.clear();
+  stack.push({tree.root, tmin_root, std::min(tmax_root, dmax)});
 
-	while(!stack.empty()) {
-		KDTree* node;
-		real depth;
-		stack.pop(node, depth);
+  while(not stack.empty() && not out.containsOpaqueFace) {
+    auto e = stack.pop();
+    
+    while(not e.node->is_leaf) {
+      auto branch = static_cast<Branch*>(e.node);
+      real rel = branch->cutValue - ray_orig[branch->cutAxis];
+      real tsplit = rel * ray_inv_dir[branch->cutAxis];
+      Node* first;
+      Node* second;
+      if(rel >= 0) {
+        first = branch->left;
+        second = branch->right;
+      }
+      else {
+        first = branch->right;
+        second = branch->left;
+      }
+      if(tsplit >= e.tmax || tsplit < 0)
+        e.node = first;
+      else if (tsplit <= e.tmin)
+        e.node = second;
+      else {
+        stack.push({second, tsplit, e.tmax});
+        e.node = first;
+        e.tmax = tsplit;
+      }
+    }
 
-		if(node->isLeaf) {
-			intersectSetOfTrianglesLighting(orig, dir, node->faces,
-			    node->facesCount, vertices, materials, faceToIgnore,
-			    distanceMax, out);
-
-			// End immediately if an opaque face has been found
-			if(out.containsOpaqueFace)
-				break;
-		}
-		else {
-			pushSubTree(orig, inv_dir, node, stack, distanceMax);
-		}
-	}
+    auto leaf = static_cast<Leaf*>(e.node);
+    intersectSetOfTrianglesLighting(ray_orig, ray_dir, leaf->facePtrs,
+      leaf->facesCount, vertices, materials, faceToIgnore, dmax, out);
+  }
+  if(not out.containsOpaqueFace)
+    out.finalize();
+  return out.containsOpaqueFace || not out.empty();
 }
 
 } // namespace proxo

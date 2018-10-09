@@ -48,7 +48,7 @@ void RayTracer::threadRenderTask(
     void* data, positive threadId, positive threadsCount)
 {
 	RayTracer* that = (RayTracer*) data;
-	TreeStack treeStack(1024);
+	NodeStack nodeStack(that->tree->depthMax+1);
 	MaterialStack matStack(256, 1.0, 0.0);
 
 	real rayOrig[VEC4_SCALARS_COUNT] = { 0, 0, 0, 1 };
@@ -77,7 +77,7 @@ void RayTracer::threadRenderTask(
 
 			// Cast ray
 			that->getColor(
-			    rayOrig, rayDir, 1, NULL, pxl + 1, pxl, treeStack, matStack);
+			    rayOrig, rayDir, 1, NULL, pxl + 1, pxl, nodeStack, matStack);
 
 			// Cast more ray for depth of field
 			positive count = 1;
@@ -88,7 +88,7 @@ void RayTracer::threadRenderTask(
 				real ro[VEC4_SCALARS_COUNT], rd[VEC4_SCALARS_COUNT];
 				that->dof_.getDirection(rayDir, oi, rd, ro);
 				// Cast ray
-				that->getColor(ro, rd, 1, NULL, p, &d, treeStack, matStack);
+				that->getColor(ro, rd, 1, NULL, p, &d, nodeStack, matStack);
 				// Add color to pixel
 				pxl[1] += p[0];
 				pxl[2] += p[1];
@@ -221,7 +221,7 @@ void RayTracer::getPointData(IntersectionData& intersect, Pool* pool,
 }
 
 void RayTracer::getLightingColor(vec3 color, vec4 point, vec4 normal,
-    Material& mat, IntersectionData& intersect, TreeStack& treeStack,
+    Material& mat, IntersectionData& intersect, NodeStack& nodeStack,
     MaterialStack& matStack, vec3 colorOut)
 {
 	SortedIntersectionsData intersectLight;
@@ -256,9 +256,8 @@ void RayTracer::getLightingColor(vec3 color, vec4 point, vec4 normal,
 					real dir[VEC3_SCALARS_COUNT];
 					blurLight.getDirection(it, dir);
 
-					intersectTreeLighting(point, dir, tree, treeStack,
-							pool->vertexPool, pool->materialPool, intersect.face, distToLight,
-							intersectLight);
+					intersectKDTreeLighting(nodeStack, *tree, pool->vertexPool, pool->materialPool,
+              intersect.face, point, dir, distToLight, intersectLight);
 
 					if(!intersectLight.containsOpaqueFace) {
 						real filter[VEC3_SCALARS_COUNT] = {1,1,1};
@@ -266,10 +265,7 @@ void RayTracer::getLightingColor(vec3 color, vec4 point, vec4 normal,
 						MaterialStack ms(matStack);
 						if(!intersectLight.empty()) {
 							// Go trough translucent material to reach the light source
-							while(!intersectLight.empty()) {
-								IntersectionData intersect = intersectLight.top();
-								intersectLight.pop();
-
+							for(const auto& intersect : intersectLight) {
 								const real* ab = ms.top().absorption;
 								real depth = intersect.depth - prevDepth;
 								filter[0] *= ab[0] == 0 ? 1 : pow(1-ab[0], depth);
@@ -317,7 +313,7 @@ void RayTracer::getLightingColor(vec3 color, vec4 point, vec4 normal,
 }
 
 void RayTracer::getRefractionColor(vec4 point, vec4 normal, vec3 dir,
-    Material& mat, IntersectionData& intersect, TreeStack& treeStack,
+    Material& mat, IntersectionData& intersect, NodeStack& nodeStack,
     MaterialStack& matStack, real maxIntensity, vec3 colorOut,
     real& refractRatioOut, positive depth)
 {
@@ -341,7 +337,7 @@ void RayTracer::getRefractionColor(vec4 point, vec4 normal, vec3 dir,
 
 		// Cast refracted ray
 		getColor(point, refractDir, refractIntensity * maxIntensity,
-		    intersect.face, refractColor, &refractDepth, treeStack, matStack,
+		    intersect.face, refractColor, &refractDepth, nodeStack, matStack,
 		    depth + 1);
 
 		const real* ab     = matStack.top().absorption;
@@ -361,7 +357,7 @@ void RayTracer::getRefractionColor(vec4 point, vec4 normal, vec3 dir,
 
 void RayTracer::getReflectionColor(vec4 point, vec4 normal, vec3 dir,
     real refractRatio, Material& mat, IntersectionData& intersect,
-    TreeStack& treeStack, MaterialStack& matStack, real maxIntensity,
+    NodeStack& nodeStack, MaterialStack& matStack, real maxIntensity,
     vec3 colorOut, positive depth)
 {
 	real reflectDir[VEC4_SCALARS_COUNT];
@@ -372,7 +368,7 @@ void RayTracer::getReflectionColor(vec4 point, vec4 normal, vec3 dir,
 		real reflectDepth;
 		// Cast refletc ray
 		getColor(point, reflectDir, reflectIntensity * maxIntensity,
-		    intersect.face, reflectColor, &reflectDepth, treeStack, matStack,
+		    intersect.face, reflectColor, &reflectDepth, nodeStack, matStack,
 		    depth + 1);
 		colorOut[0] += reflectColor[0] * reflectIntensity;
 		colorOut[1] += reflectColor[1] * reflectIntensity;
@@ -381,7 +377,7 @@ void RayTracer::getReflectionColor(vec4 point, vec4 normal, vec3 dir,
 }
 
 void RayTracer::getColor(vec3 orig, vec3 dir, real maxIntensity,
-    positive* lastFace, vec3 colorOut, real* depthOut, TreeStack& treeStack,
+    positive* lastFace, vec3 colorOut, real* depthOut, NodeStack& nodeStack,
     MaterialStack& matStack, positive depth)
 {
 	colorOut[0] = 0;
@@ -394,8 +390,8 @@ void RayTracer::getColor(vec3 orig, vec3 dir, real maxIntensity,
 
 	// Get ray first intersection
 	IntersectionData intersect;
-	intersectTree(
-	    orig, dir, tree, treeStack, pool->vertexPool, lastFace, intersect);
+	intersectKDTree(nodeStack, *tree, pool->vertexPool,
+      lastFace, orig, dir, std::numeric_limits<real>::infinity(), intersect);
 
 	/// TODO translucent, couleur perçue absorbée par épaisseur d'objet pas
 	/// complètement transparent
@@ -424,7 +420,7 @@ void RayTracer::getColor(vec3 orig, vec3 dir, real maxIntensity,
 		// TODO allow translucent object to receive specular light (with fresnel
 		// coeffs)
 		if(isOpaque) {
-			getLightingColor(color, point, normal, mat, intersect, treeStack,
+			getLightingColor(color, point, normal, mat, intersect, nodeStack,
 			    matStack, colorOut);
 		}
 
@@ -432,13 +428,13 @@ void RayTracer::getColor(vec3 orig, vec3 dir, real maxIntensity,
 		real refractRatio = 1;
 
 		if(!isOpaque) {
-			getRefractionColor(point, normal, dir, mat, intersect, treeStack,
+			getRefractionColor(point, normal, dir, mat, intersect, nodeStack,
 			    matStack, maxIntensity, colorOut, refractRatio, depth);
 		}
 
 		// reflect // reflect > 0 || (refractRation < 1 && depthAbsorbtion < 1)
 		getReflectionColor(point, normal, dir, refractRatio, mat, intersect,
-		    treeStack, matStack, maxIntensity, colorOut, depth);
+		    nodeStack, matStack, maxIntensity, colorOut, depth);
 	}
 	else {
 		// skybox
@@ -448,28 +444,33 @@ void RayTracer::getColor(vec3 orig, vec3 dir, real maxIntensity,
 		*depthOut   = std::numeric_limits<real>::infinity();
 	}
 }
+#include <chrono>
 
 void RayTracer::render()
 {
+using namespace std::chrono;
 	if(tree != NULL)
 		delete tree;
 	pool->reset();
 	imageBuffer->clear();
+  auto t1 = steady_clock::now();
 	sceneToPool.run(*scene, *pool, false);
+  auto t2 = steady_clock::now();
 	scene->printSize();
 
-	tree = new KDTree(*pool, pool->facePool, 0, pool->currentFacesCount);
-	tree->build(*pool);
+  auto t3 = steady_clock::now();
+	tree = new KDTree(*pool);
+  auto t4 = steady_clock::now();
 
 	// Auto focus enabled: find distance to nearest object in middle of the
 	// screen
 	if(scene->camera.autofocus) {
 		IntersectionData intersect;
-		TreeStack treeStack(64);
+		NodeStack nodeStack(tree->depthMax+1);
 		real orig[VEC3_SCALARS_COUNT] = { 0, 0, 0 };
 		real dir[VEC3_SCALARS_COUNT]  = { 0, 0, -1 };
-		intersectTree(
-		    orig, dir, tree, treeStack, pool->vertexPool, NULL, intersect);
+		intersectKDTree(nodeStack, *tree, pool->vertexPool,
+        NULL, orig, dir, std::numeric_limits<real>::infinity(), intersect);
 		if(intersect.intersectionSide == 0)
 			dof_.setFocusDistance(scene->camera.distanceFocus);
 		else
@@ -485,7 +486,14 @@ void RayTracer::render()
 	    (integer) scene->camera.screenHeight);
 	printf("DoF: %d rays\n", dof_.getRaysCount());
 
+  auto t5 = steady_clock::now();
 	multithread.execute(RayTracer::threadRenderTask, this);
+  auto t6 = steady_clock::now();
+  printf("pool %f kdtree %f tracing %f\n",
+      duration<double>(t2-t1).count(),
+      duration<double>(t4-t3).count(),
+      duration<double>(t6-t5).count());
+
 }
 
 } // namespace proxo

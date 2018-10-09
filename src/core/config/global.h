@@ -1,14 +1,14 @@
 
 /// Configuration
 
-#define CPU_CORES_COUNT 2
+#define CPU_CORES_COUNT 8
 #define THREADS_COUNT CPU_CORES_COUNT
 #define ENABLE_CEL_SHADING true
 
 /// Optimization / precision
 
 // Comment/Uncomment
-#define USE_DOUBLE_PRECISION_FLOATING_VALUE
+//#define USE_DOUBLE_PRECISION_FLOATING_VALUE
 #define USE_64_BITS_INTEGER_VALUE
 
 #define FASTEST_INV_SQRT 0

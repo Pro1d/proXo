@@ -7,8 +7,6 @@
 
 namespace proxo {
 
-#define MINIMUM_FACES_TREE 50
-
 enum {
 	BOUND_X_MIN,
 	BOUND_Y_MIN,
@@ -18,69 +16,78 @@ enum {
 	BOUND_Z_MAX
 };
 
+struct Node {
+  const bool is_leaf;
+  Node(bool is_leaf) : is_leaf{is_leaf} {}
+  virtual ~Node() = default;
+};
+struct Branch : Node {
+  Branch(positive cutAxis, real cutValue) : Node{false}, cutAxis{cutAxis}, cutValue{cutValue} {}
+  virtual ~Branch() {
+    if(left) delete left;
+    if(right) delete right;
+  }
+  Node* left{NULL};
+  Node* right{NULL};
+  positive cutAxis;
+  real cutValue;
+};
+struct Leaf : Node {
+  Leaf(positive facesCount) : Node{true}, facesCount{facesCount}, facePtrs{facesCount ? new positive*[facesCount] : NULL} {}
+  virtual ~Leaf() {
+    if(facePtrs) delete[] facePtrs;
+  }
+  positive facesCount{0};
+  positive** facePtrs{NULL};
+};
+
 class KDTree {
+private:
+  static void buildNode(Node*& node, real bounds[6], const Pool& pool, positive** facePtrs, positive facesCount, positive d= 0);
+  static bool chooseCut(const Pool& pool, real bounds[6], positive** facePtrs, positive facesCount, positive& cutAxis, real& cutValue, positive cutFaceCounts[2]);
+	void setBounds(const Pool& pool);
+  positive updateDepthMax();
 public:
-	KDTree(Pool& pool, positive* faces, positive faceBegin, positive faceEnd,
-	    KDTree* parent = NULL);
+	KDTree(const Pool& pool);
 	~KDTree();
-	void build(Pool& pool);
-	void setBounds(Pool& pool);
-	void print(positive depth = 0);
 
 	real bounds[6]; // xmin, ymin, zmin, xmax, ymax, zmax
-	KDTree* middleSubTree;
-	KDTree* firstSubTree;
-	KDTree* secondSubTree;
-	bool isLeaf;
-	positive facesCount;
-	positive* faces;
-	bool isLocked[3];
+  Node* root{NULL};
+  positive depthMax{0};
 };
 
-class TreeStack {
+class NodeStack {
 public:
-	TreeStack(positive sizeMax)
-	    : treeStack(new KDTree*[sizeMax]), treeStackTop(treeStack),
-	      distanceStack(new real[sizeMax]), distanceStackTop(distanceStack)
+  struct Element {
+    Node* node;
+    real tmin, tmax;
+  };
+	NodeStack(positive sizeMax)
+	    : stack(new Element[sizeMax]), top(stack)
 	{
 	}
-	~TreeStack()
+  NodeStack(const NodeStack&) = delete;
+	~NodeStack()
 	{
-		delete[] treeStack;
-		delete[] distanceStack;
+		delete[] stack;
 	}
-	bool empty();
-	void clear();
-	void push(KDTree*& t, real d);
-	void pop(KDTree*& t, real& d);
-	KDTree **treeStack, **treeStackTop;
-	real *distanceStack, *distanceStackTop;
+	inline bool empty() {
+    return stack == top;
+  }
+	inline void clear() {
+    top = stack;
+  }
+	inline void push(Element e) {
+    *top = e;
+    ++top;
+  }
+	inline Element pop() {
+    return *--top;
+  }
+private:
+	Element* const stack;
+  Element* top;
 };
-
-inline bool TreeStack::empty()
-{
-	return treeStack == treeStackTop;
-}
-
-inline void TreeStack::clear()
-{
-	*treeStackTop = *treeStack;
-	*distanceStackTop = *distanceStack;
-}
-
-inline void TreeStack::push(KDTree*& t, real d)
-{
-	*treeStackTop = t;
-	treeStackTop++;
-	*distanceStackTop = d;
-	distanceStackTop++;
-}
-
-inline void TreeStack::pop(KDTree*& t, real& d)
-{
-	t = *--treeStackTop;
-	d = *--distanceStackTop;
-}
 
 } // namespace proxo
 

@@ -27,18 +27,18 @@ public:
 	void getPointData(IntersectionData& intersect, Pool* pool, Material& mat,
 	    vec4 point, vec4 normal, vec3 color, vec3 emissive);
 	void getLightingColor(vec3 color, vec4 point, vec4 normal, Material& mat,
-	    IntersectionData& intersect, TreeStack& treeStack,
+	    IntersectionData& intersect, NodeStack& nodeStack,
 	    MaterialStack& matStack, vec3 colorOut);
 	void getRefractionColor(vec4 point, vec4 normal, vec3 dir, Material& mat,
-	    IntersectionData& intersect, TreeStack& treeStack,
+	    IntersectionData& intersect, NodeStack& nodeStack,
 	    MaterialStack& matStack, real maxIntensity, vec3 colorOut,
 	    real& refractRatioOut, positive depth);
 	void getReflectionColor(vec4 point, vec4 normal, vec3 dir,
 	    real refractRatio, Material& mat, IntersectionData& intersect,
-	    TreeStack& treeStack, MaterialStack& matStack, real maxIntensity,
+	    NodeStack& nodeStack, MaterialStack& matStack, real maxIntensity,
 	    vec3 colorOut, positive depth);
 	void getColor(vec3 orig, vec3 dir, real maxIntensity, positive* lastFace,
-	    vec3 colorOut, real* depthOut, TreeStack& treeStack,
+	    vec3 colorOut, real* depthOut, NodeStack& nodeStack,
 	    MaterialStack& matStack, positive depth = 0);
 
 	Scene* scene;

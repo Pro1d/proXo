@@ -145,9 +145,9 @@ int main(int argc, char** argv)
 			Uint32 t = SDL_GetTicks();
 			realTimeEngine.render();
 			printf("r:%03dms ", SDL_GetTicks() - t);
-			t = SDL_GetTicks();
-			radNorm.normalize(buf);
-			printf("n:%03dms ", SDL_GetTicks() - t);
+			//t = SDL_GetTicks();
+			//radNorm.normalize(buf);
+			//printf("n:%03dms ", SDL_GetTicks() - t);
 			t = SDL_GetTicks();
 			btb.convert();
 			printf("c:%03dms \n", SDL_GetTicks() - t);
