@@ -77,7 +77,7 @@ bool intersectAxialParallelepiped(const vec3 orig, const vec3 inv_dir, const rea
 }
 
 void intersectSetOfTriangles(vec3 orig, vec3 dir, positive** faces,
-    positive facesCount, vec4 vertices, positive* faceToIgnore,
+    positive facesCount, vec4 vertices, positive* faceToIgnore, real dmax,
     IntersectionData& out)
 {
 	auto facesEnd = faces + facesCount;
@@ -89,7 +89,7 @@ void intersectSetOfTriangles(vec3 orig, vec3 dir, positive** faces,
 		vec4 v3 = vertices + f[2] * VEC4_SCALARS_COUNT;
 		integer intersect =
 		    intersectTriangle(orig, dir, v1, v2, v3, &t, &u, &v);
-		if(intersect != 0 && 0 < t && t < out.depth && f != faceToIgnore) {
+		if(intersect != 0 && 0 < t && t < dmax && t < out.depth && f != faceToIgnore) {
 			out.intersectionSide = intersect;
 			out.depth            = t;
 			out.uv[0]            = u;
@@ -215,7 +215,7 @@ bool intersectKDTree(NodeStack& stack, KDTree& tree, vec4 vertices, positive* fa
 
     auto leaf = static_cast<Leaf*>(e.node);
     intersectSetOfTriangles(ray_orig, ray_dir, leaf->facePtrs,
-      leaf->facesCount, vertices, faceToIgnore, out);
+      leaf->facesCount, vertices, faceToIgnore, e.tmax, out);
   }
 
   return out.intersectionSide != 0;

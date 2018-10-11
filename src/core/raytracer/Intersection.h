@@ -48,7 +48,7 @@ integer intersectTriangle(vec3 orig, vec3 dir, vec3 vert0, vec3 vert1,
     vec3 vert2, real* t, real* u, real* v);
 bool intersectAxialParallelepiped(const vec3 orig, const vec3 inv_dir, const real* paralMinMax, real& tmin, real& tmax);
 void intersectSetOfTriangles(vec3 orig, vec3 inv_dir, positive** faces,
-    positive facesCount, vec4 vertices, positive* faceToIgnore,
+    positive facesCount, vec4 vertices, positive* faceToIgnore, real dmax,
     IntersectionData& out);
 void intersectSetOfTrianglesLighting(vec3 orig, vec3 dir, positive** faces,
     positive facesCount, vec4 vertices, vec16 materials, positive* faceToIgnore,
