@@ -274,4 +274,86 @@ bool intersectKDTreeLighting(NodeStack& stack, KDTree& tree, vec4 vertices, vec1
   return out.containsOpaqueFace || not out.empty();
 }
 
+inline void GetInterval(vec3 a, vec3 b, vec3 c, vec3 axis, real& min, real& max) {
+  real A = dot(axis, a);
+  real B = dot(axis, b);
+  real C = dot(axis, c);
+  min = std::min(std::min(A,B),C);
+  max = std::max(std::max(A,B),C);
+}
+
+inline void GetInterval(real aabb[6], vec3 axis, real& min, real& max) {
+  vec3 i = aabb;
+  vec3 a = aabb + 3;
+
+  real vertex[8 * VEC3_SCALARS_COUNT] = {
+    i[0], a[1], a[2],
+    i[0], a[1], i[2],
+    i[0], i[1], a[2],
+    i[0], i[1], i[2],
+    a[0], a[1], a[2],
+    a[0], a[1], i[2],
+    a[0], i[1], a[2],
+    a[0], i[1], i[2]
+  };
+
+  min = max = dot(axis, vertex + 0);
+
+  for (int i = 1; i < 8; ++i) {
+    float projection = dot(axis, vertex + i * VEC3_SCALARS_COUNT);
+    min = std::min(projection, min);
+    max = std::max(projection, max);
+  }
+}
+
+bool OverlapOnAxis(real aabb[6], vec3 a, vec3 b, vec3 c, vec3 axis) {
+    real amin, amax, bmin, bmax;
+    GetInterval(aabb, axis, amin, amax);
+    GetInterval(a, b, c, axis, bmin, bmax);
+    return ((bmin <= amax) && (amin <= bmax));
+}
+
+bool intersectionAABBTriangle(real AABB[6], vec3 a, vec3 b, vec3 c)
+{
+  // Compute the edge vectors of the triangle  (ABC)
+	real f0[VEC3_SCALARS_COUNT], f1[VEC3_SCALARS_COUNT], f2[VEC3_SCALARS_COUNT];
+  substract(b, a, f0);
+  substract(c, b, f1);
+  substract(a, c, f2);
+
+#define UX  1,0,0
+#define UY  0,1,0
+#define UZ  0,0,1
+#define __CROSS(UX, UY, UZ, V) \
+  (UY*V[2]-V[1]*UZ), (UZ*V[0]-V[2]*UX), (UX*V[1]-V[0]*UY)
+#define CROSS(U, V) __CROSS(UX, UY, UZ, V)
+	
+  real test[13 * VEC3_SCALARS_COUNT] = {
+		// 3 Normals of AABB
+		UX, // AABB Axis 1
+		UY, // AABB Axis 2
+		UZ, // AABB Axis 3
+		// 1 Normal of the Triangle
+		__CROSS(f0[0], f0[1], f0[2], f1),
+		// 9 Axis, cross products of all edges
+		CROSS(UX, f0),
+		CROSS(UX, f1),
+		CROSS(UX, f2),
+		CROSS(UY, f0),
+		CROSS(UY, f1),
+		CROSS(UY, f2),
+		CROSS(UZ, f0),
+		CROSS(UZ, f1),
+		CROSS(UZ, f2)
+	};
+
+	for (positive i = 0; i < 13 * VEC3_SCALARS_COUNT; i += VEC3_SCALARS_COUNT) {
+		if (!OverlapOnAxis(AABB, a, b, c, test + i)) {
+			return false; // Seperating axis found
+		}
+	}
+
+return true; // Seperating axis not found
+
+}
 } // namespace proxo

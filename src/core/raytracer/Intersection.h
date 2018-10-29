@@ -57,6 +57,7 @@ bool intersectKDTree(NodeStack& stack, KDTree& tree, vec4 vertices,
     positive* faceToIgnore, vec3 ray_orig, vec3 ray_dir, real dmax, IntersectionData& out);
 bool intersectKDTreeLighting(NodeStack& stack, KDTree& tree, vec4 vertices, vec16 materals,
     positive* faceToIgnore, vec3 ray_orig, vec3 ray_dir, real dmax, SortedIntersectionsData& out);
+bool intersectionAABBTriangle(real AABB[6], vec3 a, vec3 b, vec3 c);
 
 } // namespace proxo
 
