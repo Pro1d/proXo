@@ -9,14 +9,18 @@ Why to implement a graphic engine? So many others exist and are much more powerf
 
 ## Features
 ### Real time engine
-*Keywords: Memory access efficiency/CPU cache, low level optimisation, fast inverse square root, multithreading, supersampling, light.*
 
 Take a look to this [video](https://www.youtube.com/watch?v=6xoTmThzS68)
 
+*Keywords: Memory access efficiency/CPU cache, low level optimisation, fast inverse square root, multithreading, supersampling, light.*
+
 ### Ray tracer
-*Keywords: light physics, refraction, reflection, absorption, KDTree, ray-triangle intersection, depth of field, texture, normal map, specular/ambient map.*
 
 Check out these [fantastic results](result/)!
+
+<img src="result/dragon_reflection.png" width="250"> <img src="result/dragon_refraction.png" width="250">
+
+*Keywords: light physics, refraction, reflection, absorption, KDTree, ray-triangle intersection, depth of field, texture, normal map, specular/ambient map.*
 
 ## Sample demo
 It reads `.scene` files (*TODO: how to write a scene description file*).
